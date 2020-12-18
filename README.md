@@ -1,0 +1,1 @@
+# next-magic-auth
