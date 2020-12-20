@@ -106,3 +106,6 @@ dist
 
 # allow hasura sql files
 !hasura/**/*.sql
+
+# ignore local env files
+.env*
