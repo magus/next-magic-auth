@@ -96,3 +96,10 @@ hasura console
 ```
 
 You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.
+
+As you make migrations you can squash from a particular migration all the way up to the latest, keeping them concise to avoid many migration folders initially when making many changes to setup the database.
+
+```sh
+# squash all migrations from version 1608459932016 to the latest
+hasura migrate squash --from 1608459932016
+```

@@ -1,9 +1,58 @@
 - table:
     schema: public
+    name: refreshToken
+  object_relationships:
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user
+        column_mapping:
+          userId: id
+- table:
+    schema: public
+    name: role
+- table:
+    schema: public
     name: user
+  array_relationships:
+  - name: roles
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          schema: public
+          name: user_role
   select_permissions:
+  - role: self
+    permission:
+      columns:
+      - created
+      - email
+      - id
+      - updated
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+      allow_aggregations: true
   - role: user
     permission:
       columns:
       - id
       filter: {}
+- table:
+    schema: public
+    name: user_role
+  object_relationships:
+  - name: role
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: role
+        column_mapping:
+          roleId: id
+  - name: user
+    using:
+      foreign_key_constraint_on: userId

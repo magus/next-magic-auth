@@ -8,8 +8,14 @@
     "start": "next start"
   },
   "dependencies": {
+    "graphql-request": "^3.4.0",
+    "graphql-tag": "^2.11.0",
+    "graphqurl": "^0.3.3",
+    "joi": "^17.3.0",
+    "jsonwebtoken": "^8.5.1",
     "next": "10.0.3",
     "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "uuid": "^8.3.2"
   }
 }
