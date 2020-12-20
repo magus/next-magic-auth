@@ -1,6 +1,10 @@
 - table:
     schema: public
     name: loginToken
+  object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: userId
 - table:
     schema: public
     name: refreshToken

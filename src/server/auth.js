@@ -27,7 +27,9 @@ export default {
     }
 
     const refreshToken = random.base64(32);
-    const expires = new Date(Date.now() + config.JWT_TOKEN_EXPIRES * 60 * 1000);
+    const refreshTokenExpires = new Date(
+      Date.now() + config.JWT_TOKEN_EXPIRES * 60 * 1000,
+    );
     const token = jwt.sign(
       {
         'https://hasura.io/jwt/claims': {
@@ -43,6 +45,6 @@ export default {
       },
     );
 
-    return { token, expires, refreshToken };
+    return { token, refreshToken, refreshTokenExpires };
   },
 };

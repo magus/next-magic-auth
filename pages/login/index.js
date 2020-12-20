@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 
-import styles from '../styles/login.module.css';
+import styles from '../../styles/login.module.css';
 
 export default function Login() {
   const router = useRouter();
