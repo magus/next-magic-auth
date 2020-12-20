@@ -14,8 +14,6 @@ export default async function login(req, res) {
     const form = JSON.parse(req.body);
     const { error, value } = schema.validate(form);
 
-    console.debug({ form, error, value });
-
     if (error) {
       const [errorDetail] = error.details;
 

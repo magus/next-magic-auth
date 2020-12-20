@@ -11,8 +11,6 @@ export default function Login() {
     const { elements } = event.target;
     const email = elements.email.value;
 
-    console.debug({ email });
-
     // make the login API call
     const response = await fetch('/api/login', {
       method: 'POST',

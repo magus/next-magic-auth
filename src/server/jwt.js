@@ -15,8 +15,6 @@ export default {
       allowedRoles.push(user.defaultRole);
     }
 
-    console.debug({ user, allowedRoles });
-
     const refreshToken = uuidv4();
     const expire = new Date(Date.now() + config.JWT_TOKEN_EXPIRES * 60 * 1000);
     const token = jwt.sign(
