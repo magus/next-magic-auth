@@ -1,8 +1,11 @@
 import gql from 'graphql-tag';
 import Joi from 'joi';
 
+import config from '../../src/server/config';
 import graphql from '../../src/server/graphql';
-import jwt from '../../src/server/jwt';
+import auth from '../../src/server/auth';
+import random from '../../src/utils/random';
+import serverEmail from '../../src/server/email';
 
 // schema for validating username and password
 const schema = Joi.object({
@@ -22,35 +25,38 @@ export default async function login(req, res) {
         .json({ error: true, message: errorDetail.message });
     }
 
-    // get the user for this email
+    // upsert user by email (get if existing, create if not)
     const { email } = value;
+
     const {
-      data: userByEmailData,
-      error: userByEmailError,
-    } = await graphql.query(userByEmail, {
+      data: upsertUserData,
+      error: upsertUserError,
+    } = await graphql.query(upsertUser, {
       variables: { email },
     });
 
-    if (userByEmailError) {
-      return res.status(500).json({ error: true, message: userByEmailError });
+    if (upsertUserError) {
+      return res.status(500).json({ error: true, message: upsertUserError });
     }
 
-    let user;
+    const [user] = upsertUserData.insert_user.returning;
 
-    if (userByEmailData.user.length) {
-      const [foundUserByEmail] = userByEmailData.user;
-      user = foundUserByEmail;
-    } else {
-      // no user, create user
-      const { data, error } = await graphql.query(createUser, {
-        variables: { email },
-      });
+    const {
+      token: loginToken,
+      expires: loginTokenExpires,
+    } = auth.generateLoginToken();
+    // store token to confirm via email link
+    const setLoginTokenResult = await graphql.query(setLoginToken, {
+      variables: { userId: user.id, loginToken, expires: loginTokenExpires },
+    });
 
-      const [createdUser] = data.insert_user.returning;
-      user = createdUser;
-    }
+    // const emailResponse = await serverEmail.send(email, {
+    //   subject: 'Login to Magic',
+    //   text: 'content',
+    //   html: '<strong>strong content</strong>',
+    // });
 
-    // const jwtToken = jwt.generateJWTToken(user);
+    // const jwtToken = auth.generateJWTToken(user);
 
     return res.status(200).json({
       error: false,
@@ -78,41 +84,14 @@ const UserForLoginFragment = gql`
   }
 `;
 
-const userByEmailString = `
-fragment UserForLoginFragment on user {
-  id
-  email
-  defaultRole
-  roles {
-    role {
-      name
-      id
-    }
-  }
-}
-
-query UserByEmail($email: String!) {
-  user(where: { email: { _eq: $email } }) {
-    ...UserForLoginFragment
-  }
-}
-`;
-
-const userByEmail = gql`
+const upsertUser = gql`
   ${UserForLoginFragment}
 
-  query UserByEmail($email: String!) {
-    user(where: { email: { _eq: $email } }) {
-      ...UserForLoginFragment
-    }
-  }
-`;
-
-const createUser = gql`
-  ${UserForLoginFragment}
-
-  mutation CreateUser($email: String!) {
-    insert_user(objects: { email: $email }) {
+  mutation UpsertUser($email: String!) {
+    insert_user(
+      objects: { email: $email }
+      on_conflict: { constraint: user_email_key, update_columns: updated }
+    ) {
       returning {
         ...UserForLoginFragment
       }
@@ -131,6 +110,24 @@ const setRefreshToken = gql`
       on_conflict: {
         constraint: refreshToken_pkey
         update_columns: [value, expires]
+      }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+const setLoginToken = gql`
+  mutation SetLoginToken(
+    $loginToken: String!
+    $userId: uuid!
+    $expires: timestamptz!
+  ) {
+    insert_loginToken(
+      objects: { expires: $expires, userId: $userId, value: $loginToken }
+      on_conflict: {
+        constraint: loginToken_pkey
+        update_columns: [created, value, expires]
       }
     ) {
       affected_rows

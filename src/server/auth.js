@@ -2,10 +2,21 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
 import config from './config';
+import random from '../utils/random';
 
 const defaultAllowedRoles = ['user', 'self'];
 
 export default {
+  generateLoginToken: function generateLoginToken() {
+    // generate random 64 bytes for login verification
+    const token = random.base64(32);
+
+    const expires = new Date(
+      Date.now() + config.LOGIN_TOKEN_EXPIRES * 60 * 1000,
+    );
+
+    return { token, expires };
+  },
   generateJWTToken: function generateJWTToken(user) {
     const allowedRoles = user.roles.map((userRole) => userRole.role.name);
     allowedRoles.push(...defaultAllowedRoles);
@@ -15,8 +26,8 @@ export default {
       allowedRoles.push(user.defaultRole);
     }
 
-    const refreshToken = uuidv4();
-    const expire = new Date(Date.now() + config.JWT_TOKEN_EXPIRES * 60 * 1000);
+    const refreshToken = random.base64(32);
+    const expires = new Date(Date.now() + config.JWT_TOKEN_EXPIRES * 60 * 1000);
     const token = jwt.sign(
       {
         'https://hasura.io/jwt/claims': {
@@ -32,6 +43,6 @@ export default {
       },
     );
 
-    return { token, expire, refreshToken };
+    return { token, expires, refreshToken };
   },
 };

@@ -1,5 +1,8 @@
 - table:
     schema: public
+    name: loginToken
+- table:
+    schema: public
     name: refreshToken
   object_relationships:
   - name: user
@@ -16,6 +19,15 @@
 - table:
     schema: public
     name: user
+  object_relationships:
+  - name: refreshToken
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: refreshToken
+        column_mapping:
+          id: userId
   array_relationships:
   - name: roles
     using:
