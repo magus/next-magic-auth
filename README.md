@@ -79,6 +79,20 @@ dokku config:set --no-restart hasura DOKKU_LETSENCRYPT_EMAIL=letsencrypt@iamnoah
 dokku letsencrypt hasura
 ```
 
-You should now be able to visit the Hasura admin console by navigating to the domain you setup above
+- You should now be able to visit the Hasura admin console by navigating to the domain you setup above
 
     > e.g. https://magic.iamnoah.com/
+
+Personally, I prefer to disable the public admin console in secure production situations. You can setup the hasura project, local migration tracking and the CLI console to get the same admin console and track all changes in your repository
+
+https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#migrations-setup
+
+```sh
+dokku config:set hasura HASURA_GRAPHQL_ENABLE_CONSOLE="false"
+hasura init hasura --endpoint https://magic.iamnoah.com
+export HASURA_GRAPHQL_ADMIN_SECRET=<SECRET>
+hasura console
+# this will open a browser tab pointed at a local server running the hasura admin console
+```
+
+You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.

@@ -1,1 +1,9 @@
-[]
+- table:
+    schema: public
+    name: user
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      filter: {}
