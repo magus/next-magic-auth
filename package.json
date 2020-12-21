@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "server:purge": "now rm magic --safe",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "dev": "next dev"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.4.0",

@@ -77,14 +77,35 @@ async function refreshAuthentication(res, clientToken, serverToken) {
     },
   });
 
-  res.setHeader('Set-Cookie', [
-    cookie.generateCookie(cookie.cookies.jwtToken, jwtToken.token, {
-      httpOnly: false,
-    }),
-    cookie.generateCookie(cookie.cookies.refreshToken, jwtToken.refreshToken),
-  ]);
+  setCookies(res, {
+    jwtToken: jwtToken.token,
+    refreshToken: jwtToken.refreshToken,
+  });
 
   return;
+}
+
+function clearCookies(res) {
+  setCookies(
+    res,
+    {
+      jwtToken: '',
+      refreshToken: '',
+    },
+    { expires: new Date(0) },
+  );
+}
+
+function setCookies(res, { jwtToken, refreshToken }, cookieOptions) {
+  res.setHeader('Set-Cookie', [
+    cookie.generateCookie(cookie.cookies.jwtToken, jwtToken, {
+      httpOnly: false,
+      ...cookieOptions,
+    }),
+    cookie.generateCookie(cookie.cookies.refreshToken, refreshToken, {
+      ...cookieOptions,
+    }),
+  ]);
 }
 
 function getJwtTokenUserId(jwtToken) {
@@ -96,6 +117,7 @@ function getJwtTokenUserId(jwtToken) {
 }
 
 export default {
+  clearCookies,
   generateLoginToken,
   generateJWTToken,
   refreshAuthentication,
