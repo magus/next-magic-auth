@@ -38,11 +38,17 @@ export default async function login(req, res) {
     const {
       token: loginToken,
       expires: loginTokenExpires,
-    } = auth.generateLoginToken();
+      requestCookie,
+    } = auth.generateLoginToken(res);
 
     // store token to confirm via email link
     await graphql.query(setLoginToken, {
-      variables: { userId: user.id, loginToken, expires: loginTokenExpires },
+      variables: {
+        userId: user.id,
+        loginToken,
+        expires: loginTokenExpires,
+        requestCookie,
+      },
     });
 
     const loginConfirmUrl = `${
@@ -120,9 +126,15 @@ const setLoginToken = gql`
     $loginToken: String!
     $userId: uuid!
     $expires: timestamptz!
+    $requestCookie: String!
   ) {
     insert_loginToken(
-      objects: { expires: $expires, userId: $userId, value: $loginToken }
+      objects: {
+        expires: $expires
+        userId: $userId
+        value: $loginToken
+        requestCookie: $requestCookie
+      }
       on_conflict: {
         constraint: loginToken_pkey
         update_columns: [created, value, expires]

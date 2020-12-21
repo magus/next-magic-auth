@@ -25,6 +25,12 @@ export default function Login() {
     set_phrase(json.phrase);
   }
 
+  async function handleLoginComplete() {
+    const response = await fetch('/api/auth/complete', {
+      method: 'POST',
+    });
+  }
+
   async function handleRefreshToken() {
     const response = await fetch('/api/auth/refresh', {
       method: 'POST',
@@ -46,6 +52,7 @@ export default function Login() {
 
       <div>{phrase}</div>
 
+      <button onClick={handleLoginComplete}>Complete Login</button>
       <button onClick={handleRefreshToken}>Refresh</button>
 
       {JSON.stringify(user, null, 2)}

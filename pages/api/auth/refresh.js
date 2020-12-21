@@ -25,7 +25,7 @@ export default async function loginRefresh(req, res) {
       throw new Error('no refresh token, logout and try again');
     }
 
-    await auth.refreshAuthentication(res, refreshToken, serverRefreshToken);
+    await auth.refreshAuthentication(res, serverRefreshToken, refreshToken);
 
     return res.status(200).json({ error: false });
   } catch (e) {

@@ -10,13 +10,13 @@ export default async function loginConfirm(req, res) {
   try {
     const { token, userId } = req.query;
 
-    const {
-      loginToken: [loginToken],
-    } = await graphql.query(getLoginTokenByUserId, {
+    // set loginToken to approved
+    await graphql.query(approveLoginTokenByUserId, {
       variables: { userId },
     });
 
-    await auth.refreshAuthentication(res, token, loginToken);
+    // client will then be able to hit /auth/login/complete
+    // which will hit server and write refresh token
 
     // return res.status(200).json({ error: false });
     return res.status(302).redirect(loginConfirmUrl);
@@ -29,30 +29,13 @@ export default async function loginConfirm(req, res) {
   }
 }
 
-const UserForLoginFragment = gql`
-  fragment UserForLoginFragment on user {
-    id
-    email
-    defaultRole
-    roles {
-      role {
-        name
-        id
-      }
-    }
-  }
-`;
-
-const getLoginTokenByUserId = gql`
-  ${UserForLoginFragment}
-
-  query GetLoginTokenByUserId($userId: uuid!) {
-    loginToken(where: { userId: { _eq: $userId } }) {
-      value
-      expires
-      user {
-        ...UserForLoginFragment
-      }
+const approveLoginTokenByUserId = gql`
+  mutation ApproveLoginTokenByUserId($userId: uuid!) {
+    update_loginToken_by_pk(
+      pk_columns: { userId: $userId }
+      _set: { approved: true }
+    ) {
+      userId
     }
   }
 `;

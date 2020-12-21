@@ -11,13 +11,20 @@ const CLAIMS_NAMESPACE = 'https://hasura.io/jwt/claims';
 const HASURA_USER_ID_HEADER = 'x-hasura-user-id';
 const defaultAllowedRoles = ['user', 'self'];
 
-function generateLoginToken() {
+function generateLoginToken(res) {
   // generate random 64 bytes for login verification
   const token = random.base64(32);
-
   const expires = new Date(Date.now() + config.LOGIN_TOKEN_EXPIRES * 60 * 1000);
 
-  return { token, expires };
+  // generate requestCookie and write to requesting login client
+  const requestCookie = random.base64(32);
+
+  res.setHeader(
+    'Set-Cookie',
+    cookie.generateCookie(cookie.cookies.loginRequestCookie, requestCookie),
+  );
+
+  return { token, expires, requestCookie };
 }
 
 function generateJWTToken(user) {
@@ -51,7 +58,7 @@ function generateJWTToken(user) {
   return { token, refreshToken, refreshTokenExpires };
 }
 
-async function refreshAuthentication(res, clientToken, serverToken) {
+async function refreshAuthentication(res, serverToken, clientToken) {
   // verify serverToken is not expired
   if (Date.now() > new Date(serverToken.expires).getTime()) {
     // e.g. /auth/timeout
@@ -59,7 +66,7 @@ async function refreshAuthentication(res, clientToken, serverToken) {
   }
 
   // verify clientToken against serverToken stored for userId
-  if (clientToken !== serverToken.value) {
+  if (clientToken && clientToken !== serverToken.value) {
     // todo generate static page for this
     // e.g. /auth/invalid
     throw new Error('unexpected token value');
@@ -77,12 +84,20 @@ async function refreshAuthentication(res, clientToken, serverToken) {
     },
   });
 
+  // clear loginRequestCookie
+  setCookies(
+    res,
+    {
+      loginRequestCookie: '',
+    },
+    { expires: new Date(0) },
+  );
+
+  // set authentication cookies
   setCookies(res, {
     jwtToken: jwtToken.token,
     refreshToken: jwtToken.refreshToken,
   });
-
-  return;
 }
 
 function clearCookies(res) {
@@ -91,21 +106,47 @@ function clearCookies(res) {
     {
       jwtToken: '',
       refreshToken: '',
+      loginRequestCookie: '',
     },
     { expires: new Date(0) },
   );
 }
 
-function setCookies(res, { jwtToken, refreshToken }, cookieOptions) {
-  res.setHeader('Set-Cookie', [
-    cookie.generateCookie(cookie.cookies.jwtToken, jwtToken, {
-      httpOnly: false,
-      ...cookieOptions,
-    }),
-    cookie.generateCookie(cookie.cookies.refreshToken, refreshToken, {
-      ...cookieOptions,
-    }),
-  ]);
+function setCookies(
+  res,
+  { jwtToken, refreshToken, loginRequestCookie },
+  cookieOptions,
+) {
+  const cookies = [];
+
+  if (typeof jwtToken === 'string') {
+    cookies.push(
+      cookie.generateCookie(cookie.cookies.jwtToken, jwtToken, {
+        httpOnly: false,
+        ...cookieOptions,
+      }),
+    );
+  }
+
+  if (typeof refreshToken === 'string') {
+    cookies.push(
+      cookie.generateCookie(cookie.cookies.refreshToken, refreshToken, {
+        ...cookieOptions,
+      }),
+    );
+  }
+
+  if (typeof loginRequestCookie === 'string') {
+    cookies.push(
+      cookie.generateCookie(
+        cookie.cookies.loginRequestCookie,
+        loginRequestCookie,
+        { ...cookieOptions },
+      ),
+    );
+  }
+
+  res.setHeader('Set-Cookie', cookies);
 }
 
 function getJwtTokenUserId(jwtToken) {
