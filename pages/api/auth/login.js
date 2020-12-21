@@ -26,14 +26,7 @@ export default async function login(req, res) {
         .json({ error: true, message: errorDetail.message });
     }
 
-    // upsert user by email (get if existing, create if not)
     const { email } = value;
-
-    const upsertUserData = await graphql.query(upsertUser, {
-      variables: { email },
-    });
-
-    const [user] = upsertUserData.insert_user.returning;
 
     const {
       token: loginToken,
@@ -41,10 +34,13 @@ export default async function login(req, res) {
       requestCookie,
     } = auth.generateLoginToken(res);
 
-    // store token to confirm via email link
+    // update/create user & update/create loginToken
+    // the stored token is used to confirm and complete login
     await graphql.query(setLoginToken, {
       variables: {
-        userId: user.id,
+        // user
+        email,
+        // loginToken
         loginToken,
         expires: loginTokenExpires,
         requestCookie,
@@ -108,33 +104,23 @@ export default async function login(req, res) {
   }
 }
 
-const upsertUser = gql`
-  mutation UpsertUser($email: String!) {
-    insert_user(
-      objects: { email: $email }
-      on_conflict: { constraint: user_email_key, update_columns: updated }
-    ) {
-      returning {
-        id
-      }
-    }
-  }
-`;
-
-const setLoginToken = gql`
-  mutation SetLoginToken(
+const upsertLoginTokenWithUser = gql`
+  mutation UpsertLoginTokenWithUser(
+    $email: String!
     $loginToken: String!
-    $userId: uuid!
     $expires: timestamptz!
     $requestCookie: String!
   ) {
     insert_loginToken(
       objects: {
         expires: $expires
-        userId: $userId
         value: $loginToken
         requestCookie: $requestCookie
         approved: false
+        user: {
+          data: { email: $email }
+          on_conflict: { constraint: user_email_key, update_columns: updated }
+        }
       }
       on_conflict: {
         constraint: loginToken_pkey
