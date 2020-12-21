@@ -5,6 +5,25 @@
   - name: user
     using:
       foreign_key_constraint_on: userId
+  event_triggers:
+  - name: loginSendEmail
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns:
+        - approved
+        - requestCookie
+        - value
+        - created
+        - expires
+        - userId
+    retry_conf:
+      num_retries: 5
+      interval_sec: 30
+      timeout_sec: 60
+    webhook: https://magicwords.vercel.app/api/events/loginSendEmail
 - table:
     schema: public
     name: refreshToken

@@ -1,5 +1,33 @@
+// nouns = 185 words; adjectives = 228 words
+// so 4 characters of 64-bit values = 256 bits, enough to index into both word lists
+const charsPerWord = 4;
+
+// convert base64 to decimal value of bits
+// then use decimal value to index into wordList for word
+// e.g. 'tE' = 46 + 5 = 51
+function getWordFrom(base64String, wordList) {
+  const base64Bits = base64String
+    .split('')
+    .reduce((sum, c) => sum + base64Chars[c], 0);
+  const word = wordList[base64Bits % wordList.length];
+
+  return word;
+}
+
+exports.getPhraseFromToken = function getPhraseFromToken(token) {
+  const adjectiveBase64 = token.substr(0, charsPerWord);
+  const nounBase64 = token.substr(token.length - charsPerWord, charsPerWord);
+
+  return [
+    // adjective
+    getWordFrom(adjectiveBase64, adjectives),
+    // noun
+    getWordFrom(nounBase64, nouns),
+  ].join(' ');
+};
+
 // 228 words
-exports.adjectives = [
+const adjectives = [
   'adorable',
   'adventurous',
   'aggressive',
@@ -231,7 +259,7 @@ exports.adjectives = [
 ];
 
 // 185 words
-exports.nouns = [
+const nouns = [
   'actor',
   'gold',
   'painting',
@@ -419,7 +447,7 @@ exports.nouns = [
   'ghost',
 ];
 
-exports.base64Chars = {
+const base64Chars = {
   '=': 0,
   A: 1,
   B: 2,

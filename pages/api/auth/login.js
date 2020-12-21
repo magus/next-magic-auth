@@ -1,11 +1,8 @@
 import gql from 'graphql-tag';
 import Joi from 'joi';
 
-import config from '../../../src/server/config';
 import graphql from '../../../src/server/graphql';
 import auth from '../../../src/server/auth';
-import random from '../../../src/server/random';
-import serverEmail from '../../../src/server/email';
 import words from '../../../src/server/words';
 
 // schema for validating username and password
@@ -47,53 +44,12 @@ export default async function login(req, res) {
       },
     });
 
-    const loginConfirmUrl = `${
-      config.FRONTEND_HOST
-    }/api/auth/confirm?token=${encodeURIComponent(
-      loginToken,
-    )}&userId=${encodeURIComponent(user.id)}`;
-
-    // nouns = 185 words; adjectives = 228 words
-    // so 4 characters of 64-bit values = 256 bits, enough to index into both word lists
-    const charsPerWord = 4;
-    const getWordFrom = (base64String, wordList) => {
-      const base64Bits = base64String
-        .split('')
-        .reduce((sum, c) => sum + words.base64Chars[c], 0);
-      const word = wordList[base64Bits % wordList.length];
-
-      return word;
-    };
-
-    const adjective = getWordFrom(
-      loginToken.substr(0, charsPerWord),
-      words.adjectives,
-    );
-    const noun = getWordFrom(
-      loginToken.substr(loginToken.length - charsPerWord, charsPerWord),
-      words.nouns,
-    );
-    const phrase = [adjective, noun].join(' ');
-
-    const emailHtml = `
-    <h3>Click the magic words below to finish the login.</h3>
-
-    <a href="${loginConfirmUrl}"><strong>${phrase}</strong></a>
-
-    <div>Click <a href="">here</a> if the magic words do not match what you saw on the login page.</div>
-    `;
-
-    const emailResponse = await serverEmail.send(email, {
-      subject: 'Login to Magic',
-      text: `Click this magic link to login! `,
-      html: emailHtml,
-    });
+    // calculate phrase for showing on login for confirmation with email
+    const phrase = words.getPhraseFromToken(loginToken);
 
     return res.status(200).json({
       error: false,
-      email,
       phrase,
-      // jwtToken,
     });
   } catch (e) {
     console.error(e);
@@ -117,6 +73,7 @@ const upsertLoginTokenWithUser = gql`
         value: $loginToken
         requestCookie: $requestCookie
         approved: false
+        email: $email
         user: {
           data: { email: $email }
           on_conflict: { constraint: user_email_key, update_columns: updated }
