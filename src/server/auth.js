@@ -68,7 +68,8 @@ async function refreshAuthentication(res, clientToken, serverToken) {
   const jwtToken = generateJWTToken(serverToken.user);
 
   // store refresh token in database
-  await graphql.query(setRefreshToken, {
+  // also delete login token if present
+  await graphql.query(setRefreshTokenDeleteLoginToken, {
     variables: {
       userId: serverToken.user.id,
       refreshToken: jwtToken.refreshToken,
@@ -82,6 +83,8 @@ async function refreshAuthentication(res, clientToken, serverToken) {
     }),
     cookie.generateCookie(cookie.cookies.refreshToken, jwtToken.refreshToken),
   ]);
+
+  return;
 }
 
 function getJwtTokenUserId(jwtToken) {
@@ -99,8 +102,8 @@ export default {
   getJwtTokenUserId,
 };
 
-const setRefreshToken = gql`
-  mutation SetRefreshToken(
+const setRefreshTokenDeleteLoginToken = gql`
+  mutation SetRefreshTokenDeleteLoginToken(
     $userId: uuid!
     $refreshToken: String!
     $expires: timestamptz!
@@ -113,6 +116,10 @@ const setRefreshToken = gql`
       }
     ) {
       affected_rows
+    }
+
+    delete_loginToken_by_pk(userId: $userId) {
+      userId
     }
   }
 `;
