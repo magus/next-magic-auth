@@ -51,12 +51,14 @@
       filter:
         id:
           _eq: X-Hasura-User-Id
+      limit: 1
       allow_aggregations: true
   - role: user
     permission:
       columns:
       - id
       filter: {}
+      limit: 1
 - table:
     schema: public
     name: user_role
