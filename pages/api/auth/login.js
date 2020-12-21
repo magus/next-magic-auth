@@ -15,7 +15,25 @@ const schema = Joi.object({
 
 export default async function login(req, res) {
   try {
-    const form = JSON.parse(req.body);
+    console.debug({
+      body: req.body,
+      type: typeof req.body,
+      req_keys: Object.keys(req),
+    });
+
+    console.error({
+      body: req.body,
+      type: typeof req.body,
+      req_keys: Object.keys(req),
+    });
+
+    console.info({
+      body: req.body,
+      type: typeof req.body,
+      req_keys: Object.keys(req),
+    });
+
+    const form = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { error, value } = schema.validate(form);
 
     if (error) {
