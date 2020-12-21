@@ -33,7 +33,7 @@ export default async function login(req, res) {
 
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
-    await graphql.query(setLoginToken, {
+    await graphql.query(upsertLoginTokenWithUser, {
       variables: {
         // user
         email,
