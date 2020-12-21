@@ -134,10 +134,11 @@ const setLoginToken = gql`
         userId: $userId
         value: $loginToken
         requestCookie: $requestCookie
+        approved: false
       }
       on_conflict: {
         constraint: loginToken_pkey
-        update_columns: [created, value, expires]
+        update_columns: [created, value, expires, requestCookie, approved]
       }
     ) {
       affected_rows

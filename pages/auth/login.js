@@ -31,6 +31,12 @@ export default function Login() {
     });
   }
 
+  async function handleLogout() {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+    });
+  }
+
   async function handleRefreshToken() {
     const response = await fetch('/api/auth/refresh', {
       method: 'POST',
@@ -54,6 +60,7 @@ export default function Login() {
 
       <button onClick={handleLoginComplete}>Complete Login</button>
       <button onClick={handleRefreshToken}>Refresh</button>
+      <button onClick={handleLogout}>Logout</button>
 
       {JSON.stringify(user, null, 2)}
     </div>

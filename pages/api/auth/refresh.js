@@ -22,7 +22,9 @@ export default async function loginRefresh(req, res) {
     });
 
     if (!serverRefreshToken) {
-      throw new Error('no refresh token, logout and try again');
+      throw new Error(
+        'no valid login sessions found in backend, logout and try again',
+      );
     }
 
     await auth.refreshAuthentication(res, serverRefreshToken, refreshToken);
