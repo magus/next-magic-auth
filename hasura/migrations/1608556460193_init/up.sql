@@ -15,7 +15,8 @@ CREATE TABLE public."loginToken" (
     expires timestamp with time zone NOT NULL,
     value text NOT NULL,
     "requestCookie" text NOT NULL,
-    approved boolean DEFAULT false NOT NULL
+    approved boolean DEFAULT false NOT NULL,
+    email text NOT NULL
 );
 CREATE TABLE public."refreshToken" (
     "userId" uuid NOT NULL,
@@ -41,6 +42,10 @@ CREATE TABLE public.user_role (
 );
 ALTER TABLE ONLY public."loginToken"
     ADD CONSTRAINT "loginToken_pkey" PRIMARY KEY ("userId");
+ALTER TABLE ONLY public."loginToken"
+    ADD CONSTRAINT "loginToken_requestCookie_key" UNIQUE ("requestCookie");
+ALTER TABLE ONLY public."loginToken"
+    ADD CONSTRAINT "loginToken_userId_key" UNIQUE ("userId");
 ALTER TABLE ONLY public."refreshToken"
     ADD CONSTRAINT "refreshToken_pkey" PRIMARY KEY ("userId");
 ALTER TABLE ONLY public."refreshToken"
