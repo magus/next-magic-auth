@@ -23,8 +23,6 @@ export default function Login() {
 
     const json = await response.json();
     set_phrase(json.phrase);
-
-    console.debug('login', { json });
   }
 
   async function handleRefreshToken() {

@@ -15,25 +15,7 @@ const schema = Joi.object({
 
 export default async function login(req, res) {
   try {
-    console.debug({
-      body: req.body,
-      type: typeof req.body,
-      req_keys: Object.keys(req),
-    });
-
-    console.error({
-      body: req.body,
-      type: typeof req.body,
-      req_keys: Object.keys(req),
-    });
-
-    console.info({
-      body: req.body,
-      type: typeof req.body,
-      req_keys: Object.keys(req),
-    });
-
-    const form = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const form = typeof req.body === 'string' ? JSON.parse(req.body) : {};
     const { error, value } = schema.validate(form);
 
     if (error) {
@@ -78,7 +60,6 @@ export default async function login(req, res) {
         .reduce((sum, c) => sum + words.base64Chars[c], 0);
       const word = wordList[base64Bits % wordList.length];
 
-      console.debug({ base64String, base64Bits, word });
       return word;
     };
 
@@ -99,8 +80,6 @@ export default async function login(req, res) {
 
     <div>Click <a href="">here</a> if the magic words do not match what you saw on the login page.</div>
     `;
-
-    console.debug({ loginConfirmUrl, phrase, emailHtml });
 
     const emailResponse = await serverEmail.send(email, {
       subject: 'Login to Magic',

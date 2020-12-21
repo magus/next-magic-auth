@@ -21,8 +21,6 @@ export default {
       html,
     };
 
-    console.debug({ emailConfig });
-
     return await sgMail.send(emailConfig);
   },
 };
