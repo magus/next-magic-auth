@@ -37,7 +37,8 @@ exports.USER_DB_SCHEMA_NAME = USER_DB_SCHEMA_NAME || 'public';
 exports.USER_FIELDS = USER_FIELDS ? USER_FIELDS.split(',') : [];
 
 // e.g. '{"type":"HS256", "key": "zNZmbXfZuv/1cvMuieq9oW2ygtBOdJlu0x25Tyy0q9qkpNK6sa++Y2dj7z6xhTTa4mYuLfetsm6GfbKrkXkc9g=="}'
-exports.JWT_SECRET = JWT_SECRET ? JSON.parse(JWT_SECRET) : {};
+exports.JWT_SECRET =
+  JWT_SECRET && typeof JWT_SECRET === 'string' ? JSON.parse(JWT_SECRET) : {};
 
 // in minutes
 exports.JWT_COOKIE_EXPIRES = JWT_COOKIE_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
