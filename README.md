@@ -105,3 +105,9 @@ As you make migrations you can squash from a particular migration all the way up
 # squash all migrations from version 1608459932016 to the latest
 hasura migrate squash --from 1608459932016
 ```
+
+You can use the migration under `hasura/migrations` to jump start your database with the models used by this demo. Be sure to replace https://magic.iamnoah.com with the domain you setup above.
+
+```sh
+hasura migrate apply --endpoint https://magic.iamnoah.com
+```
