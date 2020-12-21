@@ -9,6 +9,10 @@ export default async function loginRefresh(req, res) {
     const refreshToken = req.cookies[cookie.cookies.refreshToken];
     const jwtToken = req.cookies[cookie.cookies.jwtToken];
 
+    if (!(refreshToken && jwtToken)) {
+      throw new Error('auth tokens missing');
+    }
+
     const userId = auth.getJwtTokenUserId(jwtToken);
 
     const {
