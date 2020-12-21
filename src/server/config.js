@@ -27,7 +27,7 @@ exports.__DEV__ = !isProd;
 exports.__PROD__ = isProd;
 
 exports.FRONTEND_HOST = isProd
-  ? FRONTEND_HOST || 'https://magic-auth.vercel.app/'
+  ? FRONTEND_HOST || 'https://magicwords.vercel.app/'
   : LOCALHOST_FRONTEND;
 
 exports.HASURA_ADMIN_SECRET = HASURA_ADMIN_SECRET;
