@@ -3,6 +3,8 @@
 
 # demo
 
+https://magicwords.vercel.app/
+
 # setup
 
 ## postgres database
