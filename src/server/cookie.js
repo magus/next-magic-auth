@@ -18,6 +18,10 @@ export default {
       ...extraOptions,
     };
 
+    if (config.COOKIE_DOMAIN) {
+      options.domain = config.COOKIE_DOMAIN;
+    }
+
     if ('maxAge' in options) {
       options.expires = new Date(Date.now() + options.maxAge);
       options.maxAge /= 1000;
