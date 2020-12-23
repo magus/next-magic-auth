@@ -90,18 +90,24 @@ https://magicwords.vercel.app/
 
     > e.g. https://magic.iamnoah.com/
 
-Personally, I prefer to disable the public admin console in secure production situations. You can setup the hasura project, local migration tracking and the CLI console to get the same admin console and track all changes in your repository
+- Now that you have confirmed everything is setup properly you can disable the admin console. Don't worry you can still access it locally but making it unavailable publically is a best practice for production.
 
-https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#migrations-setup
+    ```sh
+    dokku config:set hasura HASURA_GRAPHQL_ENABLE_CONSOLE="false"
+    ```
 
-```sh
-dokku config:set hasura HASURA_GRAPHQL_ENABLE_CONSOLE="false"
-hasura init hasura --endpoint https://magic.iamnoah.com
-export HASURA_GRAPHQL_ADMIN_SECRET=<SECRET>
-hasura console
-# this will open a browser tab pointed at a local server running the hasura admin console
-```
+- Finally we setup the local `hasura` project folder to version control database metadata
 
+    > https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#migrations-setup
+
+    ```sh
+    hasura init hasura --endpoint https://magic.iamnoah.com
+    export HASURA_GRAPHQL_ADMIN_SECRET=<ADMIN_SECRET>
+    hasura console
+    # this will open a browser tab pointed at a local server running the hasura admin console
+    ```
+
+ ### migrations
 You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.
 
 As you make migrations you can squash from a particular migration all the way up to the latest, keeping them concise to avoid many migration folders initially when making many changes to setup the database.
