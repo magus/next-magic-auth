@@ -46,7 +46,7 @@ exports.JWT_COOKIE_EXPIRES = JWT_COOKIE_EXPIRES || 60 * 24 * 365; // expire cook
 exports.JWT_REFRESH_TOKEN_EXPIRES = JWT_REFRESH_TOKEN_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
 exports.JWT_TOKEN_EXPIRES = JWT_TOKEN_EXPIRES || 15; // expire jwt token after 15 min
 exports.LOGIN_TOKEN_EXPIRES = LOGIN_TOKEN_EXPIRES || 60 * 2; // expire login token after 2 hours
-exports.COOKIE_DOMAIN = COOKIE_DOMAIN || 'iamnoah.com';
+exports.COOKIE_DOMAIN = COOKIE_DOMAIN || '.iamnoah.com';
 
 exports.SENDGRID_API_KEY = SENDGRID_API_KEY;
 // verified sender on sendgrid
