@@ -64,7 +64,7 @@ dokku config:set hasura \
   HASURA_GRAPHQL_DATABASE_URL="postgres://postgres:<PASSWORD>@dokku-postgres-hasura-db:5432/hasura_db" \
   HASURA_GRAPHQL_ADMIN_SECRET="<SECRET>" \
   HASURA_GRAPHQL_ENABLE_CONSOLE="true" \
-  HASURA_GRAPHQL_JWT_SECRET='{"type":"HS256", "key": "<KEY>"}' \
+  HASURA_GRAPHQL_JWT_SECRET='{"type":"HS512", "key": "<KEY>"}' \
   HASURA_GRAPHQL_UNAUTHORIZED_ROLE="anonymous" \
   HASURA_GRAPHQL_ENABLED_APIS="graphql,metadata,pgdump"
 
