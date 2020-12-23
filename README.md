@@ -94,25 +94,25 @@ Personally, I prefer to disable the public admin console in secure production si
 
 https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#migrations-setup
 
-    ```sh
-    dokku config:set hasura HASURA_GRAPHQL_ENABLE_CONSOLE="false"
-    hasura init hasura --endpoint https://magic.iamnoah.com
-    export HASURA_GRAPHQL_ADMIN_SECRET=<SECRET>
-    hasura console
-    # this will open a browser tab pointed at a local server running the hasura admin console
-    ```
+```sh
+dokku config:set hasura HASURA_GRAPHQL_ENABLE_CONSOLE="false"
+hasura init hasura --endpoint https://magic.iamnoah.com
+export HASURA_GRAPHQL_ADMIN_SECRET=<SECRET>
+hasura console
+# this will open a browser tab pointed at a local server running the hasura admin console
+```
 
 You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.
 
 As you make migrations you can squash from a particular migration all the way up to the latest, keeping them concise to avoid many migration folders initially when making many changes to setup the database.
 
-    ```sh
-    # squash all migrations from version 1608459932016 to the latest
-    hasura migrate squash --from 1608459932016
-    ```
+```sh
+# squash all migrations from version 1608459932016 to the latest
+hasura migrate squash --from 1608459932016
+```
 
 You can use the migration under `hasura/migrations` to jump start your database with the models used by this demo. Be sure to replace https://magic.iamnoah.com with the domain you setup above.
 
-    ```sh
-    hasura migrate apply --endpoint https://magic.iamnoah.com
-    ```
+```sh
+hasura migrate apply --endpoint https://magic.iamnoah.com
+```
