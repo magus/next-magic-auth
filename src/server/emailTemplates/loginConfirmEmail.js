@@ -66,7 +66,7 @@ body,
   text-align: left;
 }
 
-.email_email__3AZYW {
+.email_email__3AZYW  a {
   font-weight: 700;
 }
 
