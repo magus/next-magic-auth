@@ -12,14 +12,24 @@ export default function LoginConfirm() {
     let frameId;
 
     if (pageRef.current) {
+      alert(`window.innerHeight: ${window.innerHeight}`);
+      alert(`window.outerHeight: ${window.outerHeight}`);
+
       // walk all parents
       let node = pageRef.current;
       while (node) {
         if (node.offsetHeight) {
           alert(
-            [node.tagName, node.className, node.id, node.offsetHeight].join(
-              ' ',
-            ),
+            [
+              node.tagName,
+              node.className,
+              node.id,
+              'offsetHeight',
+              node.offsetHeight,
+              'styleHeight',
+              node.style.height,
+              'END',
+            ].join(' '),
           );
         }
 
