@@ -14,7 +14,9 @@ export default function LoginPage() {
   );
 }
 
-function CheckEmailModal({ phrase }) {
+function CheckEmailModal({ userId, phrase }) {
+  const approved = graphql.watchLoginToken(userId);
+
   return (
     <div className={styles.checkEmailModal}>
       <div className={styles.checkEmailModalKeepThisTab}>
@@ -22,6 +24,8 @@ function CheckEmailModal({ phrase }) {
       </div>
       <div>Click the magic words in your email</div>
       <div className={styles.magicWords}>{phrase}</div>
+
+      {JSON.stringify(approved, null, 2)}
     </div>
   );
 }
@@ -73,9 +77,17 @@ function LoginForm() {
   }
 
   async function handleOpenModal() {
-    modal.open(() => <CheckEmailModal phrase="test phrase" />, {
-      disableBackgroundDismiss: true,
-    });
+    modal.open(
+      () => (
+        <CheckEmailModal
+          userId="d5347111-fa43-4c09-b3dd-7e9994651be5"
+          phrase="test phrase"
+        />
+      ),
+      {
+        disableBackgroundDismiss: true,
+      },
+    );
   }
 
   async function handleEmailInput(event) {
@@ -107,6 +119,7 @@ function LoginForm() {
       <button onClick={handleRefreshToken}>Refresh</button>
       <button onClick={handleLogout}>Logout</button>
       <button onClick={handleOpenModal}>Open Modal</button>
+      <button onClick={getMe}>Get Me</button>
 
       {JSON.stringify(me, null, 2)}
     </>

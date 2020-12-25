@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useSubscription, useQuery } from '@apollo/client';
 
-import client from 'src/client/graphql/client';
 import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
 
@@ -13,6 +12,14 @@ const gqls = {
         email
         created
         updated
+      }
+    }
+  `,
+
+  watchLoginToken: gql`
+    subscription WatchLoginToken($userId: uuid!) {
+      loginToken_by_pk(userId: $userId) {
+        approved
       }
     }
   `,
@@ -39,15 +46,39 @@ export default {
 
     return [get, self];
   },
+
+  watchLoginToken: (userId) => {
+    const result = useSubscription(gqls.watchLoginToken, {
+      variables: { userId },
+      context: {
+        headers: {
+          [headers.role]: roles.self,
+        },
+      },
+    });
+
+    let approved = false;
+
+    if (!result.error && result.data && result.data.loginToken_by_pk) {
+      // extract approved
+      approved = result.data.loginToken_by_pk.approved;
+    }
+
+    return approved;
+  },
 };
 
-async function query(query, { headers, variables, asRole = 'user' } = {}) {
+async function query(
+  client,
+  query,
+  { headers, variables, asRole = roles.user } = {},
+) {
   const queryResult = await client.query({
     query,
     variables,
     context: {
       headers: {
-        'x-hasura-role': asRole,
+        [headers.role]: asRole,
         ...headers,
       },
     },

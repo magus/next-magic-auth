@@ -44,7 +44,7 @@ exports.JWT_SECRET =
 // in minutes
 exports.JWT_COOKIE_EXPIRES = JWT_COOKIE_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
 exports.JWT_REFRESH_TOKEN_EXPIRES = JWT_REFRESH_TOKEN_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
-exports.JWT_TOKEN_EXPIRES = JWT_TOKEN_EXPIRES || 15; // expire jwt token after 15 min
+exports.JWT_TOKEN_EXPIRES = JWT_TOKEN_EXPIRES || 1; // expire jwt token after 15 min
 exports.LOGIN_TOKEN_EXPIRES = LOGIN_TOKEN_EXPIRES || 60 * 2; // expire login token after 2 hours
 
 // one day if domain of front end and backend (hasura) match

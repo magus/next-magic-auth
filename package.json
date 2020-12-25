@@ -21,6 +21,7 @@
     "next": "10.0.3",
     "react": "17.0.1",
     "react-dom": "17.0.1",
+    "subscriptions-transport-ws": "^0.9.18",
     "uuid": "^8.3.2"
   }
 }
