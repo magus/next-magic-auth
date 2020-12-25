@@ -50,8 +50,9 @@ export function ModalContainer() {
           initial={{ opacity: 0.0 }}
           animate={{ opacity: 1.0 }}
           exit={{ opacity: 0.0 }}
-          onClick={modal.close}
         >
+          <div className={styles.modalBackground} onClick={modal.close} />
+
           <motion.div
             className={styles.modalContent}
             initial={{ opacity: 0.0, scale: 0.7 }}

@@ -82,6 +82,7 @@
 .checkEmailModalKeepThisTab {
   font-weight: 800;
   font-size: var(--font-large);
+  margin: 0 0 var(--spacer) 0;
 }
 
 .magicWords {
