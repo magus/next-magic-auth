@@ -13,6 +13,8 @@
   text-align: center;
   text-transform: capitalize;
 
+  cursor: pointer;
+
   display: flex;
   justify-content: center;
 }

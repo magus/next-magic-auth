@@ -34,9 +34,7 @@ export default function Email() {
 
         <tr>
           <td>
-            <a href={loginConfirmUrl}>
-              <Button>{phrase}</Button>
-            </a>
+            <Button href={loginConfirmUrl}>{phrase}</Button>
           </td>
         </tr>
 
