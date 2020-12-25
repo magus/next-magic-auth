@@ -6,13 +6,38 @@ import styles from 'styles/auth-confirm.module.css';
 import request from 'graphql-request';
 
 export default function LoginConfirm() {
+  const pageRef = React.useRef(null);
+
   React.useEffect(() => {
-    // force page height to match window.innerHeight
-    document.documentElement.style.height = `${window.innerHeight}px`;
+    if (pageRef.current) {
+      // force page height to match window.innerHeight
+      document.documentElement.style.height = `${window.innerHeight}px`;
+
+      // walk all parents
+      let node = pageRef.current;
+      while (node) {
+        if (node.offsetHeight) {
+          alert(
+            [
+              node.tagName,
+              node.className,
+              node.id,
+              'offsetHeight',
+              node.offsetHeight,
+              'styleHeight',
+              node.style.height,
+              'END',
+            ].join(' '),
+          );
+        }
+
+        node = node.parentNode;
+      }
+    }
   }, []);
 
   return (
-    <Page className={styles.container}>
+    <Page innerRef={pageRef} className={styles.container}>
       <div className={styles.header}>Success!</div>
 
       <div className={styles.instructions}>
