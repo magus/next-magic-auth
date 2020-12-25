@@ -9,17 +9,20 @@ export default function LoginConfirm() {
   const pageRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (pageRef.current) {
-      const cachedContent = pageRef.current.innerHTML;
-      pageRef.current.innerHTML = null;
-      const frameId = requestAnimationFrame(() => {
-        pageRef.current.innerHTML = cachedContent;
-      });
+    let frameId;
 
-      return function cleanup() {
-        cancelAnimationFrame(frameId);
-      };
+    if (pageRef.current) {
+      pageRef.current.style.display = 'none';
+      pageRef.current.offsetHeight;
+
+      // frameId = requestAnimationFrame(() => {
+      //   pageRef.current.display = '';
+      // });
     }
+
+    return function cleanup() {
+      cancelAnimationFrame(frameId);
+    };
   }, []);
 
   return (
