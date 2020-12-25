@@ -106,7 +106,6 @@ function getAuthHeaders() {
 
   return {
     [headers.authorization]: `Bearer ${jwtToken}`,
-    [headers.role]: roles.user,
   };
 }
 
@@ -197,8 +196,9 @@ export function buildApolloClient() {
       const newContext = {
         ...prevContext,
         headers: {
-          ...getAuthHeaders(),
+          [headers.role]: roles.user,
           ...prevContext.headers,
+          ...getAuthHeaders(),
         },
       };
 

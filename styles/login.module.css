@@ -8,10 +8,13 @@
   align-items: center;
 }
 
-.loginForm {
+.containerContent {
   max-width: 480px;
   min-width: 320px;
   padding: var(--spacer-3);
+}
+
+.loginForm {
   display: flex;
   flex-direction: column;
   justify-content: center;

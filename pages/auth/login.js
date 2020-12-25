@@ -9,12 +9,15 @@ import styles from 'styles/login.module.css';
 export default function LoginPage() {
   return (
     <Page className={styles.container}>
-      <LoginForm />
+      <div className={styles.containerContent}>
+        <LoginForm />
+      </div>
     </Page>
   );
 }
 
 function CheckEmailModal({ dismiss, userId, phrase }) {
+  const [getMe, me] = graphql.me();
   const approved = graphql.watchLoginToken(userId);
 
   React.useEffect(async () => {
@@ -23,6 +26,7 @@ function CheckEmailModal({ dismiss, userId, phrase }) {
         method: 'POST',
       });
       if (response.status === 200) {
+        getMe();
         dismiss();
       }
     }
@@ -48,7 +52,10 @@ function LoginForm() {
   const modal = useModal();
   const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
-  const [user, set_user] = React.useState(null);
+
+  React.useEffect(() => {
+    getMe();
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -72,19 +79,15 @@ function LoginForm() {
   }
 
   async function handleLogout() {
-    const response = await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
-  }
+    return new Promise((resolve) => {
+      // resolve(true);
 
-  async function handleRefreshToken() {
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
+      fetch('/api/auth/logout', {
+        method: 'POST',
+      }).then((response) => {
+        window.location = '/';
+      });
     });
-
-    if (response.status === 200) {
-      getMe();
-    }
   }
 
   async function handleEmailInput(event) {
@@ -92,6 +95,17 @@ function LoginForm() {
   }
 
   const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
+
+  if (me) {
+    return (
+      <>
+        {JSON.stringify(me, null, 2)}
+        <button className={styles.button} onClick={handleLogout}>
+          Logout
+        </button>
+      </>
+    );
+  }
 
   return (
     <>
@@ -109,12 +123,6 @@ function LoginForm() {
         />
         <button className={buttonStyles}>Login</button>
       </form>
-
-      <button onClick={handleRefreshToken}>Refresh</button>
-      <button onClick={handleLogout}>Logout</button>
-      <button onClick={getMe}>Get Me</button>
-
-      {JSON.stringify(me, null, 2)}
     </>
   );
 }
