@@ -22,6 +22,8 @@ export default function LoginConfirm() {
               node.tagName,
               node.className,
               node.id,
+              'overflow',
+              node.style.overflow,
               'offsetHeight',
               node.offsetHeight,
               'styleHeight',
