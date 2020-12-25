@@ -68,6 +68,7 @@ body,
 
 .email_email__3AZYW  a {
   font-weight: 700;
+  cursor: pointer;
 }
 
 .email_paragraph__1JNat {
