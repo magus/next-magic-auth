@@ -32,7 +32,6 @@ export default async function loginConfirm(req, res) {
     // which will hit server and write refresh token
 
     // return res.status(200).json({ error: false });
-    return res.status(302).redirect(loginConfirmUrl);
     // res.setHeader('Content-Type', 'text/html');
     // return res.status(200).send(`
     //   <html>
@@ -41,6 +40,7 @@ export default async function loginConfirm(req, res) {
     //     </head>
     //   </html>
     // `);
+    return res.status(302).redirect(loginConfirmUrl);
   } catch (e) {
     console.error(e);
 
