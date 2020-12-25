@@ -8,7 +8,7 @@ import request from 'graphql-request';
 export default function LoginConfirm() {
   React.useEffect(() => {
     // force page height to match window.innerHeight
-    document.body.style.height = `${window.innerHeight}px`;
+    document.documentElement.style.height = `${window.innerHeight}px`;
   }, []);
 
   return (
