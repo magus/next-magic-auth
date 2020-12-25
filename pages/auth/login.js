@@ -14,8 +14,21 @@ export default function LoginPage() {
   );
 }
 
-function CheckEmailModal({ userId, phrase }) {
+function CheckEmailModal({ dismiss, userId, phrase }) {
   const approved = graphql.watchLoginToken(userId);
+
+  React.useEffect(async () => {
+    if (approved) {
+      const response = await fetch('/api/auth/complete', {
+        method: 'POST',
+      });
+      if (response.status === 200) {
+        dismiss();
+      }
+    }
+  }, [approved]);
+
+  async function handleLoginComplete() {}
 
   return (
     <div className={styles.checkEmailModal}>
@@ -35,7 +48,6 @@ function LoginForm() {
   const modal = useModal();
   const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
-  const [phrase, set_phrase] = React.useState(null);
   const [user, set_user] = React.useState(null);
 
   async function handleSubmit(event) {
@@ -50,14 +62,13 @@ function LoginForm() {
       body: JSON.stringify({ email }),
     });
 
-    const json = await response.json();
-    set_phrase(json.phrase);
-  }
-
-  async function handleLoginComplete() {
-    const response = await fetch('/api/auth/complete', {
-      method: 'POST',
-    });
+    if (response.status === 200) {
+      const json = await response.json();
+      modal.open(CheckEmailModal, {
+        props: json,
+        disableBackgroundDismiss: true,
+      });
+    }
   }
 
   async function handleLogout() {
@@ -74,20 +85,6 @@ function LoginForm() {
     if (response.status === 200) {
       getMe();
     }
-  }
-
-  async function handleOpenModal() {
-    modal.open(
-      () => (
-        <CheckEmailModal
-          userId="d5347111-fa43-4c09-b3dd-7e9994651be5"
-          phrase="test phrase"
-        />
-      ),
-      {
-        disableBackgroundDismiss: true,
-      },
-    );
   }
 
   async function handleEmailInput(event) {
@@ -113,12 +110,8 @@ function LoginForm() {
         <button className={buttonStyles}>Login</button>
       </form>
 
-      <div>{phrase}</div>
-
-      <button onClick={handleLoginComplete}>Complete Login</button>
       <button onClick={handleRefreshToken}>Refresh</button>
       <button onClick={handleLogout}>Logout</button>
-      <button onClick={handleOpenModal}>Open Modal</button>
       <button onClick={getMe}>Get Me</button>
 
       {JSON.stringify(me, null, 2)}

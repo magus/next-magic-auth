@@ -33,16 +33,23 @@ export default async function login(req, res) {
 
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
-    await graphql.query(upsertLoginTokenWithUser, {
-      variables: {
-        // user
-        email,
-        // loginToken
-        loginToken,
-        expires: loginTokenExpires,
-        requestCookie,
+    const upsertLoginTokenWithUserResult = await graphql.query(
+      upsertLoginTokenWithUser,
+      {
+        variables: {
+          // user
+          email,
+          // loginToken
+          loginToken,
+          expires: loginTokenExpires,
+          requestCookie,
+        },
       },
-    });
+    );
+
+    const [
+      { userId },
+    ] = upsertLoginTokenWithUserResult.insert_loginToken.returning;
 
     // calculate phrase for showing on login for confirmation with email
     const phrase = words.getPhraseFromToken(loginToken);
@@ -50,6 +57,7 @@ export default async function login(req, res) {
     return res.status(200).json({
       error: false,
       phrase,
+      userId,
     });
   } catch (e) {
     console.error(e);
@@ -84,7 +92,9 @@ const upsertLoginTokenWithUser = gql`
         update_columns: [created, value, expires, requestCookie, approved]
       }
     ) {
-      affected_rows
+      returning {
+        userId
+      }
     }
   }
 `;

@@ -20,6 +20,11 @@ export default async function loginConfirm(req, res) {
     // when login token does not exist
     //   { data: { loginToken: null } }
     if (!data.loginToken) {
+      throw new Error('login token missing, try again');
+    }
+
+    // token does not match
+    if (data.loginToken.value !== token) {
       throw new Error('login token invalid, try again');
     }
 
@@ -43,6 +48,7 @@ const approveLoginTokenByUserId = gql`
       pk_columns: { userId: $userId }
       _set: { approved: true }
     ) {
+      value
       userId
     }
   }

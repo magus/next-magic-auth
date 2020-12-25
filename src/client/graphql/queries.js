@@ -1,5 +1,8 @@
+import * as React from 'react';
 import gql from 'graphql-tag';
-import { useLazyQuery, useSubscription, useQuery } from '@apollo/client';
+import { useLazyQuery, useQuery } from '@apollo/client';
+
+import { useAdhocSubscription } from 'src/client/graphql/client';
 
 import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
@@ -48,13 +51,9 @@ export default {
   },
 
   watchLoginToken: (userId) => {
-    const result = useSubscription(gqls.watchLoginToken, {
+    const result = useAdhocSubscription(gqls.watchLoginToken, {
       variables: { userId },
-      context: {
-        headers: {
-          [headers.role]: roles.self,
-        },
-      },
+      anonymous: true,
     });
 
     let approved = false;
@@ -71,14 +70,14 @@ export default {
 async function query(
   client,
   query,
-  { headers, variables, asRole = roles.user } = {},
+  { headers, variables, role = roles.user } = {},
 ) {
   const queryResult = await client.query({
     query,
     variables,
     context: {
       headers: {
-        [headers.role]: asRole,
+        [headers.role]: role,
         ...headers,
       },
     },

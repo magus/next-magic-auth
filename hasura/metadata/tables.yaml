@@ -6,14 +6,12 @@
     using:
       foreign_key_constraint_on: userId
   select_permissions:
-  - role: user
+  - role: anonymous
     permission:
       columns:
       - approved
       - userId
-      filter:
-        userId:
-          _eq: X-Hasura-User-Id
+      filter: {}
   event_triggers:
   - name: loginSendEmail
     definition:

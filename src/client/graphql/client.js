@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   ApolloClient,
   ApolloLink,
@@ -14,12 +15,62 @@ import config from 'src/client/config';
 import cookie from 'src/client/cookie';
 import roles from 'src/shared/roles';
 import headers from 'src/shared/headers';
+import { gql } from 'graphql-request';
 
 const graphqlHost = 'magic.iamnoah.com/v1/graphql';
 
+const JWT_VERIFY_FAIL_REGEX = /Could not verify JWT/;
+
+// adhoc useSubscription to prevent opening web socket in client setup
+// also allows us to handle errors on the socket and reset client
+export function useAdhocSubscription(
+  query,
+  { variables, anonymous, role = roles.user },
+) {
+  const [result, set_result] = React.useState(null);
+  const [rebuildClient, set_rebuildClient] = React.useState(1);
+
+  React.useEffect(() => {
+    const client = buildApolloWebsocketClient({
+      anonymous,
+      headers: {
+        [headers.role]: anonymous ? undefined : role,
+      },
+    });
+
+    const observable = client.subscribe({
+      query,
+      variables,
+    });
+
+    const subscription = observable.subscribe(set_result, (error) => {
+      if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
+        // refresh token and rebuild client
+        return refreshJWTToken().then((success) => {
+          if (!success) {
+            return logout();
+          }
+
+          set_rebuildClient(rebuildClient + 1);
+        });
+      }
+
+      // otherwise set error and continue
+      set_result({ error });
+    });
+
+    return function cleanup() {
+      subscription.unsubscribe();
+      client.link.subscriptionClient.close();
+    };
+  }, [rebuildClient]);
+
+  return { ...result };
+}
+
 function refreshJWTToken() {
   return new Promise((resolve) => {
-    // resolve(true);
+    // return resolve(false);
 
     fetch('/api/auth/refresh', {
       method: 'POST',
@@ -29,6 +80,18 @@ function refreshJWTToken() {
       }
 
       return resolve(false);
+    });
+  });
+}
+
+function logout() {
+  return new Promise((resolve) => {
+    // resolve(true);
+
+    fetch('/api/auth/logout', {
+      method: 'POST',
+    }).then((response) => {
+      window.location = '/';
     });
   });
 }
@@ -47,11 +110,10 @@ function getAuthHeaders() {
   };
 }
 
-export function buildApolloClient() {
-  const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
-
+export function buildApolloWebsocketClient(options = {}) {
   // can only use web socket link in browser
   // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
+
   const wsLink = !process.browser
     ? null
     : new WebSocketLink({
@@ -60,11 +122,25 @@ export function buildApolloClient() {
           reconnect: true,
           connectionParams: {
             headers: {
-              ...getAuthHeaders(),
+              ...(options.anonymous ? {} : getAuthHeaders()),
+              ...options.headers,
             },
           },
         },
       });
+
+  const link = ApolloLink.from([wsLink]);
+
+  const cache = new InMemoryCache();
+
+  return new ApolloClient({
+    link,
+    cache,
+  });
+}
+
+export function buildApolloClient() {
+  const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
 
   const errorLink = onError(
     ({ graphQLErrors, networkError, operation, forward }) => {
@@ -79,15 +155,11 @@ export function buildApolloClient() {
         let needsRefresh = false;
 
         graphQLErrors.map((gqlError) => {
-          if (
-            gqlError.message === 'Could not verify JWT: JWTExpired' ||
-            gqlError.message ===
-              'Could not verify JWT: JWSError JWSInvalidSignature'
-          ) {
+          if (JWT_VERIFY_FAIL_REGEX.test(gqlError.message)) {
             needsRefresh = true;
           } else {
             // unhandled error, log it
-            if (config.isDev) {
+            if (config.__DEV__) {
               console.error('[graphql]', 'gqlError', gqlError);
             }
           }
@@ -97,9 +169,9 @@ export function buildApolloClient() {
           // Refresh JWT token
           return new Observable((observer) => {
             refreshJWTToken().then((success) => {
+              // cannot refresh token? logout
               if (!success) {
-                // TODO logout
-                throw new Error('unable to refresh token');
+                return logout();
               }
 
               const subscriber = {
@@ -136,24 +208,7 @@ export function buildApolloClient() {
     return forward(operation);
   });
 
-  // use http link only on server side render
-  const webLink = !process.browser
-    ? httpLink
-    : split(
-        (operation) => {
-          const context = operation.getContext();
-          const definition = getMainDefinition(operation.query);
-
-          return (
-            definition.kind === 'OperationDefinition' &&
-            definition.operation === 'subscription'
-          );
-        },
-        wsLink,
-        httpLink,
-      );
-
-  const link = ApolloLink.from([errorLink, authMiddleware, webLink]);
+  const link = ApolloLink.from([errorLink, authMiddleware, httpLink]);
 
   const cache = new InMemoryCache();
 

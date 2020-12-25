@@ -50,6 +50,10 @@ export default async function loginConfirm(req, res) {
 
     const { approved, value: loginToken, userId, email } = data.new;
 
+    if (!email) {
+      throw new Error('email missing');
+    }
+
     // if approved, ignore event
     if (approved) {
       return res

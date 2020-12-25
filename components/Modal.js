@@ -64,7 +64,12 @@ export function ModalContainer() {
             animate={{ opacity: 1.0, scale: 1.0 }}
             exit={{ opacity: 0.0, scale: 0.7 }}
           >
-            {modal.config.component ? <modal.config.component /> : null}
+            {!modal.config.component ? null : (
+              <modal.config.component
+                {...modal.config.props}
+                dismiss={modal.close}
+              />
+            )}
           </motion.div>
         </motion.div>
       )}
