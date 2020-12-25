@@ -10,4 +10,6 @@
   line-height: var(--button-height);
   color: rgba(var(--white), 0.9);
   font-weight: 700;
+
+  text-transform: capitalize;
 }

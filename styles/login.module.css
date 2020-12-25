@@ -74,6 +74,5 @@
 }
 
 .magicWords {
-  text-transform: capitalize;
   margin: var(--spacer-4) 0 0 0;
 }
