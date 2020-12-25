@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
-import auth from '../../../src/server/auth';
-import cookie from '../../../src/server/cookie';
-import graphql from '../../../src/server/graphql';
+import auth from 'src/server/auth';
+import cookie from 'src/server/cookie';
+import graphql from 'src/server/graphql';
 
 export default async function loginRefresh(req, res) {
   try {

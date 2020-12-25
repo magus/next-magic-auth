@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
 
-import graphql from '../../src/client/graphql';
-import styles from '../../styles/login.module.css';
+import graphql from 'src/client/graphql';
+import styles from 'styles/login.module.css';
 
 export default function Login() {
   const router = useRouter();
@@ -50,6 +51,8 @@ export default function Login() {
 
   return (
     <div className={styles.container}>
+      <motion.div animate={{ scale: 0.5 }} />
+
       <form className={styles.loginForm} onSubmit={handleSubmit}>
         <label className={styles.loginLabel} htmlFor="email">
           Email

@@ -1,4 +1,4 @@
-import auth from '../../../src/server/auth';
+import auth from 'src/server/auth';
 
 export default async function loginRefresh(req, res) {
   try {

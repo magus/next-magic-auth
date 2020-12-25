@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 
-import config from '../../../src/server/config';
-import cookie from '../../../src/server/cookie';
-import graphql from '../../../src/server/graphql';
-import auth from '../../../src/server/auth';
+import config from 'src/server/config';
+import cookie from 'src/server/cookie';
+import graphql from 'src/server/graphql';
+import auth from 'src/server/auth';
 
 export default async function loginComplete(req, res) {
   try {

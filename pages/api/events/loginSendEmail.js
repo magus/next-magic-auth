@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
-import config from '../../../src/server/config';
-import serverEmail from '../../../src/server/email';
-import words from '../../../src/server/words';
+import config from 'src/server/config';
+import serverEmail from 'src/server/email';
+import words from 'src/server/words';
 
 // {
 //   "event": {

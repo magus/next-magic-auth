@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
-import config from '../../../src/server/config';
-import graphql from '../../../src/server/graphql';
-import auth from '../../../src/server/auth';
+import config from 'src/server/config';
+import graphql from 'src/server/graphql';
+import auth from 'src/server/auth';
 
 const loginConfirmUrl = `${config.FRONTEND_HOST}/auth/confirm`;
 

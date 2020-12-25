@@ -1,5 +1,5 @@
 import { parse } from 'cookie';
-import cookies from '../shared/cookies';
+import cookies from 'src/shared/cookies';
 
 function getCookies() {
   const cookies = parse(document.cookie);

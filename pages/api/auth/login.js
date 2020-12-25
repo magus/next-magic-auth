@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 import Joi from 'joi';
 
-import graphql from '../../../src/server/graphql';
-import auth from '../../../src/server/auth';
-import words from '../../../src/server/words';
+import graphql from 'src/server/graphql';
+import auth from 'src/server/auth';
+import words from 'src/server/words';
 
 // schema for validating username and password
 const schema = Joi.object({

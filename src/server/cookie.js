@@ -1,7 +1,7 @@
 import { serialize } from 'cookie';
 
-import config from '../server/config';
-import cookies from '../shared/cookies';
+import config from './config';
+import cookies from 'src/shared/cookies';
 
 export default {
   cookies,
