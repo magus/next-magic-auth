@@ -42,8 +42,6 @@ function CheckEmailModal({ dismiss, userId, phrase }) {
       </div>
       <div>Click the magic words in your email</div>
       <Button className={styles.magicWords}>{phrase}</Button>
-
-      {JSON.stringify(approved, null, 2)}
     </div>
   );
 }

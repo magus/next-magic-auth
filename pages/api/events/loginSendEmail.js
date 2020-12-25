@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 
 import config from 'src/server/config';
 import serverEmail from 'src/server/email';
-import loginConfirm from 'src/server/emailTemplates/loginConfirm';
+import loginConfirmEmail from 'src/server/emailTemplates/loginConfirmEmail';
 import words from 'src/server/words';
 
 // {
@@ -19,7 +19,8 @@ import words from 'src/server/words';
 //               "value": "a",
 //               "userId": "7f708d1c-0e5e-4ded-a4df-3370fbce77c8",
 //               "requestCookie": "a",
-//               "approved": false
+//               "approved": false,
+//               "email": "zzz"
 //           }
 //       },
 //       "trace_context": {
@@ -41,7 +42,7 @@ import words from 'src/server/words';
 //       "name": "loginToken"
 //   }
 // }
-export default async function loginConfirm(req, res) {
+export default async function loginSendEmail(req, res) {
   try {
     // hasura event webhook payload
     const {
@@ -77,7 +78,7 @@ export default async function loginConfirm(req, res) {
     const loginConfirmUrl = `${config.FRONTEND_HOST}/api/auth/confirm?${queryParams}`;
     const phrase = words.getPhraseFromToken(loginToken);
 
-    const emailHtml = loginConfirm({ email, loginConfirmUrl, phrase });
+    const emailHtml = loginConfirmEmail({ email, loginConfirmUrl, phrase });
 
     const emailResponse = await serverEmail.send(email, {
       subject: 'Login with Magic',
