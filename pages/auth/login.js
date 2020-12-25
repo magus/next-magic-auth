@@ -98,7 +98,7 @@ function LoginForm() {
   if (me) {
     return (
       <>
-        {JSON.stringify(me, null, 2)}
+        <pre>{JSON.stringify(me, null, 2)}</pre>
         <Button className={styles.button} onClick={handleLogout}>
           Logout
         </Button>
