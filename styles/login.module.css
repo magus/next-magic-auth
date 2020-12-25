@@ -34,6 +34,10 @@
   padding: var(--spacer) var(--spacer-2);
 }
 
+.loginInput::placeholder {
+  color: rgba(var(--black), 0.25);
+}
+
 .loginButton {
   width: 100%;
   height: var(--button-height);
@@ -44,4 +48,12 @@
   line-height: var(--button-height);
   color: rgba(var(--white), 0.9);
   font-weight: 700;
+
+  /* disabled by default */
+  opacity: 0.4;
+}
+
+.loginButtonEnabled {
+  composes: loginButton;
+  opacity: 1.0;
 }

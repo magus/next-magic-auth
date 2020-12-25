@@ -26,6 +26,7 @@ function CheckEmailModal({ phrase }) {
 function LoginForm() {
   const router = useRouter();
   const modal = useModal();
+  const [email, set_email] = React.useState(null);
   const [phrase, set_phrase] = React.useState(null);
   const [user, set_user] = React.useState(null);
 
@@ -72,6 +73,12 @@ function LoginForm() {
     modal.open(() => <CheckEmailModal phrase="test phrase" />);
   }
 
+  async function handleEmailInput(event) {
+    set_email(event.target.value);
+  }
+
+  const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
+
   return (
     <>
       <form className={styles.loginForm} onSubmit={handleSubmit}>
@@ -83,8 +90,10 @@ function LoginForm() {
           name="email"
           type="email"
           placeholder="magic@gmail.com"
+          value={email}
+          onChange={handleEmailInput}
         />
-        <button className={styles.loginButton}>Login</button>
+        <button className={buttonStyles}>Login</button>
       </form>
 
       <div>{phrase}</div>
