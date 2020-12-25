@@ -8,35 +8,17 @@ import request from 'graphql-request';
 export default function LoginConfirm() {
   const pageRef = React.useRef(null);
 
-  React.useEffect(() => {
-    if (pageRef.current) {
-      // force page height to match window.innerHeight
-      document.documentElement.style.height = `${window.innerHeight}px`;
+  // Chrome iOS cannot vertically center properly
+  // The first load has the wrong inner height
 
-      // walk all parents
-      let node = pageRef.current;
-      while (node) {
-        if (node.offsetHeight) {
-          node.style.overflow = 'hidden';
-
-          alert(
-            [
-              node.tagName,
-              node.className,
-              node.id,
-              'offsetHeight',
-              node.offsetHeight,
-              'styleHeight',
-              node.style.height,
-              'END',
-            ].join(' '),
-          );
-        }
-
-        node = node.parentNode;
-      }
-    }
-  }, []);
+  // React.useEffect(() => {
+  //   requestAnimationFrame(() => {
+  //     requestAnimationFrame(() => {
+  //       // force page height to match window.innerHeight
+  //       document.documentElement.style.height = `${window.innerHeight}px`;
+  //     });
+  //   });
+  // }, []);
 
   return (
     <Page innerRef={pageRef} className={styles.container}>
@@ -45,6 +27,7 @@ export default function LoginConfirm() {
       <div className={styles.instructions}>
         Go back to the page, you should now be logged in.
       </div>
+      <div className={styles.instructions}>This window can be closed now.</div>
     </Page>
   );
 }
