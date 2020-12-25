@@ -41,27 +41,12 @@
   color: rgba(var(--black), 0.25);
 }
 
-.button {
-  width: 100%;
-  height: var(--button-height);
-  border-radius: var(--spacer);
-  background-color: rgba(var(--main-color), 1.0);
-  display: flex;
-  justify-content: center;
-  line-height: var(--button-height);
-  color: rgba(var(--white), 0.9);
-  font-weight: 700;
-}
-
 .loginButton {
-  composes: button;
-
   /* disabled by default */
   opacity: 0.4;
 }
 
 .loginButtonEnabled {
-  composes: loginButton;
   opacity: 1.0;
 }
 
@@ -89,7 +74,6 @@
 }
 
 .magicWords {
-  composes: button;
   text-transform: capitalize;
   margin: var(--spacer-4) 0 0 0;
 }

@@ -1,0 +1,13 @@
+.button {
+  --button-height: var(--spacer-6);
+
+  width: 100%;
+  height: var(--button-height);
+  border-radius: var(--spacer);
+  background-color: rgba(var(--main-color), 1.0);
+  display: flex;
+  justify-content: center;
+  line-height: var(--button-height);
+  color: rgba(var(--white), 0.9);
+  font-weight: 700;
+}

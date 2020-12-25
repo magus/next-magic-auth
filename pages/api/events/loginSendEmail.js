@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 
 import config from 'src/server/config';
 import serverEmail from 'src/server/email';
+import loginConfirm from 'src/server/emailTemplates/loginConfirm';
 import words from 'src/server/words';
 
 // {
@@ -76,16 +77,10 @@ export default async function loginConfirm(req, res) {
     const loginConfirmUrl = `${config.FRONTEND_HOST}/api/auth/confirm?${queryParams}`;
     const phrase = words.getPhraseFromToken(loginToken);
 
-    const emailHtml = `
-    <h3>Click the magic words below to finish the login.</h3>
-
-    <a href="${loginConfirmUrl}"><strong>${phrase}</strong></a>
-
-    <div>Click <a href="">here</a> if the magic words do not match what you saw on the login page.</div>
-    `;
+    const emailHtml = loginConfirm({ email, loginConfirmUrl, phrase });
 
     const emailResponse = await serverEmail.send(email, {
-      subject: 'Login to Magic',
+      subject: 'Login with Magic',
       html: emailHtml,
     });
 

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 
 import Page from 'components/Page';
+import Button from 'components/Button';
 import { useModal } from 'components/Modal';
 import graphql from 'src/client/graphql/queries';
 import styles from 'styles/login.module.css';
@@ -40,7 +41,7 @@ function CheckEmailModal({ dismiss, userId, phrase }) {
         Keep this tab open
       </div>
       <div>Click the magic words in your email</div>
-      <div className={styles.magicWords}>{phrase}</div>
+      <Button className={styles.magicWords}>{phrase}</Button>
 
       {JSON.stringify(approved, null, 2)}
     </div>
@@ -100,9 +101,9 @@ function LoginForm() {
     return (
       <>
         {JSON.stringify(me, null, 2)}
-        <button className={styles.button} onClick={handleLogout}>
+        <Button className={styles.button} onClick={handleLogout}>
           Logout
-        </button>
+        </Button>
       </>
     );
   }
@@ -121,7 +122,7 @@ function LoginForm() {
           value={email}
           onChange={handleEmailInput}
         />
-        <button className={buttonStyles}>Login</button>
+        <Button className={buttonStyles}>Login</Button>
       </form>
     </>
   );

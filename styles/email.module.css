@@ -1,0 +1,13 @@
+.container {
+  max-width: 450px;
+  text-align: left;
+}
+
+.email {
+  font-weight: 800;
+}
+
+.paragraph {
+  display: inline-block;
+  margin: var(--spacer-2) 0;
+}
