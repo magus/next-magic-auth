@@ -29,7 +29,7 @@ function CheckEmailModal({ phrase }) {
 function LoginForm() {
   const router = useRouter();
   const modal = useModal();
-  const [email, set_email] = React.useState(null);
+  const [email, set_email] = React.useState('');
   const [phrase, set_phrase] = React.useState(null);
   const [user, set_user] = React.useState(null);
 
