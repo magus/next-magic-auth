@@ -29,7 +29,6 @@
 }
 
 .loginInput {
-  margin: 0  0 var(--spacer-2) 0;
   width: 100%;
   height: var(--button-height);
   border: 1px solid rgba(var(--black), 0.4);
@@ -74,5 +73,5 @@
 }
 
 .magicWords {
-  margin: var(--spacer-4) 0 0 0;
+  margin: var(--spacer-2) 0 0 0;
 }

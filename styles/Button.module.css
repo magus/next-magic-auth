@@ -1,6 +1,8 @@
 .button {
   --button-height: var(--spacer-6);
 
+  margin: var(--spacer-2) 0 0 0;
+
   width: 100%;
   height: var(--button-height);
   border-radius: var(--spacer);
