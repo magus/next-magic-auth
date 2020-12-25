@@ -17,6 +17,8 @@ export default function LoginConfirm() {
       let node = pageRef.current;
       while (node) {
         if (node.offsetHeight) {
+          node.style.overflow = 'hidden';
+
           alert(
             [
               node.tagName,
