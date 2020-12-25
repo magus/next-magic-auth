@@ -1,12 +1,31 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
-import { motion } from 'framer-motion';
 
+import Page from 'components/Page';
+import { useModal } from 'components/Modal';
 import graphql from 'src/client/graphql';
 import styles from 'styles/login.module.css';
 
-export default function Login() {
+export default function LoginPage() {
+  return (
+    <Page className={styles.container}>
+      <LoginForm />
+    </Page>
+  );
+}
+
+function CheckEmailModal({ phrase }) {
+  return (
+    <div>
+      Check Email
+      <div>{phrase}</div>
+    </div>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const modal = useModal();
   const [phrase, set_phrase] = React.useState(null);
   const [user, set_user] = React.useState(null);
 
@@ -49,10 +68,12 @@ export default function Login() {
     }
   }
 
-  return (
-    <div className={styles.container}>
-      <motion.div animate={{ scale: 0.5 }} />
+  async function handleOpenModal() {
+    modal.open(() => <CheckEmailModal phrase="test phrase" />);
+  }
 
+  return (
+    <>
       <form className={styles.loginForm} onSubmit={handleSubmit}>
         <label className={styles.loginLabel} htmlFor="email">
           Email
@@ -71,8 +92,9 @@ export default function Login() {
       <button onClick={handleLoginComplete}>Complete Login</button>
       <button onClick={handleRefreshToken}>Refresh</button>
       <button onClick={handleLogout}>Logout</button>
+      <button onClick={handleOpenModal}>Open Modal</button>
 
       {JSON.stringify(user, null, 2)}
-    </div>
+    </>
   );
 }
