@@ -12,8 +12,3 @@
   align-items: center;
   justify-content: center;
 }
-
-.modalContent {
-
-  background-color: rgba(var(--white), 1.0);
-}

@@ -16,9 +16,12 @@ export default function LoginPage() {
 
 function CheckEmailModal({ phrase }) {
   return (
-    <div>
-      Check Email
-      <div>{phrase}</div>
+    <div className={styles.checkEmailModal}>
+      <div className={styles.checkEmailModalKeepThisTab}>
+        Keep this tab open
+      </div>
+      <div>Click the magic words in your email</div>
+      <div className={styles.magicWords}>{phrase}</div>
     </div>
   );
 }
