@@ -55,12 +55,16 @@ body,
         border-radius: 8px;
   background-color: rgba(249, 109, 16, 1.0);
   line-height: 48px;
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 700;
   text-transform: capitalize;
   text-align: center;
   cursor: pointer;
   display: inline-block;
+}
+
+a[href].Button_button__1rPei {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .email_container__24Nn- {
