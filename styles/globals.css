@@ -42,7 +42,6 @@ a {
   list-style: none outside none;
   margin: 0;
   padding: 0;
-  text-align: left;
   text-decoration: none;
   text-indent: 0;
   color: rgba(var(--black), 1.0);
