@@ -12,8 +12,19 @@ export default function LoginConfirm() {
     let frameId;
 
     if (pageRef.current) {
-      pageRef.current.style.display = 'none';
-      pageRef.current.offsetHeight;
+      // walk all parents
+      let node = pageRef.current;
+      while (node) {
+        if (node.offsetHeight) {
+          alert(
+            [node.tagName, node.className, node.id, node.offsetHeight].join(
+              ' ',
+            ),
+          );
+        }
+
+        node = node.parentNode;
+      }
 
       // frameId = requestAnimationFrame(() => {
       //   pageRef.current.display = '';
