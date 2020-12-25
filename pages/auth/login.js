@@ -73,7 +73,9 @@ function LoginForm() {
   }
 
   async function handleOpenModal() {
-    modal.open(() => <CheckEmailModal phrase="test phrase" />);
+    modal.open(() => <CheckEmailModal phrase="test phrase" />, {
+      disableBackgroundDismiss: true,
+    });
   }
 
   async function handleEmailInput(event) {
