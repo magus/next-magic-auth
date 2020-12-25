@@ -28,10 +28,15 @@ function CheckEmailModal({ dismiss, userId, phrase }) {
       });
       if (response.status === 200) {
         getMe();
-        dismiss();
       }
     }
   }, [approved]);
+
+  React.useEffect(() => {
+    if (me) {
+      dismiss();
+    }
+  }, [me]);
 
   async function handleLoginComplete() {}
 
