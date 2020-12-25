@@ -7,7 +7,7 @@ export default function Button({ className, children, href, ...restProps }) {
     return (
       <a
         href={href}
-        className={[className, styles.button].join(' ')}
+        className={[className, styles.inlineBlock, styles.button].join(' ')}
         {...restProps}
       >
         {children}
