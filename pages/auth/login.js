@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 
 import Page from 'components/Page';
 import { useModal } from 'components/Modal';
-import graphql from 'src/client/graphql';
+import graphql from 'src/client/graphql/queries';
 import styles from 'styles/login.module.css';
 
 export default function LoginPage() {
@@ -29,6 +29,7 @@ function CheckEmailModal({ phrase }) {
 function LoginForm() {
   const router = useRouter();
   const modal = useModal();
+  const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
   const [phrase, set_phrase] = React.useState(null);
   const [user, set_user] = React.useState(null);
@@ -67,8 +68,7 @@ function LoginForm() {
     });
 
     if (response.status === 200) {
-      const me = await graphql.me();
-      set_user(me);
+      getMe();
     }
   }
 
@@ -108,7 +108,7 @@ function LoginForm() {
       <button onClick={handleLogout}>Logout</button>
       <button onClick={handleOpenModal}>Open Modal</button>
 
-      {JSON.stringify(user, null, 2)}
+      {JSON.stringify(me, null, 2)}
     </>
   );
 }

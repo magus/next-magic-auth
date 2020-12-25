@@ -7,9 +7,11 @@ import cookie from './cookie';
 import graphql from './graphql';
 import random from './random';
 
+import roles from 'src/shared/roles';
+
 const CLAIMS_NAMESPACE = 'https://hasura.io/jwt/claims';
 const HASURA_USER_ID_HEADER = 'x-hasura-user-id';
-const defaultAllowedRoles = ['user', 'self'];
+const defaultAllowedRoles = [roles.user, roles.self];
 
 function generateLoginToken(res) {
   // generate random 64 bytes for login verification
