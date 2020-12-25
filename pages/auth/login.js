@@ -49,11 +49,18 @@ export default function Login() {
   }
 
   return (
-    <div className={styles.login}>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input name="email" type="email" />
-        <button>Log in</button>
+    <div className={styles.container}>
+      <form className={styles.loginForm} onSubmit={handleSubmit}>
+        <label className={styles.loginLabel} htmlFor="email">
+          Email
+        </label>
+        <input
+          className={styles.loginInput}
+          name="email"
+          type="email"
+          placeholder="magic@gmail.com"
+        />
+        <button className={styles.loginButton}>Login</button>
       </form>
 
       <div>{phrase}</div>

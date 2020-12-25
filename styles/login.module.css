@@ -1,7 +1,47 @@
-.login {
+.container {
+  --button-height: var(--spacer-6);
+
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.loginForm {
+  max-width: 480px;
+  min-width: 320px;
+  padding: var(--spacer-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginLabel {
+  visibility: hidden;
+  align-self: flex-start;
+  font-size: var(--font-small);
+  margin: 0 0 0 1px;
+}
+
+.loginInput {
+  margin: 0  0 var(--spacer-2) 0;
+  width: 100%;
+  height: var(--button-height);
+  border: 1px solid rgba(var(--black), 0.4);
+  border-radius: var(--spacer);
+  padding: var(--spacer) var(--spacer-2);
+}
+
+.loginButton {
+  width: 100%;
+  height: var(--button-height);
+  border-radius: var(--spacer);
+  background-color: rgba(var(--main-color), 1.0);
+  display: flex;
+  justify-content: center;
+  line-height: var(--button-height);
+  color: rgba(var(--white), 0.9);
+  font-weight: 700;
 }
