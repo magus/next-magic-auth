@@ -3,13 +3,22 @@ import * as React from 'react';
 import Page from 'components/Page';
 
 import styles from 'styles/auth-confirm.module.css';
+import request from 'graphql-request';
 
 export default function LoginConfirm() {
   const pageRef = React.useRef(null);
 
   React.useEffect(() => {
     if (pageRef.current) {
-      pageRef.current.style.height = `${pageRef.current.offsetHeight}px`;
+      const cachedContent = pageRef.current.innerHTML;
+      pageRef.current.innerHTML = null;
+      const frameId = requestAnimationFrame(() => {
+        pageRef.current.innerHTML = cachedContent;
+      });
+
+      return function cleanup() {
+        cancelAnimationFrame(frameId);
+      };
     }
   }, []);
 
