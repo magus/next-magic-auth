@@ -17,19 +17,19 @@ export function useModal() {
 }
 
 export function ModalContextProvider({ children }) {
-  const [component, set_component] = React.useState(null);
+  const [config, set_config] = React.useState({ component: null });
 
-  function open(ModalContentComponent) {
-    set_component(ModalContentComponent);
+  function open(component, config) {
+    set_config({ component, ...config });
   }
 
   function close() {
-    set_component(null);
+    set_config({ component: null });
   }
 
   const value = {
-    isOpen: component !== null,
-    component,
+    isOpen: config.component !== null,
+    config,
     open,
     close,
   };
@@ -51,7 +51,12 @@ export function ModalContainer() {
           animate={{ opacity: 1.0 }}
           exit={{ opacity: 0.0 }}
         >
-          <div className={styles.modalBackground} onClick={modal.close} />
+          <div
+            className={styles.modalBackground}
+            onClick={
+              modal.config.disableBackgroundDismiss ? undefined : modal.close
+            }
+          />
 
           <motion.div
             className={styles.modalContent}
@@ -59,7 +64,7 @@ export function ModalContainer() {
             animate={{ opacity: 1.0, scale: 1.0 }}
             exit={{ opacity: 0.0, scale: 0.7 }}
           >
-            {modal.component}
+            {modal.config.component ? <modal.config.component /> : null}
           </motion.div>
         </motion.div>
       )}
