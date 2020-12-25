@@ -54,15 +54,11 @@ body,
   -moz-border-radius: 8px;
         border-radius: 8px;
   background-color: rgba(249, 109, 16, 1.0);
-  display: -webkit-flex;
-  display: -moz-box;
-  display: flex;
-  -webkit-justify-content: center;
-      -moz-box-pack: center;
-          justify-content: center;
   line-height: 48px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 700;
+  text-transform: capitalize;
+  text-align: center;
 }
 
 .email_container__24Nn- {
@@ -71,17 +67,17 @@ body,
 }
 
 .email_email__3AZYW {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .email_paragraph__1JNat {
   display: inline-block;
-  margin: 16px 0;
+  padding: 16px 0;
 }
     </style>
     </head>
     <body>
-      <table class="email_container__24Nn-" cellpadding="0" cellspacing="0" border="0"><tbody><tr><td><span class="email_paragraph__1JNat">Click the magic words below to login as <b class="email_email__3AZYW">${email}</b>.<br>The magic words will only work for the next 2 hours.</span></td></tr><tr><td><a href="${loginConfirmUrl}" style=""><button class="Button_button__1rPei">${phrase}</button></a></td></tr><tr><td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span></td></tr></tbody></table>
+      <table class="email_container__24Nn-" cellpadding="0" cellspacing="0" border="0"><tbody><tr><td><span class="email_paragraph__1JNat">Click the magic words below to login as <strong class="email_email__3AZYW">${email}</strong>.<br>The magic words will only work for the next 2 hours.</span></td></tr><tr><td><a href="${loginConfirmUrl}" style=""><button class="Button_button__1rPei">${phrase}</button></a></td></tr><tr><td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span></td></tr></tbody></table>
     </body>
   </html>
   `;

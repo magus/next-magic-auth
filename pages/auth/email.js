@@ -10,7 +10,7 @@ export default function Email() {
   const {
     email = 'test@test.com',
     loginConfirmUrl = 'https://domain.com/api/blah/blah',
-    phrase = 'Testy Tester',
+    phrase = 'testy tester',
   } = router.query;
 
   return (
@@ -25,7 +25,7 @@ export default function Email() {
           <td>
             <span className={styles.paragraph}>
               Click the magic words below to login as{' '}
-              <b className={styles.email}>{email}</b>.
+              <strong className={styles.email}>{email}</strong>.
               <br />
               The magic words will only work for the next 2 hours.
             </span>

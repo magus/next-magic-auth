@@ -4,10 +4,10 @@
 }
 
 .email {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .paragraph {
   display: inline-block;
-  margin: var(--spacer-2) 0;
+  padding: var(--spacer-2) 0;
 }
