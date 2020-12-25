@@ -48,6 +48,10 @@ body,
   height: 100%;
 }
 
+.email_container__24Nn- .Button_button__1rPei {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .Button_button__1rPei {
   width: 100%;
   height: 48px;
@@ -61,11 +65,6 @@ body,
   text-align: center;
   cursor: pointer;
   display: inline-block;
-}
-
-
-.linkTarget a[href] {
-  color: rgba(255, 255, 255, 0.9);
 }
 
 .email_container__24Nn- {
@@ -84,7 +83,7 @@ body,
     </style>
     </head>
     <body>
-      <table class="email_container__24Nn-" cellpadding="0" cellspacing="0" border="0"><tbody><tr><td><span class="email_paragraph__1JNat">Click the magic words below to login as <strong class="email_email__3AZYW">${email}</strong>.<br>The magic words will only work for the next 2 hours.</span></td></tr><tr><td><span class="linkTarget"><a href="${loginConfirmUrl}" class="Button_button__1rPei">${phrase}</a></span></td></tr><tr><td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span></td></tr></tbody></table>
+      <table class="email_container__24Nn-" cellpadding="0" cellspacing="0" border="0"><tbody><tr><td><span class="email_paragraph__1JNat">Click the magic words below to login as <strong class="email_email__3AZYW">${email}</strong>.<br>The magic words will only work for the next 2 hours.</span></td></tr><tr><td><a href="${loginConfirmUrl}" class="Button_button__1rPei">${phrase}</a></td></tr><tr><td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span></td></tr></tbody></table>
     </body>
   </html>
   `;
