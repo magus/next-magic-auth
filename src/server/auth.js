@@ -84,7 +84,7 @@ function setLoginTokenCookie(res, loginTokenId) {
   cookie.set(res, encoded, { expires });
 }
 
-function generateJWTToken(user) {
+function generateJWTToken(loginTokenId, user) {
   const refreshToken = encodeJwtToken(
     TokenKinds.refresh,
     config.JWT_REFRESH_TOKEN_EXPIRES,
@@ -93,6 +93,9 @@ function generateJWTToken(user) {
         [JwtFields.HasuraAllowedRoles]: [roles.self],
         [JwtFields.HasuraDefaultRole]: roles.self,
         [JwtFields.HasuraUserId]: user.id,
+      },
+      magicData: {
+        [JwtFields.MagicLoginRequest]: loginTokenId,
       },
     },
   );
@@ -117,28 +120,27 @@ function generateJWTToken(user) {
   return { jwtToken, refreshToken };
 }
 
-async function refreshAuthentication(res, serverToken, clientToken) {
+async function refreshAuthentication(res, serverToken) {
   // verify serverToken is not expired
   if (Date.now() > new Date(serverToken.expires).getTime()) {
     // e.g. /auth/timeout
     throw new Error('token expired');
   }
 
-  // verify clientToken against serverToken stored for userId
-  if (clientToken && clientToken !== serverToken.value) {
-    // todo generate static page for this
-    // e.g. /auth/invalid
-    throw new Error('unexpected token value');
-  }
+  // serverToken may be either a
+  //   1. refreshToken (refreshing a login)
+  //   2. or loginToken (completing a login)
+  const loginTokenId = serverToken.loginTokenId || serverToken.id;
 
-  const tokens = generateJWTToken(serverToken.user);
+  const tokens = generateJWTToken(loginTokenId, serverToken.user);
 
   // store refresh token in database
   // also delete login token if present
-  await graphql.query(setRefreshTokenDeleteLoginToken, {
+  await graphql.query(setRefreshToken, {
     variables: {
+      loginTokenId,
       userId: serverToken.user.id,
-      refreshToken: tokens.refreshToken.encoded,
+      value: tokens.refreshToken.encoded,
       expires: tokens.refreshToken.expires,
     },
   });
@@ -187,24 +189,39 @@ export default {
     getJwtField(getAuthCookie(req), JwtFields.HasuraUserId),
 };
 
-const setRefreshTokenDeleteLoginToken = gql`
-  mutation SetRefreshTokenDeleteLoginToken(
+// {
+//   "data": {
+//     "insert_refreshToken": {
+//       "returning": [
+//         {
+//           "id": "8466db4e-146f-4d3b-933f-b146aa375d5d"
+//         }
+//       ]
+//     }
+//   }
+// }
+const setRefreshToken = gql`
+  mutation SetRefreshToken(
     $userId: uuid!
-    $refreshToken: String!
+    $loginTokenId: uuid!
+    $value: String!
     $expires: timestamptz!
   ) {
     insert_refreshToken(
-      objects: { userId: $userId, value: $refreshToken, expires: $expires }
+      objects: {
+        userId: $userId
+        loginTokenId: $loginTokenId
+        value: $value
+        expires: $expires
+      }
       on_conflict: {
         constraint: refreshToken_pkey
         update_columns: [value, expires]
       }
     ) {
-      affected_rows
-    }
-
-    delete_loginToken_by_pk(userId: $userId) {
-      userId
+      returning {
+        loginTokenId
+      }
     }
   }
 `;

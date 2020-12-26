@@ -22,7 +22,8 @@ CREATE TABLE public."refreshToken" (
     "userId" uuid NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
     expires timestamp with time zone NOT NULL,
-    value text NOT NULL
+    value text NOT NULL,
+    "loginTokenId" uuid NOT NULL
 );
 CREATE TABLE public.role (
     id uuid DEFAULT public.gen_random_uuid() NOT NULL,
@@ -45,9 +46,11 @@ ALTER TABLE ONLY public."loginToken"
 ALTER TABLE ONLY public."loginToken"
     ADD CONSTRAINT "loginToken_pkey" PRIMARY KEY (id);
 ALTER TABLE ONLY public."refreshToken"
-    ADD CONSTRAINT "refreshToken_pkey" PRIMARY KEY ("userId");
+    ADD CONSTRAINT "refreshToken_id_key" UNIQUE ("loginTokenId");
 ALTER TABLE ONLY public."refreshToken"
-    ADD CONSTRAINT "refreshToken_userId_key" UNIQUE ("userId");
+    ADD CONSTRAINT "refreshToken_pkey" PRIMARY KEY ("loginTokenId");
+ALTER TABLE ONLY public."refreshToken"
+    ADD CONSTRAINT "refreshToken_value_key" UNIQUE (value);
 ALTER TABLE ONLY public.role
     ADD CONSTRAINT role_name_key UNIQUE (name);
 ALTER TABLE ONLY public.role

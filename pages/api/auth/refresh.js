@@ -12,19 +12,19 @@ export default async function loginRefresh(req, res) {
       return res.status(200).json({ error: false });
     }
 
-    // extract hasura user id from jwt token
-    const userId = auth.getJwtTokenUserId(req);
+    const loginRequestId = auth.getLoginRequest(req);
 
-    if (!userId) {
-      throw new Error('missing user id');
+    if (!loginRequestId) {
+      throw new Error('missing login request');
     }
 
     // lookup refresh token in backend to compare against authCookie
-    const {
-      refreshToken: [serverRefreshToken],
-    } = await graphql.query(getRefreshTokenByUserId, {
-      variables: { userId },
-    });
+    const { refreshToken_by_pk: serverRefreshToken } = await graphql.query(
+      getRefreshToken,
+      {
+        variables: { loginRequestId },
+      },
+    );
 
     if (!serverRefreshToken) {
       throw new Error(
@@ -33,13 +33,16 @@ export default async function loginRefresh(req, res) {
     }
 
     // refresh token stored in db must match the authCookie
-    // if they do, refreshAuthentication takes care of setting auth cookie
+    // when clientToken (refreshing), verify against serverToken
+    if (authCookie !== serverRefreshToken.value) {
+      // todo generate static page for this
+      // e.g. /auth/invalid
+      throw new Error('unexpected token value');
+    }
+
+    // refreshAuthentication takes care of setting auth cookie
     // returns jwt token for client side authentication
-    const jwtToken = await auth.refreshAuthentication(
-      res,
-      serverRefreshToken,
-      authCookie,
-    );
+    const jwtToken = await auth.refreshAuthentication(res, serverRefreshToken);
 
     return res.status(200).json({ error: false, jwtToken });
   } catch (e) {
@@ -65,11 +68,12 @@ const UserForLoginFragment = gql`
   }
 `;
 
-const getRefreshTokenByUserId = gql`
+const getRefreshToken = gql`
   ${UserForLoginFragment}
 
-  query GetRefreshTokenByUserId($userId: uuid!) {
-    refreshToken(where: { userId: { _eq: $userId } }) {
+  query GetRefreshToken($loginRequestId: uuid!) {
+    refreshToken_by_pk(loginTokenId: $loginRequestId) {
+      loginTokenId
       value
       expires
       user {

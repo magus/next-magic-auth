@@ -11,9 +11,7 @@ export default async function loginComplete(req, res) {
       throw new Error('missing login request');
     }
 
-    const {
-      loginToken: [loginToken],
-    } = await graphql.query(getLoginToken, {
+    const { loginToken } = await graphql.query(getLoginToken, {
       variables: {
         id: loginRequestId,
       },
@@ -55,9 +53,9 @@ const getLoginToken = gql`
   ${UserForLoginFragment}
 
   query GetLoginToken($id: uuid!) {
-    loginToken_by_pk(id: $id) {
+    loginToken: loginToken_by_pk(id: $id) {
+      id
       approved
-      value
       expires
       user {
         ...UserForLoginFragment
