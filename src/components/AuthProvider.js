@@ -18,11 +18,37 @@ const LoggedOutState = {
   user: null,
 };
 
+const ExpireTimerFrequencyMs = 5 * 1000;
+
 export function AuthProvider({ children }) {
   const [state, set_state] = React.useState(LoggedOutState);
 
-  async function setJWTToken(jwt) {
-    set_state({ ...state, jwt });
+  React.useEffect(() => {
+    let timeoutId;
+
+    function checkExpires() {
+      if (state.expires instanceof Date) {
+        const timeLeftMs = state.expires.getTime() - Date.now();
+        console.debug({ timeLeftMs });
+      }
+
+      // call again
+      timeoutId = setTimeout(checkExpires, ExpireTimerFrequencyMs);
+    }
+
+    // start checking expires
+    checkExpires();
+
+    return function cleanup() {
+      clearTimeout(timeoutId);
+    };
+  }, [state.expires]);
+
+  async function setJWTToken(jwtToken) {
+    const jwt = jwtToken.encoded;
+    const expires = new Date(jwtToken.expires);
+
+    set_state({ ...state, jwt, expires });
     return jwt;
   }
 
@@ -52,7 +78,9 @@ export function AuthProvider({ children }) {
     });
     if (response.status === 200) {
       const json = await response.json();
-      await setJWTToken(json.jwtToken);
+      if (json.jwtToken) {
+        await setJWTToken(json.jwtToken);
+      }
     }
   }
 
@@ -63,11 +91,14 @@ export function AuthProvider({ children }) {
     const response = await fetch('/api/auth/refresh', { method: 'POST' });
     if (response.status === 200) {
       const json = await response.json();
-      return await setJWTToken(json.jwtToken);
+      if (json.jwtToken) {
+        await setJWTToken(json.jwtToken);
+      }
     } else {
       await logout();
-      return false;
     }
+
+    return false;
   }
 
   const value = {

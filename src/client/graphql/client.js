@@ -92,8 +92,8 @@ export function buildApolloClient(auth) {
         if (needsRefresh) {
           // Refresh JWT token
           return new Observable(async (observer) => {
-            const jwtToken = await auth.actions.refreshTokens();
-            console.debug('[ApolloClient]', 'needsRefresh', { jwtToken });
+            console.debug('[ApolloClient]', 'auth.actions.refreshTokens');
+            await auth.actions.refreshTokens();
 
             // if jwtToken refreshed, rebuild auth headers and forward to replay request
 

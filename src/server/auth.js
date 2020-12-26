@@ -148,8 +148,8 @@ async function refreshAuthentication(res, serverToken) {
   // store refresh token to cookie
   cookie.set(res, tokens.refreshToken.encoded);
 
-  // return only the encdoed jwt token value
-  return tokens.jwtToken.encoded;
+  // return the encdoed jwt token (encoded and expires)
+  return tokens.jwtToken;
 }
 
 function decodeJwtClaims(jwtToken) {
