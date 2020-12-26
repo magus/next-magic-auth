@@ -14,13 +14,13 @@ import words from 'src/server/words';
 //       "data": {
 //           "old": null,
 //           "new": {
-//               "created": "2020-12-21T12:47:31.384155+00:00",
-//               "expires": "2020-12-25T12:02:34.479+00:00",
-//               "value": "a",
-//               "userId": "7f708d1c-0e5e-4ded-a4df-3370fbce77c8",
-//               "requestCookie": "a",
-//               "approved": false,
-//               "email": "zzz"
+//             "email": "magic@iamnoah.com",
+//             "created": "2020-12-26T06:21:40.503897+00:00",
+//             "expires": "2020-12-26T08:21:40.283+00:00",
+//             "secret": "u0Ccu5C5/ppdBdV+wYMlttjvdW7Vk9DdhnQh9kmJuys=",
+//             "userId": "d5347111-fa43-4c09-b3dd-7e9994651be5",
+//             "id": "8ee72ad4-6946-49af-a127-15df669ab6dc",
+//             "approved": false
 //           }
 //       },
 //       "trace_context": {
