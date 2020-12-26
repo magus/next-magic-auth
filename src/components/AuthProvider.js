@@ -44,12 +44,12 @@ export function AuthProvider({ children }) {
         const nextTimeoutMs =
           timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
 
-        console.debug({
-          timeLeftMs,
-          expireThreshold,
-          timeUntilThreshold,
-          nextTimeoutMs,
-        });
+        // console.debug({
+        //   timeLeftMs,
+        //   expireThreshold,
+        //   timeUntilThreshold,
+        //   nextTimeoutMs,
+        // });
 
         // call again near expire threshold
         timeoutId = setTimeout(checkExpires, nextTimeoutMs);

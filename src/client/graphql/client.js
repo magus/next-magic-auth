@@ -19,6 +19,8 @@ import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 
 const graphqlHost = 'magic.iamnoah.com/v1/graphql';
 
+const SharedHttpCache = new InMemoryCache();
+
 function getAuthHeaders(jwtToken) {
   if (!jwtToken) {
     return {};
@@ -137,11 +139,9 @@ export function buildApolloClient(auth) {
 
   const link = ApolloLink.from([errorLink, authMiddleware, httpLink]);
 
-  const cache = new InMemoryCache();
-
   return new ApolloClient({
     ssrMode: !process.browser,
     link,
-    cache,
+    cache: SharedHttpCache,
   });
 }
