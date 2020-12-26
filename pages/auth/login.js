@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 
-import Page from 'components/Page';
-import Button from 'components/Button';
-import { useAuth } from 'components/AuthProvider';
-import { useModal } from 'components/Modal';
+import Page from 'src/components/Page';
+import Button from 'src/components/Button';
+import { useAuth } from 'src/components/AuthProvider';
+import { useModal } from 'src/components/Modal';
 import graphql from 'src/client/graphql/queries';
 import styles from 'styles/login.module.css';
 

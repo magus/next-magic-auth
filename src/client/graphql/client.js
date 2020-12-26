@@ -11,7 +11,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
-import { useAuth } from 'components/AuthProvider';
+import { useAuth } from 'src/components/AuthProvider';
 import config from 'src/client/config';
 import cookie from 'src/client/cookie';
 import roles from 'src/shared/roles';
@@ -63,34 +63,6 @@ export function useAdhocSubscription(
   }, [auth.jwt]);
 
   return { ...result };
-}
-
-function refreshJWTToken() {
-  return new Promise((resolve) => {
-    // return resolve(false);
-
-    fetch('/api/auth/refresh', {
-      method: 'POST',
-    }).then((response) => {
-      if (response.status === 200) {
-        return resolve(true);
-      }
-
-      return resolve(false);
-    });
-  });
-}
-
-function logout() {
-  return new Promise((resolve) => {
-    // resolve(true);
-
-    fetch('/api/auth/logout', {
-      method: 'POST',
-    }).then((response) => {
-      window.location = '/';
-    });
-  });
 }
 
 function getAuthHeaders(jwtToken) {

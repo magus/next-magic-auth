@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 
-import Button from 'components/Button';
+import Button from 'src/components/Button';
 
 import styles from 'styles/email.module.css';
 

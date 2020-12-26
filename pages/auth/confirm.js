@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import Page from 'components/Page';
+import Page from 'src/components/Page';
 
 import styles from 'styles/auth-confirm.module.css';
 import request from 'graphql-request';

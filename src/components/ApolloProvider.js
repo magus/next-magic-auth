@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ApolloProvider } from '@apollo/client';
 
-import { useAuth } from 'components/AuthProvider';
+import { useAuth } from 'src/components/AuthProvider';
 import { buildApolloClient } from 'src/client/graphql/client';
 
 export default function ApolloProviderWrapper({ children }) {

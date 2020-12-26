@@ -1,8 +1,8 @@
 import Head from 'next/head';
 
-import { AuthProvider } from 'components/AuthProvider';
-import ApolloProvider from 'components/ApolloProvider';
-import { ModalContextProvider } from 'components/Modal';
+import { AuthProvider } from 'src/components/AuthProvider';
+import ApolloProvider from 'src/components/ApolloProvider';
+import { ModalContextProvider } from 'src/components/Modal';
 
 import 'styles/globals.css';
 
