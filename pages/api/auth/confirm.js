@@ -28,6 +28,11 @@ export default async function loginConfirm(req, res) {
       throw new Error('login token invalid, try again');
     }
 
+    // verify loginToken not expired
+    if (Date.now() > new Date(data.loginToken.expires).getTime()) {
+      throw new Error('login token expired, try again');
+    }
+
     // client will then be able to hit /auth/login/complete
     // which will hit server and write refresh token
 
@@ -57,6 +62,7 @@ const approveLoginToken = gql`
       _set: { approved: true }
     ) {
       secret
+      expires
     }
   }
 `;
