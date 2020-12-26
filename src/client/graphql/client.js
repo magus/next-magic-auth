@@ -13,7 +13,6 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 
 import { useAuth } from 'src/components/AuthProvider';
 import config from 'src/client/config';
-import cookie from 'src/client/cookie';
 import roles from 'src/shared/roles';
 import headers from 'src/shared/headers';
 import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';

@@ -1,11 +1,8 @@
 import { serialize } from 'cookie';
 
 import config from './config';
-import cookies from 'src/shared/cookies';
 
 export default {
-  cookies,
-
   generateCookie: function generateCookie(name, value, extraOptions = {}) {
     const stringValue =
       typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);

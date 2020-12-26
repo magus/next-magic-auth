@@ -1,12 +1,13 @@
 import gql from 'graphql-tag';
 
 import auth from 'src/server/auth';
+import config from 'src/server/config';
 import cookie from 'src/server/cookie';
 import graphql from 'src/server/graphql';
 
 export default async function loginRefresh(req, res) {
   try {
-    const refreshToken = req.cookies[cookie.cookies.refreshToken];
+    const refreshToken = req.cookies[config.AUTH_COOKIE];
 
     if (!refreshToken) {
       throw new Error('refresh token missing');

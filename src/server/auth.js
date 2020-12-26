@@ -12,19 +12,39 @@ import roles from 'src/shared/roles';
 const CLAIMS_NAMESPACE = 'https://hasura.io/jwt/claims';
 const HASURA_USER_ID_HEADER = 'x-hasura-user-id';
 const defaultAllowedRoles = [roles.user, roles.self];
+const TOKEN_KIND = 'x-magic-token-kind';
+const LOGIN_REQUEST = 'x-magic-login-request';
+const TokenKinds = {
+  login: 'login',
+  refresh: 'refresh',
+  jwt: 'jwt',
+};
 
 function generateLoginToken(res) {
   // generate random 64 bytes for login verification
   const token = random.base64(32);
+  // generate expiration in future
   const expires = new Date(Date.now() + config.LOGIN_TOKEN_EXPIRES * 60 * 1000);
-
-  // generate requestCookie and write to requesting login client
+  // generate login requestCookie which will be written to cookie
+  // requesting client will send in /api/auth/complete
   const requestCookie = random.base64(32);
 
-  res.setHeader(
-    'Set-Cookie',
-    cookie.generateCookie(cookie.cookies.loginRequestCookie, requestCookie),
+  // sign the login token kind and store in cookie
+  const refreshToken = jwt.sign(
+    {
+      [CLAIMS_NAMESPACE]: {
+        [TOKEN_KIND]: TokenKinds.login,
+        [LOGIN_REQUEST]: requestCookie,
+      },
+    },
+    config.JWT_SECRET.key,
+    {
+      algorithm: config.JWT_SECRET.type,
+      expiresIn: `${config.LOGIN_TOKEN_EXPIRES}m`,
+    },
   );
+
+  setCookies(res, { refreshToken });
 
   return { token, expires, requestCookie };
 }
@@ -44,6 +64,7 @@ function generateJWTToken(user) {
         'x-hasura-allowed-roles': [roles.self],
         'x-hasura-default-role': roles.self,
         [HASURA_USER_ID_HEADER]: user.id,
+        [TOKEN_KIND]: TokenKinds.refresh,
       },
     },
     config.JWT_SECRET.key,
@@ -63,6 +84,7 @@ function generateJWTToken(user) {
         'x-hasura-allowed-roles': allowedRoles,
         'x-hasura-default-role': user.defaultRole,
         [HASURA_USER_ID_HEADER]: user.id,
+        [TOKEN_KIND]: TokenKinds.jwt,
       },
     },
     config.JWT_SECRET.key,
@@ -101,68 +123,57 @@ async function refreshAuthentication(res, serverToken, clientToken) {
     },
   });
 
-  // clear loginRequestCookie
-  setCookies(
-    res,
-    {
-      loginRequestCookie: '',
-    },
-    { expires: new Date(0) },
-  );
-
   // set authentication cookies
   setCookies(res, {
     refreshToken: jwtToken.refreshToken,
   });
 
-  return jwtToken;
+  return jwtToken.token;
 }
 
 function clearCookies(res) {
   setCookies(
     res,
     {
-      jwtToken: '',
       refreshToken: '',
-      loginRequestCookie: '',
     },
     { expires: new Date(0) },
   );
 }
 
-function setCookies(
-  res,
-  { jwtToken, refreshToken, loginRequestCookie },
-  cookieOptions,
-) {
+function setCookies(res, { refreshToken }, cookieOptions) {
   const cookies = [];
 
   if (typeof refreshToken === 'string') {
     cookies.push(
-      cookie.generateCookie(cookie.cookies.refreshToken, refreshToken, {
+      cookie.generateCookie(config.AUTH_COOKIE, refreshToken, {
         ...cookieOptions,
       }),
-    );
-  }
-
-  if (typeof loginRequestCookie === 'string') {
-    cookies.push(
-      cookie.generateCookie(
-        cookie.cookies.loginRequestCookie,
-        loginRequestCookie,
-        { ...cookieOptions },
-      ),
     );
   }
 
   res.setHeader('Set-Cookie', cookies);
 }
 
-function getJwtTokenUserId(jwtToken) {
+function decodeJWT(jwtToken) {
   const { [CLAIMS_NAMESPACE]: claims } = jwt.decode(
     jwtToken,
     config.JWT_SECRET.key,
   );
+  return claims;
+}
+
+function getLoginRequest(jwtToken) {
+  const claims = decodeJWT(jwtToken);
+  if (claims[TOKEN_KIND] === TokenKinds.login) {
+    return claims[LOGIN_REQUEST];
+  }
+
+  return null;
+}
+
+function getJwtTokenUserId(jwtToken) {
+  const claims = decodeJWT(jwtToken);
   return claims[HASURA_USER_ID_HEADER];
 }
 
@@ -172,6 +183,7 @@ export default {
   generateJWTToken,
   refreshAuthentication,
   getJwtTokenUserId,
+  getLoginRequest,
 };
 
 const setRefreshTokenDeleteLoginToken = gql`

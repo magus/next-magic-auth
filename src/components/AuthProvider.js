@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import cookie from 'src/client/cookie';
-
 const DefaultAuthContext = null;
 const AuthContext = React.createContext(DefaultAuthContext);
 
@@ -54,7 +52,7 @@ export function AuthProvider({ children }) {
     });
     if (response.status === 200) {
       const json = await response.json();
-      await setJWTToken(json.jwtToken.token);
+      await setJWTToken(json.jwtToken);
     }
   }
 
@@ -65,7 +63,7 @@ export function AuthProvider({ children }) {
     const response = await fetch('/api/auth/refresh', { method: 'POST' });
     if (response.status === 200) {
       const json = await response.json();
-      return await setJWTToken(json.jwtToken.token);
+      return await setJWTToken(json.jwtToken);
     } else {
       await logout();
       return false;

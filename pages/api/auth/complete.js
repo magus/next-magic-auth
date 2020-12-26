@@ -7,13 +7,21 @@ import auth from 'src/server/auth';
 
 export default async function loginComplete(req, res) {
   try {
-    // get login token by requestCookie
-    const requestCookie = req.cookies[cookie.cookies.loginRequestCookie];
+    // get login token from cookie
+    const refreshToken = req.cookies[config.AUTH_COOKIE];
+
+    const loginRequest = auth.getLoginRequest(refreshToken);
+
+    if (!loginRequest) {
+      throw new Error('missing login request');
+    }
 
     const {
       loginToken: [loginToken],
     } = await graphql.query(getLoginTokenByCookie, {
-      variables: { requestCookie },
+      variables: {
+        requestCookie: loginRequest,
+      },
     });
 
     // if loginToken is not approved, throw error
