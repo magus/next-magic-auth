@@ -1,4 +1,9 @@
-export default function loginConfirmEmail({ email, loginConfirmUrl, phrase }) {
+export default function loginConfirmEmail({
+  email,
+  loginConfirmUrl,
+  phrase,
+  expiresIn,
+}) {
   return `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
@@ -83,7 +88,7 @@ export default function loginConfirmEmail({ email, loginConfirmUrl, phrase }) {
                <td><a href="${loginConfirmUrl}" class="Button_button__1rPei">${phrase}</a></td>
             </tr>
             <tr>
-               <td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span><br>The magic words will only work for the next 2 hours.</span></td>
+               <td><span class="email_paragraph__1JNat">Ensure the magic words match what you saw on the login page.</span><br>The magic words will only work for the next ${expiresIn}.</span></td>
             </tr>
          </tbody>
       </table>

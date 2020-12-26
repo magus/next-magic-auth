@@ -4,6 +4,7 @@ import config from 'src/server/config';
 import serverEmail from 'src/server/email';
 import loginConfirmEmail from 'src/server/emailTemplates/loginConfirmEmail';
 import words from 'src/server/words';
+import { expiresMinutesDuration } from 'src/server/time';
 
 // {
 //   "event": {
@@ -77,8 +78,13 @@ export default async function loginSendEmail(req, res) {
 
     const loginConfirmUrl = `${config.FRONTEND_HOST}/api/auth/confirm?${queryParams}`;
     const phrase = words.getPhraseFromToken(secret);
-
-    const emailHtml = loginConfirmEmail({ email, loginConfirmUrl, phrase });
+    const expiresIn = expiresMinutesDuration(config.LOGIN_TOKEN_EXPIRES);
+    const emailHtml = loginConfirmEmail({
+      email,
+      loginConfirmUrl,
+      phrase,
+      expiresIn,
+    });
 
     const emailResponse = await serverEmail.send(email, {
       subject: 'Login with Magic',

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
 
+import { expiresMinutesDuration } from 'src/server/time';
+
 import Button from 'src/components/Button';
 
 import styles from 'styles/email.module.css';
@@ -11,7 +13,11 @@ export default function Email() {
     email = 'test@test.com',
     loginConfirmUrl = 'https://domain.com/api/blah/blah',
     phrase = 'testy tester',
+    // e.g. http://localhost:3000/auth/email?expireMinutes=676
+    expireMinutes = 60 * 2,
   } = router.query;
+
+  const expiresIn = expiresMinutesDuration(expireMinutes);
 
   return (
     <table
@@ -27,7 +33,7 @@ export default function Email() {
               Click the magic words below to login as{' '}
               <strong className={styles.email}>{email}</strong>.
               <br />
-              The magic words will only work for the next 2 hours.
+              The magic words will only work for the next {expiresIn}.
             </span>
           </td>
         </tr>
