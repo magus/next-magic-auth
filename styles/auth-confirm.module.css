@@ -12,9 +12,11 @@
 
 .header {
   font-size: 64px;
+  font-weight: 600;
   margin: 0 0 var(--spacer-3) 0;
 }
 
 .instructions {
   font-size: var(--font-large);
+  font-weight: 200;
 }
