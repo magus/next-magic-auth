@@ -38,10 +38,25 @@ function generateJWTToken(user) {
     allowedRoles.push(user.defaultRole);
   }
 
-  const refreshToken = random.base64(32);
+  const refreshToken = jwt.sign(
+    {
+      [CLAIMS_NAMESPACE]: {
+        'x-hasura-allowed-roles': [roles.self],
+        'x-hasura-default-role': roles.self,
+        [HASURA_USER_ID_HEADER]: user.id,
+      },
+    },
+    config.JWT_SECRET.key,
+    {
+      algorithm: config.JWT_SECRET.type,
+      expiresIn: `${config.JWT_REFRESH_TOKEN_EXPIRES}m`,
+    },
+  );
+
   const refreshTokenExpires = new Date(
     Date.now() + config.JWT_REFRESH_TOKEN_EXPIRES * 60 * 1000,
   );
+
   const token = jwt.sign(
     {
       [CLAIMS_NAMESPACE]: {
