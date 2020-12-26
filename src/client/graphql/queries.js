@@ -33,6 +33,7 @@ export default {
 
   me: () => {
     const [get, result] = useLazyQuery(gqls.me, {
+      fetchPolicy: 'cache-and-network',
       context: {
         headers: {
           [headers.role]: roles.self,

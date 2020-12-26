@@ -11,6 +11,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
+import { useAuth } from 'components/AuthProvider';
 import config from 'src/client/config';
 import cookie from 'src/client/cookie';
 import roles from 'src/shared/roles';
@@ -27,11 +28,12 @@ export function useAdhocSubscription(
   query,
   { variables, anonymous, role = roles.user },
 ) {
+  const auth = useAuth();
   const [result, set_result] = React.useState(null);
-  const [rebuildClient, set_rebuildClient] = React.useState(1);
 
   React.useEffect(() => {
     const client = buildApolloWebsocketClient({
+      jwtToken: auth.jwt,
       anonymous,
       headers: {
         [headers.role]: anonymous ? undefined : role,
@@ -43,16 +45,11 @@ export function useAdhocSubscription(
       variables,
     });
 
-    const subscription = observable.subscribe(set_result, (error) => {
+    const subscription = observable.subscribe(set_result, async (error) => {
       if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
-        // refresh token and rebuild client
-        return refreshJWTToken().then((success) => {
-          if (!success) {
-            return logout();
-          }
-
-          set_rebuildClient(rebuildClient + 1);
-        });
+        // refresh token and cause rebuild client (auth.jwt)
+        const jwtToken = await auth.actions.refreshTokens();
+        console.debug('[AdhocSubscription]', 'needsRefresh', { jwtToken });
       }
 
       // otherwise set error and continue
@@ -63,7 +60,7 @@ export function useAdhocSubscription(
       subscription.unsubscribe();
       client.link.subscriptionClient.close();
     };
-  }, [rebuildClient]);
+  }, [auth.jwt]);
 
   return { ...result };
 }
@@ -96,10 +93,7 @@ function logout() {
   });
 }
 
-function getAuthHeaders() {
-  // get jwt token from cookie
-  const jwtToken = !process.browser ? null : cookie.getJwtToken();
-
+function getAuthHeaders(jwtToken) {
   if (!jwtToken) {
     return {};
   }
@@ -110,9 +104,12 @@ function getAuthHeaders() {
 }
 
 export function buildApolloWebsocketClient(options = {}) {
+  const authHeaders = getAuthHeaders(
+    options.anonymous ? null : options.jwtToken,
+  );
+
   // can only use web socket link in browser
   // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
-
   const wsLink = !process.browser
     ? null
     : new WebSocketLink({
@@ -121,7 +118,7 @@ export function buildApolloWebsocketClient(options = {}) {
           reconnect: true,
           connectionParams: {
             headers: {
-              ...(options.anonymous ? {} : getAuthHeaders()),
+              ...authHeaders,
               ...options.headers,
             },
           },
@@ -138,7 +135,9 @@ export function buildApolloWebsocketClient(options = {}) {
   });
 }
 
-export function buildApolloClient() {
+export function buildApolloClient(auth) {
+  let authHeaders = getAuthHeaders(auth.jwt);
+
   const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
 
   const errorLink = onError(
@@ -166,21 +165,23 @@ export function buildApolloClient() {
 
         if (needsRefresh) {
           // Refresh JWT token
-          return new Observable((observer) => {
-            refreshJWTToken().then((success) => {
-              // cannot refresh token? logout
-              if (!success) {
-                return logout();
-              }
+          return new Observable(async (observer) => {
+            const jwtToken = await auth.actions.refreshTokens();
+            console.debug('[ApolloClient]', 'needsRefresh', { jwtToken });
 
-              const subscriber = {
-                next: observer.next.bind(observer),
-                error: observer.error.bind(observer),
-                complete: observer.complete.bind(observer),
-              };
+            // if jwtToken refreshed, rebuild auth headers and forward to replay request
 
-              forward(operation).subscribe(subscriber);
-            });
+            // if (jwtToken) {
+            //   authHeaders = getAuthHeaders(jwtToken);
+
+            //   const subscriber = {
+            //     next: observer.next.bind(observer),
+            //     error: observer.error.bind(observer),
+            //     complete: observer.complete.bind(observer),
+            //   };
+
+            //   forward(operation).subscribe(subscriber);
+            // }
           });
         }
 
@@ -198,7 +199,7 @@ export function buildApolloClient() {
         headers: {
           [headers.role]: roles.user,
           ...prevContext.headers,
-          ...getAuthHeaders(),
+          ...authHeaders,
         },
       };
 

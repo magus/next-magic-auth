@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 
 import Page from 'components/Page';
 import Button from 'components/Button';
+import { useAuth } from 'components/AuthProvider';
 import { useModal } from 'components/Modal';
 import graphql from 'src/client/graphql/queries';
 import styles from 'styles/login.module.css';
@@ -18,27 +19,27 @@ export default function LoginPage() {
 }
 
 function CheckEmailModal({ dismiss, userId, phrase }) {
+  const auth = useAuth();
   const [getMe, me] = graphql.me();
   const approved = graphql.watchLoginToken(userId);
 
   React.useEffect(async () => {
     if (approved) {
-      const response = await fetch('/api/auth/complete', {
-        method: 'POST',
-      });
-      if (response.status === 200) {
-        getMe();
-      }
+      await auth.actions.completeLogin();
     }
   }, [approved]);
+
+  React.useEffect(() => {
+    if (auth.isLoggedIn) {
+      getMe();
+    }
+  }, [auth.isLoggedIn]);
 
   React.useEffect(() => {
     if (me) {
       dismiss();
     }
   }, [me]);
-
-  async function handleLoginComplete() {}
 
   return (
     <div className={styles.checkEmailModal}>
@@ -52,14 +53,17 @@ function CheckEmailModal({ dismiss, userId, phrase }) {
 }
 
 function LoginForm() {
+  const auth = useAuth();
   const router = useRouter();
   const modal = useModal();
   const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
 
   React.useEffect(() => {
-    getMe();
-  }, []);
+    if (auth.isLoggedIn) {
+      getMe();
+    }
+  }, [auth.isLoggedIn]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -68,30 +72,13 @@ function LoginForm() {
     const email = elements.email.value;
 
     // make the login API call
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-
-    if (response.status === 200) {
-      const json = await response.json();
+    const json = await auth.actions.login(email);
+    if (json) {
       modal.open(CheckEmailModal, {
         props: json,
         disableBackgroundDismiss: true,
       });
     }
-  }
-
-  async function handleLogout() {
-    return new Promise((resolve) => {
-      // resolve(true);
-
-      fetch('/api/auth/logout', {
-        method: 'POST',
-      }).then((response) => {
-        window.location = '/';
-      });
-    });
   }
 
   async function handleEmailInput(event) {
@@ -100,11 +87,12 @@ function LoginForm() {
 
   const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
 
-  if (me) {
+  if (auth.isLoggedIn) {
     return (
       <>
         <pre>{JSON.stringify(me, null, 2)}</pre>
-        <Button className={styles.button} onClick={handleLogout}>
+        <Button onClick={() => getMe()}>Get Me</Button>
+        <Button className={styles.button} onClick={auth.actions.logout}>
           Logout
         </Button>
       </>
