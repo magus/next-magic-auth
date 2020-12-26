@@ -120,7 +120,7 @@ function generateJWTToken(loginTokenId, user) {
   return { jwtToken, refreshToken };
 }
 
-async function refreshAuthentication(res, serverToken) {
+async function refreshAuthentication(res, serverToken, authCookie) {
   // verify serverToken is not expired
   if (Date.now() > new Date(serverToken.expires).getTime()) {
     // e.g. /auth/timeout
@@ -134,20 +134,42 @@ async function refreshAuthentication(res, serverToken) {
 
   const tokens = generateJWTToken(loginTokenId, serverToken.user);
 
-  // store refresh token in database
-  // also delete login token if present
-  await graphql.query(setRefreshToken, {
-    variables: {
-      loginTokenId,
-      userId: serverToken.user.id,
-      value: tokens.refreshToken.encoded,
-      expires: tokens.refreshToken.expires,
-    },
-  });
+  // when refreshing with authCookie, verify against db stored serverToken
+  //   1. authCookie matches N-1 serverToken value (lastValue)
+  //   2. authCookie matches current serverToken (value)
+  //   3. no authCookie, login complete (first refresh token generation)
 
-  // store refresh token to cookie
-  cookie.set(res, tokens.refreshToken.encoded);
+  // scenario 1 above, return current value do not update
+  if (authCookie && authCookie === serverToken.lastValue) {
+    // console.debug('scenario 1');
+    // set previous refresh token value to cookie
+    cookie.set(res, serverToken.value);
+  } else if (!authCookie || authCookie === serverToken.value) {
+    // scenario 2 or 3 above, normal refresh or login
+    // console.debug('scenario 2 or 3');
 
+    // store refresh token in database
+    // also delete login token if present
+    await graphql.query(setRefreshToken, {
+      variables: {
+        loginTokenId,
+        userId: serverToken.user.id,
+        value: tokens.refreshToken.encoded,
+        lastValue: serverToken.value || '',
+        expires: tokens.refreshToken.expires,
+      },
+    });
+
+    // store new refresh token to cookie
+    cookie.set(res, tokens.refreshToken.encoded);
+  } else {
+    // authCookie did not match any known refresh tokens
+    // todo generate static page for this
+    // e.g. /auth/invalid
+    throw new Error('unexpected token value');
+  }
+
+  // always return a valid jwtToken
   // return the encdoed jwt token (encoded and expires)
   return tokens.jwtToken;
 }
@@ -205,6 +227,7 @@ const setRefreshToken = gql`
     $userId: uuid!
     $loginTokenId: uuid!
     $value: String!
+    $lastValue: String!
     $expires: timestamptz!
   ) {
     insert_refreshToken(
@@ -212,11 +235,12 @@ const setRefreshToken = gql`
         userId: $userId
         loginTokenId: $loginTokenId
         value: $value
+        lastValue: $lastValue
         expires: $expires
       }
       on_conflict: {
         constraint: refreshToken_pkey
-        update_columns: [value, expires]
+        update_columns: [value, lastValue, expires]
       }
     ) {
       returning {

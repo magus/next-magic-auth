@@ -32,17 +32,13 @@ export default async function loginRefresh(req, res) {
       );
     }
 
-    // refresh token stored in db must match the authCookie
-    // when clientToken (refreshing), verify against serverToken
-    if (authCookie !== serverRefreshToken.value) {
-      // todo generate static page for this
-      // e.g. /auth/invalid
-      throw new Error('unexpected token value');
-    }
-
     // refreshAuthentication takes care of setting auth cookie
     // returns jwt token for client side authentication
-    const jwtToken = await auth.refreshAuthentication(res, serverRefreshToken);
+    const jwtToken = await auth.refreshAuthentication(
+      res,
+      serverRefreshToken,
+      authCookie,
+    );
 
     return res.status(200).json({ error: false, jwtToken });
   } catch (e) {
@@ -75,6 +71,7 @@ const getRefreshToken = gql`
     refreshToken_by_pk(loginTokenId: $loginRequestId) {
       loginTokenId
       value
+      lastValue
       expires
       user {
         ...UserForLoginFragment

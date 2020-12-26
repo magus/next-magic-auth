@@ -113,12 +113,11 @@ export function AuthProvider({ children }) {
     if (response.status === 200) {
       const json = await response.json();
       if (json.jwtToken) {
-        await setJWTToken(json.jwtToken);
+        return await setJWTToken(json.jwtToken);
       }
-    } else {
-      await logout();
     }
 
+    await logout();
     return false;
   }
 
