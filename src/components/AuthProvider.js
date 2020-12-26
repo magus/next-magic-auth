@@ -19,6 +19,7 @@ const LoggedOutState = {
 };
 
 const ExpireTimerFrequencyMs = 5 * 1000;
+const ExpireDurationThreshold = 0.25;
 
 export function AuthProvider({ children }) {
   const [state, set_state] = React.useState(LoggedOutState);
@@ -26,14 +27,33 @@ export function AuthProvider({ children }) {
   React.useEffect(() => {
     let timeoutId;
 
-    function checkExpires() {
-      if (state.expires instanceof Date) {
-        const timeLeftMs = state.expires.getTime() - Date.now();
-        console.debug({ timeLeftMs });
-      }
+    async function checkExpires() {
+      const { expires, expireThreshold } = state;
 
-      // call again
-      timeoutId = setTimeout(checkExpires, ExpireTimerFrequencyMs);
+      if (expires instanceof Date) {
+        const timeLeftMs = expires.getTime() - Date.now();
+
+        // refresh token if within expireThreshold
+        if (timeLeftMs < expireThreshold) {
+          await refreshTokens();
+        }
+
+        // calculate time in ms until threshold
+        const timeUntilThreshold = timeLeftMs - expireThreshold;
+        // wait until threshold or ping at default frequency
+        const nextTimeoutMs =
+          timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
+
+        console.debug({
+          timeLeftMs,
+          expireThreshold,
+          timeUntilThreshold,
+          nextTimeoutMs,
+        });
+
+        // call again near expire threshold
+        timeoutId = setTimeout(checkExpires, nextTimeoutMs);
+      }
     }
 
     // start checking expires
@@ -47,8 +67,9 @@ export function AuthProvider({ children }) {
   async function setJWTToken(jwtToken) {
     const jwt = jwtToken.encoded;
     const expires = new Date(jwtToken.expires);
+    const expireThreshold = ExpireDurationThreshold * (expires - Date.now());
 
-    set_state({ ...state, jwt, expires });
+    set_state({ ...state, jwt, expires, expireThreshold });
     return jwt;
   }
 
