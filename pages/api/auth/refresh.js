@@ -1,20 +1,25 @@
 import gql from 'graphql-tag';
 
 import auth from 'src/server/auth';
-import config from 'src/server/config';
-import cookie from 'src/server/cookie';
 import graphql from 'src/server/graphql';
 
 export default async function loginRefresh(req, res) {
   try {
-    const refreshToken = req.cookies[config.AUTH_COOKIE];
+    const authCookie = auth.getAuthCookie(req);
 
-    if (!refreshToken) {
-      throw new Error('refresh token missing');
+    // no auth cookie, return 200 with no jwtToken
+    if (!authCookie) {
+      return res.status(200).json({ error: false });
     }
 
-    const userId = auth.getJwtTokenUserId(refreshToken);
+    // extract hasura user id from jwt token
+    const userId = auth.getJwtTokenUserId(req);
 
+    if (!userId) {
+      throw new Error('missing user id');
+    }
+
+    // lookup refresh token in backend to compare against authCookie
     const {
       refreshToken: [serverRefreshToken],
     } = await graphql.query(getRefreshTokenByUserId, {
@@ -27,10 +32,13 @@ export default async function loginRefresh(req, res) {
       );
     }
 
+    // refresh token stored in db must match the authCookie
+    // if they do, refreshAuthentication takes care of setting auth cookie
+    // returns jwt token for client side authentication
     const jwtToken = await auth.refreshAuthentication(
       res,
       serverRefreshToken,
-      refreshToken,
+      authCookie,
     );
 
     return res.status(200).json({ error: false, jwtToken });

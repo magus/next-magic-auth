@@ -8,23 +8,23 @@ const loginConfirmUrl = `${config.FRONTEND_HOST}/auth/confirm`;
 
 export default async function loginConfirm(req, res) {
   try {
-    const { token, userId } = req.query;
+    const { id, token } = req.query;
 
     // set loginToken to approved
-    const data = await graphql.query(approveLoginTokenByUserId, {
-      variables: { userId },
+    const data = await graphql.query(approveLoginToken, {
+      variables: { id },
     });
 
     // when login token exists
-    //   { data: { loginToken: { userId: 'd5347111-fa43-4c09-b3dd-7e9994651be5' } } }
+    //   { data: { loginToken: { secret: '...' } } }
     // when login token does not exist
     //   { data: { loginToken: null } }
     if (!data.loginToken) {
       throw new Error('login token missing, try again');
     }
 
-    // token does not match
-    if (data.loginToken.value !== token) {
+    // token does not match stored secret
+    if (data.loginToken.secret !== token) {
       throw new Error('login token invalid, try again');
     }
 
@@ -50,14 +50,13 @@ export default async function loginConfirm(req, res) {
   }
 }
 
-const approveLoginTokenByUserId = gql`
-  mutation ApproveLoginTokenByUserId($userId: uuid!) {
+const approveLoginToken = gql`
+  mutation ApproveLoginToken($id: uuid!) {
     loginToken: update_loginToken_by_pk(
-      pk_columns: { userId: $userId }
+      pk_columns: { id: $id }
       _set: { approved: true }
     ) {
-      value
-      userId
+      secret
     }
   }
 `;

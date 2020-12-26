@@ -50,7 +50,7 @@ export default async function loginSendEmail(req, res) {
       table: { name },
     } = req.body;
 
-    const { approved, value: loginToken, userId, email } = data.new;
+    const { id, secret, email, approved } = data.new;
 
     if (!email) {
       throw new Error('email missing');
@@ -66,8 +66,8 @@ export default async function loginSendEmail(req, res) {
     // not approved, send email
 
     const queryParams = [
-      ['token', loginToken],
-      ['userId', userId],
+      ['id', id],
+      ['token', secret],
     ]
       .map((qp) => {
         const [key, value] = qp;
@@ -76,7 +76,7 @@ export default async function loginSendEmail(req, res) {
       .join('&');
 
     const loginConfirmUrl = `${config.FRONTEND_HOST}/api/auth/confirm?${queryParams}`;
-    const phrase = words.getPhraseFromToken(loginToken);
+    const phrase = words.getPhraseFromToken(secret);
 
     const emailHtml = loginConfirmEmail({ email, loginConfirmUrl, phrase });
 

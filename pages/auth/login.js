@@ -18,10 +18,10 @@ export default function LoginPage() {
   );
 }
 
-function CheckEmailModal({ dismiss, userId, phrase }) {
+function CheckEmailModal({ dismiss, id, phrase }) {
   const auth = useAuth();
   const [getMe, me] = graphql.me();
-  const approved = graphql.watchLoginToken(userId);
+  const approved = graphql.watchLoginToken(id);
 
   React.useEffect(async () => {
     if (approved) {

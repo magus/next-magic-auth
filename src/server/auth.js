@@ -9,92 +9,112 @@ import random from './random';
 
 import roles from 'src/shared/roles';
 
-const CLAIMS_NAMESPACE = 'https://hasura.io/jwt/claims';
-const HASURA_USER_ID_HEADER = 'x-hasura-user-id';
-const defaultAllowedRoles = [roles.user, roles.self];
-const TOKEN_KIND = 'x-magic-token-kind';
-const LOGIN_REQUEST = 'x-magic-login-request';
+const JwtFields = {
+  HasuraNamespace: 'https://hasura.io/jwt/claims',
+  HasuraAllowedRoles: 'x-hasura-allowed-roles',
+  HasuraDefaultRole: 'x-hasura-default-role',
+  HasuraUserId: 'x-hasura-user-id',
+  MagicNamespace: 'https://magicwords.vercel.app/claims',
+  MagicTokenKind: 'x-magic-token-kind',
+  MagicLoginRequest: 'x-magic-login-request',
+};
+
+const JwtDefaults = {
+  AllowedRoles: [roles.user, roles.self],
+};
+
 const TokenKinds = {
   login: 'login',
   refresh: 'refresh',
   jwt: 'jwt',
 };
 
-function generateLoginToken(res) {
-  // generate random 64 bytes for login verification
-  const token = random.base64(32);
-  // generate expiration in future
-  const expires = new Date(Date.now() + config.LOGIN_TOKEN_EXPIRES * 60 * 1000);
-  // generate login requestCookie which will be written to cookie
+const getExpires = (expiresMinutes) =>
+  new Date(Date.now() + expiresMinutes * 60 * 1000);
+
+function encodeJwtToken(kind, expiresMinutes, extraData) {
+  const data = {
+    [JwtFields.HasuraNamespace]: {
+      ...extraData.hasuraData,
+    },
+    [JwtFields.MagicNamespace]: {
+      [JwtFields.MagicTokenKind]: kind,
+      ...extraData.magicData,
+    },
+  };
+
+  const expiresIn = `${expiresMinutes}m`;
+  const encoded = jwt.sign(data, config.JWT_SECRET.key, {
+    algorithm: config.JWT_SECRET.type,
+    expiresIn,
+  });
+
+  // convert expire minutes to milliseconds for unix ms timestamp
+  const expires = getExpires(expiresMinutes);
+
+  return { encoded, expires };
+}
+
+function generateLoginToken() {
+  // generate random 64 byte secret value for login verification
+  // only sent in email to remotely verify login request
+  const secret = random.base64(32);
+  // calculate expires time for cookie and storing in database
+  const expires = getExpires(config.LOGIN_TOKEN_EXPIRES);
+
+  return { secret, expires };
+}
+
+function setLoginTokenCookie(res, loginTokenId) {
+  // loginTokenId will be written inside cookie
   // requesting client will send in /api/auth/complete
-  const requestCookie = random.base64(32);
 
   // sign the login token kind and store in cookie
-  const refreshToken = jwt.sign(
+  const { encoded, expires } = encodeJwtToken(
+    TokenKinds.login,
+    config.LOGIN_TOKEN_EXPIRES,
     {
-      [CLAIMS_NAMESPACE]: {
-        [TOKEN_KIND]: TokenKinds.login,
-        [LOGIN_REQUEST]: requestCookie,
+      magicData: {
+        [JwtFields.MagicLoginRequest]: loginTokenId,
       },
-    },
-    config.JWT_SECRET.key,
-    {
-      algorithm: config.JWT_SECRET.type,
-      expiresIn: `${config.LOGIN_TOKEN_EXPIRES}m`,
     },
   );
 
-  setCookies(res, { refreshToken });
-
-  return { token, expires, requestCookie };
+  // store login token to auth cookie
+  cookie.set(res, encoded, { expires });
 }
 
 function generateJWTToken(user) {
+  const refreshToken = encodeJwtToken(
+    TokenKinds.refresh,
+    config.JWT_REFRESH_TOKEN_EXPIRES,
+    {
+      hasuraData: {
+        [JwtFields.HasuraAllowedRoles]: [roles.self],
+        [JwtFields.HasuraDefaultRole]: roles.self,
+        [JwtFields.HasuraUserId]: user.id,
+      },
+    },
+  );
+
+  // build allowedRoles array for user
   const allowedRoles = user.roles.map((userRole) => userRole.role.name);
-  allowedRoles.push(...defaultAllowedRoles);
+  allowedRoles.push(...JwtDefaults.AllowedRoles);
 
   // ensure roles includes defaultRole
   if (!~allowedRoles.indexOf(user.defaultRole)) {
     allowedRoles.push(user.defaultRole);
   }
 
-  const refreshToken = jwt.sign(
-    {
-      [CLAIMS_NAMESPACE]: {
-        'x-hasura-allowed-roles': [roles.self],
-        'x-hasura-default-role': roles.self,
-        [HASURA_USER_ID_HEADER]: user.id,
-        [TOKEN_KIND]: TokenKinds.refresh,
-      },
+  const jwtToken = encodeJwtToken(TokenKinds.jwt, config.JWT_TOKEN_EXPIRES, {
+    hasuraData: {
+      [JwtFields.HasuraAllowedRoles]: allowedRoles,
+      [JwtFields.HasuraDefaultRole]: user.defaultRole,
+      [JwtFields.HasuraUserId]: user.id,
     },
-    config.JWT_SECRET.key,
-    {
-      algorithm: config.JWT_SECRET.type,
-      expiresIn: `${config.JWT_REFRESH_TOKEN_EXPIRES}m`,
-    },
-  );
+  });
 
-  const refreshTokenExpires = new Date(
-    Date.now() + config.JWT_REFRESH_TOKEN_EXPIRES * 60 * 1000,
-  );
-
-  const token = jwt.sign(
-    {
-      [CLAIMS_NAMESPACE]: {
-        'x-hasura-allowed-roles': allowedRoles,
-        'x-hasura-default-role': user.defaultRole,
-        [HASURA_USER_ID_HEADER]: user.id,
-        [TOKEN_KIND]: TokenKinds.jwt,
-      },
-    },
-    config.JWT_SECRET.key,
-    {
-      algorithm: config.JWT_SECRET.type,
-      expiresIn: `${config.JWT_TOKEN_EXPIRES}m`,
-    },
-  );
-
-  return { token, refreshToken, refreshTokenExpires };
+  return { jwtToken, refreshToken };
 }
 
 async function refreshAuthentication(res, serverToken, clientToken) {
@@ -111,79 +131,60 @@ async function refreshAuthentication(res, serverToken, clientToken) {
     throw new Error('unexpected token value');
   }
 
-  const jwtToken = generateJWTToken(serverToken.user);
+  const tokens = generateJWTToken(serverToken.user);
 
   // store refresh token in database
   // also delete login token if present
   await graphql.query(setRefreshTokenDeleteLoginToken, {
     variables: {
       userId: serverToken.user.id,
-      refreshToken: jwtToken.refreshToken,
-      expires: jwtToken.refreshTokenExpires,
+      refreshToken: tokens.refreshToken.encoded,
+      expires: tokens.refreshToken.expires,
     },
   });
 
-  // set authentication cookies
-  setCookies(res, {
-    refreshToken: jwtToken.refreshToken,
-  });
+  // store refresh token to cookie
+  cookie.set(res, tokens.refreshToken.encoded);
 
-  return jwtToken.token;
+  // return only the encdoed jwt token value
+  return tokens.jwtToken.encoded;
 }
 
-function clearCookies(res) {
-  setCookies(
-    res,
-    {
-      refreshToken: '',
-    },
-    { expires: new Date(0) },
-  );
-}
-
-function setCookies(res, { refreshToken }, cookieOptions) {
-  const cookies = [];
-
-  if (typeof refreshToken === 'string') {
-    cookies.push(
-      cookie.generateCookie(config.AUTH_COOKIE, refreshToken, {
-        ...cookieOptions,
-      }),
-    );
+function decodeJwtClaims(jwtToken) {
+  if (!jwtToken) {
+    return {};
   }
 
-  res.setHeader('Set-Cookie', cookies);
+  const {
+    [JwtFields.HasuraNamespace]: hasuraClaims,
+    [JwtFields.MagicNamespace]: magicClaims,
+  } = jwt.decode(jwtToken, config.JWT_SECRET.key);
+
+  return { ...hasuraClaims, ...magicClaims };
 }
 
-function decodeJWT(jwtToken) {
-  const { [CLAIMS_NAMESPACE]: claims } = jwt.decode(
-    jwtToken,
-    config.JWT_SECRET.key,
-  );
-  return claims;
+function getJwtField(jwtToken, field) {
+  const claims = decodeJwtClaims(jwtToken);
+  return claims[field];
 }
 
-function getLoginRequest(jwtToken) {
-  const claims = decodeJWT(jwtToken);
-  if (claims[TOKEN_KIND] === TokenKinds.login) {
-    return claims[LOGIN_REQUEST];
-  }
-
-  return null;
-}
-
-function getJwtTokenUserId(jwtToken) {
-  const claims = decodeJWT(jwtToken);
-  return claims[HASURA_USER_ID_HEADER];
-}
+const getAuthCookie = (req) => req.cookies[config.AUTH_COOKIE];
 
 export default {
-  clearCookies,
+  clearCookies: cookie.clear,
+
   generateLoginToken,
-  generateJWTToken,
+  setLoginTokenCookie,
+
   refreshAuthentication,
-  getJwtTokenUserId,
-  getLoginRequest,
+
+  getAuthCookie,
+
+  getLoginRequest: (req) =>
+    getJwtField(getAuthCookie(req), JwtFields.MagicLoginRequest),
+
+  getJwtTokenUserId: (req) =>
+    getJwtField(getAuthCookie(req), JwtFields.HasuraUserId),
 };
 
 const setRefreshTokenDeleteLoginToken = gql`

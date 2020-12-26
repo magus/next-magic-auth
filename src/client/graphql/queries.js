@@ -20,8 +20,8 @@ const gqls = {
   `,
 
   watchLoginToken: gql`
-    subscription WatchLoginToken($userId: uuid!) {
-      loginToken_by_pk(userId: $userId) {
+    subscription WatchLoginToken($id: uuid!) {
+      loginToken_by_pk(id: $id) {
         approved
       }
     }
@@ -51,9 +51,9 @@ export default {
     return [get, self];
   },
 
-  watchLoginToken: (userId) => {
+  watchLoginToken: (id) => {
     const result = useAdhocSubscription(gqls.watchLoginToken, {
-      variables: { userId },
+      variables: { id },
       anonymous: true,
     });
 

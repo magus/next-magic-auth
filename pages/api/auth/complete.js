@@ -1,26 +1,21 @@
 import gql from 'graphql-tag';
 
-import config from 'src/server/config';
-import cookie from 'src/server/cookie';
 import graphql from 'src/server/graphql';
 import auth from 'src/server/auth';
 
 export default async function loginComplete(req, res) {
   try {
-    // get login token from cookie
-    const refreshToken = req.cookies[config.AUTH_COOKIE];
+    const loginRequestId = auth.getLoginRequest(req);
 
-    const loginRequest = auth.getLoginRequest(refreshToken);
-
-    if (!loginRequest) {
+    if (!loginRequestId) {
       throw new Error('missing login request');
     }
 
     const {
       loginToken: [loginToken],
-    } = await graphql.query(getLoginTokenByCookie, {
+    } = await graphql.query(getLoginToken, {
       variables: {
-        requestCookie: loginRequest,
+        id: loginRequestId,
       },
     });
 
@@ -56,11 +51,11 @@ const UserForLoginFragment = gql`
   }
 `;
 
-const getLoginTokenByCookie = gql`
+const getLoginToken = gql`
   ${UserForLoginFragment}
 
-  query GetLoginTokenByCookie($requestCookie: String!) {
-    loginToken(where: { requestCookie: { _eq: $requestCookie } }) {
+  query GetLoginToken($id: uuid!) {
+    loginToken_by_pk(id: $id) {
       approved
       value
       expires

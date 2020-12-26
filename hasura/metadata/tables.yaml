@@ -10,7 +10,7 @@
     permission:
       columns:
       - approved
-      - userId
+      - id
       filter: {}
   event_triggers:
   - name: loginSendEmail
@@ -21,10 +21,11 @@
       update:
         columns:
         - approved
-        - requestCookie
-        - value
+        - email
+        - secret
         - created
         - expires
+        - id
         - userId
     retry_conf:
       num_retries: 5

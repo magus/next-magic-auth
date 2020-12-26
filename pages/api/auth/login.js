@@ -25,11 +25,7 @@ export default async function login(req, res) {
 
     const { email } = value;
 
-    const {
-      token: loginToken,
-      expires: loginTokenExpires,
-      requestCookie,
-    } = auth.generateLoginToken(res);
+    const loginToken = auth.generateLoginToken();
 
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
@@ -39,25 +35,27 @@ export default async function login(req, res) {
         variables: {
           // user
           email,
-          // loginToken
-          loginToken,
-          expires: loginTokenExpires,
-          requestCookie,
+
+          // loginToken contains secret and expires
+          ...loginToken,
         },
       },
     );
 
     const [
-      { userId },
+      { id: loginTokenId, userId },
     ] = upsertLoginTokenWithUserResult.insert_loginToken.returning;
 
+    // store loginToken id in cookie
+    auth.setLoginTokenCookie(res, loginTokenId);
+
     // calculate phrase for showing on login for confirmation with email
-    const phrase = words.getPhraseFromToken(loginToken);
+    const phrase = words.getPhraseFromToken(loginToken.secret);
 
     return res.status(200).json({
       error: false,
       phrase,
-      userId,
+      id: loginTokenId,
     });
   } catch (e) {
     console.error(e);
@@ -71,15 +69,13 @@ export default async function login(req, res) {
 const upsertLoginTokenWithUser = gql`
   mutation UpsertLoginTokenWithUser(
     $email: String!
-    $loginToken: String!
+    $secret: String!
     $expires: timestamptz!
-    $requestCookie: String!
   ) {
     insert_loginToken(
       objects: {
+        secret: $secret
         expires: $expires
-        value: $loginToken
-        requestCookie: $requestCookie
         approved: false
         email: $email
         user: {
@@ -87,12 +83,9 @@ const upsertLoginTokenWithUser = gql`
           on_conflict: { constraint: user_email_key, update_columns: updated }
         }
       }
-      on_conflict: {
-        constraint: loginToken_pkey
-        update_columns: [created, value, expires, requestCookie, approved]
-      }
     ) {
       returning {
+        id
         userId
       }
     }
