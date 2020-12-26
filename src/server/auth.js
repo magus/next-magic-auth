@@ -112,9 +112,10 @@ async function refreshAuthentication(res, serverToken, clientToken) {
 
   // set authentication cookies
   setCookies(res, {
-    jwtToken: jwtToken.token,
     refreshToken: jwtToken.refreshToken,
   });
+
+  return jwtToken;
 }
 
 function clearCookies(res) {
@@ -135,15 +136,6 @@ function setCookies(
   cookieOptions,
 ) {
   const cookies = [];
-
-  if (typeof jwtToken === 'string') {
-    cookies.push(
-      cookie.generateCookie(cookie.cookies.jwtToken, jwtToken, {
-        httpOnly: false,
-        ...cookieOptions,
-      }),
-    );
-  }
 
   if (typeof refreshToken === 'string') {
     cookies.push(

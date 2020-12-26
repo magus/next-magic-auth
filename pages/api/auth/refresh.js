@@ -7,13 +7,12 @@ import graphql from 'src/server/graphql';
 export default async function loginRefresh(req, res) {
   try {
     const refreshToken = req.cookies[cookie.cookies.refreshToken];
-    const jwtToken = req.cookies[cookie.cookies.jwtToken];
 
-    if (!(refreshToken && jwtToken)) {
-      throw new Error('auth tokens missing');
+    if (!refreshToken) {
+      throw new Error('refresh token missing');
     }
 
-    const userId = auth.getJwtTokenUserId(jwtToken);
+    const userId = auth.getJwtTokenUserId(refreshToken);
 
     const {
       refreshToken: [serverRefreshToken],
@@ -27,9 +26,13 @@ export default async function loginRefresh(req, res) {
       );
     }
 
-    await auth.refreshAuthentication(res, serverRefreshToken, refreshToken);
+    const jwtToken = await auth.refreshAuthentication(
+      res,
+      serverRefreshToken,
+      refreshToken,
+    );
 
-    return res.status(200).json({ error: false });
+    return res.status(200).json({ error: false, jwtToken });
   } catch (e) {
     console.error(e);
 

@@ -23,9 +23,7 @@ const LoggedOutState = {
 export function AuthProvider({ children }) {
   const [state, set_state] = React.useState(LoggedOutState);
 
-  async function setJWTToken() {
-    // get jwt token from cookie
-    const jwt = cookie.getJwtToken();
+  async function setJWTToken(jwt) {
     set_state({ ...state, jwt });
     return jwt;
   }
@@ -55,7 +53,8 @@ export function AuthProvider({ children }) {
       method: 'POST',
     });
     if (response.status === 200) {
-      await setJWTToken();
+      const json = await response.json();
+      await setJWTToken(json.jwtToken.token);
     }
   }
 
@@ -65,7 +64,8 @@ export function AuthProvider({ children }) {
 
     const response = await fetch('/api/auth/refresh', { method: 'POST' });
     if (response.status === 200) {
-      return await setJWTToken();
+      const json = await response.json();
+      return await setJWTToken(json.jwtToken.token);
     } else {
       await logout();
       return false;
