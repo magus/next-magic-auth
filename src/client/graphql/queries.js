@@ -2,7 +2,7 @@ import * as React from 'react';
 import gql from 'graphql-tag';
 import { useLazyQuery, useQuery } from '@apollo/client';
 
-import { useAdhocSubscription } from 'src/client/graphql/client';
+import useAdhocSubscription from 'src/hooks/useAdhocSubscription';
 
 import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
