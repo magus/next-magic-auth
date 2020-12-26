@@ -64,6 +64,8 @@ ALTER TABLE ONLY public.user_role
 ALTER TABLE ONLY public."loginToken"
     ADD CONSTRAINT "loginToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON UPDATE RESTRICT ON DELETE CASCADE;
 ALTER TABLE ONLY public."refreshToken"
+    ADD CONSTRAINT "refreshToken_loginTokenId_fkey" FOREIGN KEY ("loginTokenId") REFERENCES public."loginToken"(id) ON UPDATE RESTRICT ON DELETE CASCADE;
+ALTER TABLE ONLY public."refreshToken"
     ADD CONSTRAINT "refreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON UPDATE RESTRICT ON DELETE CASCADE;
 ALTER TABLE ONLY public.user_role
     ADD CONSTRAINT "user_role_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON UPDATE RESTRICT ON DELETE CASCADE;
