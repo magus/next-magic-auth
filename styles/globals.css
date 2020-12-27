@@ -10,6 +10,7 @@
   --font-large: 20px;
 
   --spacer: 8px;
+  --spacer-1: var(--spacer);
   --spacer-2: calc(var(--spacer) * 2);
   --spacer-3: calc(var(--spacer) * 3);
   --spacer-4: calc(var(--spacer) * 4);

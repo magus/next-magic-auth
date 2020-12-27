@@ -19,6 +19,17 @@ const gqls = {
     }
   `,
 
+  loginRequests: gql`
+    subscription LoginRequests {
+      loginToken(order_by: { created: desc }) {
+        id
+        created
+        expires
+        approved
+      }
+    }
+  `,
+
   watchLoginToken: gql`
     subscription WatchLoginToken($id: uuid!) {
       loginToken_by_pk(id: $id) {
@@ -49,6 +60,21 @@ export default {
     }
 
     return [get, self];
+  },
+
+  loginRequests: () => {
+    const result = useAdhocSubscription(gqls.loginRequests, {
+      role: roles.self,
+    });
+
+    let loginRequests = [];
+
+    if (!result.error && result.data && Array.isArray(result.data.loginToken)) {
+      // extract approved
+      loginRequests = result.data.loginToken;
+    }
+
+    return loginRequests;
   },
 
   watchLoginToken: (id) => {

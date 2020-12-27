@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
+import TimeAgo from 'src/components/TimeAgo';
 import { useAuth } from 'src/components/AuthProvider';
 import { useModal } from 'src/components/Modal';
 import graphql from 'src/client/graphql/queries';
@@ -55,6 +56,71 @@ function CheckEmailModal({ dismiss, id, phrase }) {
   );
 }
 
+function LoginRequests() {
+  const loginRequests = graphql.loginRequests();
+
+  console.debug({ loginRequests });
+
+  return (
+    <div className={styles.loginRequests}>
+      <div className={styles.loginRequestsHeader}>Login Requests</div>
+      <div className={styles.loginRequestsTable}>
+        <table>
+          <thead>
+            <tr>
+              <td></td>
+
+              <td>Details</td>
+            </tr>
+          </thead>
+          <tbody>
+            {loginRequests.map((lr) => {
+              return (
+                <tr key={lr.id}>
+                  <td>
+                    {lr.approved ? (
+                      '✅'
+                    ) : (
+                      <TimeAgo date={lr.expires}>
+                        {(formattedDate, timeAgoData) => {
+                          if (timeAgoData.isPast) {
+                            return '❌';
+                          }
+
+                          return `⏳`;
+                        }}
+                      </TimeAgo>
+                    )}
+                  </td>
+
+                  <td>
+                    <TimeAgo date={lr.expires}>
+                      {(formattedDate, timeAgoData) => {
+                        if (timeAgoData.isPast) {
+                          return 'Expired';
+                        }
+
+                        return `Expires ${formattedDate}`;
+                      }}
+                    </TimeAgo>{' '}
+                    (
+                    <TimeAgo date={lr.created}>
+                      {(formattedDate, timeAgoData) => {
+                        return `Created ${formattedDate}`;
+                      }}
+                    </TimeAgo>
+                    )
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function LoginForm(props) {
   const auth = useAuth();
   const modal = useModal();
@@ -95,11 +161,13 @@ function LoginForm(props) {
 
   const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
 
-  if (auth.isLoggedIn) {
+  if (auth.isLoggedIn && me) {
     return (
       <>
-        <pre>{JSON.stringify(me, null, 2)}</pre>
-        <Button onClick={() => getMe()}>Get Me</Button>
+        <h1>{me.email}</h1>
+
+        <LoginRequests />
+
         <Button className={styles.button} onClick={auth.actions.logout}>
           Logout
         </Button>
