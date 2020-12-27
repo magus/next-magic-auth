@@ -21,7 +21,10 @@ const gqls = {
 
   loginRequests: gql`
     subscription LoginRequests {
-      loginToken(order_by: { created: desc }) {
+      loginToken(
+        order_by: { created: desc }
+        where: { approved: { _eq: false } }
+      ) {
         id
         created
         expires
