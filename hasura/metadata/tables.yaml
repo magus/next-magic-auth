@@ -12,6 +12,17 @@
       - approved
       - id
       filter: {}
+      limit: 1
+  - role: self
+    permission:
+      columns:
+      - approved
+      - created
+      - expires
+      - id
+      filter:
+        userId:
+          _eq: X-Hasura-User-Id
   event_triggers:
   - name: loginSendEmail
     definition:
@@ -78,7 +89,6 @@
         id:
           _eq: X-Hasura-User-Id
       limit: 1
-      allow_aggregations: true
   - role: user
     permission:
       columns:
