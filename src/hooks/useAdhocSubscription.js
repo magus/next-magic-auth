@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { getMainDefinition } from '@apollo/client/utilities';
 
 import { useAuth } from 'src/components/AuthProvider';
 import roles from 'src/shared/roles';
@@ -13,6 +14,20 @@ export default function useAdhocSubscription(
 ) {
   const auth = useAuth();
   const [result, set_result] = React.useState(null);
+
+  const definition = getMainDefinition(query);
+  if (
+    !definition ||
+    !(
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    )
+  ) {
+    console.error('[useAdhocSubscription]', 'query is not a subscription', {
+      query,
+    });
+    throw new Error('query is not a subscription');
+  }
 
   React.useEffect(() => {
     const client = buildApolloWebsocketClient({
