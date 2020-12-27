@@ -110,14 +110,22 @@ export function AuthProvider({ children }) {
     if (!process.browser) return;
 
     const response = await fetch('/api/auth/refresh', { method: 'POST' });
-    if (response.status === 200) {
-      const json = await response.json();
-      if (json.jwtToken) {
-        return await setJWTToken(json.jwtToken);
-      }
+
+    const json = await response.json();
+
+    if (json.error) {
+      await logout();
+      return false;
+    } else if (json.jwtToken) {
+      return await setJWTToken(json.jwtToken);
+    } else if (response.status === 200) {
+      // no-op, no cookie no refresh
+      return false;
     }
 
-    await logout();
+    console.error('[AuthProvider]', 'unrecognized refresh response', {
+      response,
+    });
     return false;
   }
 

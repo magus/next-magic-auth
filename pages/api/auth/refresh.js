@@ -71,7 +71,6 @@ const getRefreshToken = gql`
     refreshToken_by_pk(loginTokenId: $loginRequestId) {
       loginTokenId
       value
-      lastValue
       expires
       user {
         ...UserForLoginFragment

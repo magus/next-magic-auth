@@ -84,7 +84,7 @@ function setLoginTokenCookie(res, loginTokenId) {
   cookie.set(res, encoded, { expires });
 }
 
-function generateJWTToken(loginTokenId, user) {
+function generateRefreshToken(loginTokenId, user) {
   const refreshToken = encodeJwtToken(
     TokenKinds.refresh,
     config.JWT_REFRESH_TOKEN_EXPIRES,
@@ -100,6 +100,10 @@ function generateJWTToken(loginTokenId, user) {
     },
   );
 
+  return refreshToken;
+}
+
+function generateHasuraToken(loginTokenId, user) {
   // build allowedRoles array for user
   const allowedRoles = user.roles.map((userRole) => userRole.role.name);
   allowedRoles.push(...JwtDefaults.AllowedRoles);
@@ -117,7 +121,7 @@ function generateJWTToken(loginTokenId, user) {
     },
   });
 
-  return { jwtToken, refreshToken };
+  return jwtToken;
 }
 
 async function refreshAuthentication(res, serverToken, authCookie) {
@@ -127,51 +131,52 @@ async function refreshAuthentication(res, serverToken, authCookie) {
     throw new Error('token expired');
   }
 
+  let loginTokenId;
+
   // serverToken may be either a
-  //   1. refreshToken (refreshing a login)
-  //   2. or loginToken (completing a login)
-  const loginTokenId = serverToken.loginTokenId || serverToken.id;
+  //   1. completing a login (loginToken, first refresh token)
+  //   2. or refreshing a login (refreshToken)
 
-  const tokens = generateJWTToken(loginTokenId, serverToken.user);
+  // scenario 1: completing a login (first refreshToken)
+  // no authCookie, generating first refreshToken and storing in cookie
+  if (!authCookie) {
+    loginTokenId = serverToken.id;
 
-  // when refreshing with authCookie, verify against db stored serverToken
-  //   1. authCookie matches N-1 serverToken value (lastValue)
-  //   2. authCookie matches current serverToken (value)
-  //   3. no authCookie, login complete (first refresh token generation)
+    const refreshToken = generateRefreshToken(loginTokenId, serverToken.user);
 
-  // scenario 1 above, return current value do not update
-  if (authCookie && authCookie === serverToken.lastValue) {
-    // console.debug('scenario 1');
-    // set previous refresh token value to cookie
-    cookie.set(res, serverToken.value);
-  } else if (!authCookie || authCookie === serverToken.value) {
-    // scenario 2 or 3 above, normal refresh or login
-    // console.debug('scenario 2 or 3');
-
-    // store refresh token in database
-    // also delete login token if present
+    // store new refreshToken in database
     await graphql.query(setRefreshToken, {
       variables: {
         loginTokenId,
         userId: serverToken.user.id,
-        value: tokens.refreshToken.encoded,
-        lastValue: serverToken.value || '',
-        expires: tokens.refreshToken.expires,
+        value: refreshToken.encoded,
+        expires: refreshToken.expires,
       },
     });
 
-    // store new refresh token to cookie
-    cookie.set(res, tokens.refreshToken.encoded);
+    // set new refresh token to cookie
+    cookie.set(res, refreshToken.encoded);
+  } else if (authCookie === serverToken.value) {
+    // scenario  2: refreshing a login (refreshToken)
+    // authCookie matches stored refreshToken (serverToken.value)
+    loginTokenId = serverToken.loginTokenId;
+
+    // update refresh token expires in database (refresh the refreshToken)
+    await graphql.query(updateRefreshToken, {
+      variables: {
+        loginTokenId,
+        expires: getExpires(config.JWT_REFRESH_TOKEN_EXPIRES),
+      },
+    });
   } else {
-    // authCookie did not match any known refresh tokens
+    // authCookie did not match server stored refreshToken
     // todo generate static page for this
     // e.g. /auth/invalid
-    throw new Error('unexpected token value');
+    throw new Error('invalid auth cookie, force logout');
   }
 
-  // always return a valid jwtToken
-  // return the encdoed jwt token (encoded and expires)
-  return tokens.jwtToken;
+  // always return the encoded hasura jwt token ({ encoded, expires })
+  return generateHasuraToken(loginTokenId, serverToken.user);
 }
 
 function decodeJwtClaims(jwtToken) {
@@ -227,7 +232,6 @@ const setRefreshToken = gql`
     $userId: uuid!
     $loginTokenId: uuid!
     $value: String!
-    $lastValue: String!
     $expires: timestamptz!
   ) {
     insert_refreshToken(
@@ -235,17 +239,23 @@ const setRefreshToken = gql`
         userId: $userId
         loginTokenId: $loginTokenId
         value: $value
-        lastValue: $lastValue
         expires: $expires
-      }
-      on_conflict: {
-        constraint: refreshToken_pkey
-        update_columns: [value, lastValue, expires]
       }
     ) {
       returning {
         loginTokenId
       }
+    }
+  }
+`;
+
+const updateRefreshToken = gql`
+  mutation UpdateRefreshToken($loginTokenId: uuid!, $expires: timestamptz!) {
+    update_refreshToken_by_pk(
+      pk_columns: { loginTokenId: $loginTokenId }
+      _set: { expires: $expires }
+    ) {
+      loginTokenId
     }
   }
 `;
