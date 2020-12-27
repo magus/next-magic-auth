@@ -9,10 +9,13 @@ import graphql from 'src/client/graphql/queries';
 import styles from 'styles/login.module.css';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { email } = router.query;
+
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        <LoginForm />
+        <LoginForm {...{ email }} />
       </div>
     </Page>
   );
@@ -52,12 +55,17 @@ function CheckEmailModal({ dismiss, id, phrase }) {
   );
 }
 
-function LoginForm() {
+function LoginForm(props) {
   const auth = useAuth();
-  const router = useRouter();
   const modal = useModal();
   const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
+
+  React.useEffect(() => {
+    if (!email && props.email) {
+      set_email(props.email);
+    }
+  }, [props.email]);
 
   React.useEffect(() => {
     if (auth.isLoggedIn) {

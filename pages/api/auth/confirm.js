@@ -45,7 +45,9 @@ export default async function loginConfirm(req, res) {
     //     </head>
     //   </html>
     // `);
-    return res.status(302).redirect(loginConfirmUrl);
+    return res
+      .status(302)
+      .redirect(`${loginConfirmUrl}?email=${data.loginToken.email}`);
   } catch (e) {
     console.error(e);
 
@@ -63,6 +65,7 @@ const approveLoginToken = gql`
     ) {
       secret
       expires
+      email
     }
   }
 `;
