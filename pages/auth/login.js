@@ -164,7 +164,7 @@ function LoginForm(props) {
   if (auth.isLoggedIn && me) {
     return (
       <>
-        <h1>{me.email}</h1>
+        <h1 className={styles.email}>{me.email}</h1>
 
         <LoginRequests />
 

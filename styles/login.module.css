@@ -76,6 +76,11 @@
   margin: var(--spacer-4) 0 0 0;
 }
 
+.email {
+  font-size: var(--spacer-3);
+  font-weight: 700;
+}
+
 .loginRequests {
   margin: var(--spacer-2) 0;
 }
