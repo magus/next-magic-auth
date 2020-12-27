@@ -38,7 +38,7 @@
 .loginRequestsTable table tbody {
   display:block;
   overflow: auto;
-  height: 300px;
+  max-height: 300px;
 }
 
 .loginRequestsTable table tbody td {
