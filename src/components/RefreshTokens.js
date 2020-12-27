@@ -7,7 +7,7 @@ import styles from 'styles/RefreshTokens.module.css';
 export default function RefreshTokens() {
   const refreshTokens = graphql.refreshTokens();
 
-  console.debug({ refreshTokens });
+  // console.debug({ refreshTokens });
 
   return (
     <div className={styles.refreshTokens}>
