@@ -46,7 +46,7 @@ function CheckEmailModal({ dismiss, id, phrase }) {
       <div className={styles.checkEmailModalKeepThisTab}>
         Keep this tab open
       </div>
-      <div>Click the magic words in your email</div>
+      <div>Use your phone to click the magic words in your email</div>
       <Button className={styles.magicWords}>{phrase}</Button>
     </div>
   );
