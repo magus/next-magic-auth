@@ -1,0 +1,52 @@
+.loginRequests {
+  margin: var(--spacer-2) 0;
+}
+
+.loginRequestsHeader {
+  margin: var(--spacer-3) 0 var(--spacer-1) 0;
+  font-weight: 600;
+  font-size: var(--font-large);
+}
+
+.loginRequestsTable {
+  min-width: 320px;
+  border: 1px solid rgba(var(--black), 0.1);
+}
+
+.loginRequestsTable table td {
+  padding: var(--spacer-1);
+  white-space: nowrap;
+}
+
+.loginRequestsTable table td:first-child {
+  width: var(--spacer-4);
+}
+
+.loginRequestsTable table td:nth-child(2) {
+  width: 300px;
+  overflow: hidden;
+}
+
+.loginRequestsTable table tr {
+  border-bottom: 1px solid rgba(var(--black), 0.1);
+}
+
+.loginRequestsTable table thead tr {
+  display: block;
+}
+
+.loginRequestsTable table tbody {
+  display:block;
+  overflow: auto;
+  height: 300px;
+}
+
+.loginRequestsTable table tbody td {
+  font-size: var(--font-small);
+  font-weight: 200;
+  line-height: var(--spacer-3);
+}
+
+.loginRequestsTable table thead td {
+  font-weight: 500;
+}
