@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
 import LoginRequests from 'src/components/LoginRequests';
+import RefreshTokens from 'src/components/RefreshTokens';
 import { useAuth } from 'src/components/AuthProvider';
 import { useModal } from 'src/components/Modal';
 import graphql from 'src/client/graphql/queries';
@@ -102,6 +103,8 @@ function LoginForm(props) {
         <h1 className={styles.email}>{me.email}</h1>
 
         <LoginRequests />
+
+        <RefreshTokens />
 
         <Button className={styles.button} onClick={auth.actions.logout}>
           Logout

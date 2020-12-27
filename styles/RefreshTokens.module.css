@@ -1,0 +1,52 @@
+.refreshTokens {
+  margin: var(--spacer-2) 0;
+}
+
+.refreshTokensHeader {
+  margin: var(--spacer-3) 0 var(--spacer-1) 0;
+  font-weight: 600;
+  font-size: var(--font-large);
+}
+
+.refreshTokensTable {
+  min-width: 320px;
+  border: 1px solid rgba(var(--black), 0.1);
+}
+
+.refreshTokensTable table td {
+  padding: var(--spacer-1);
+  white-space: nowrap;
+}
+
+.refreshTokensTable table td:first-child {
+  width: var(--spacer-4);
+}
+
+.refreshTokensTable table td:nth-child(2) {
+  width: 300px;
+  overflow: hidden;
+}
+
+.refreshTokensTable table tr {
+  border-bottom: 1px solid rgba(var(--black), 0.1);
+}
+
+.refreshTokensTable table thead tr {
+  display: block;
+}
+
+.refreshTokensTable table tbody {
+  display:block;
+  overflow: auto;
+  height: 300px;
+}
+
+.refreshTokensTable table tbody td {
+  font-size: var(--font-small);
+  font-weight: 200;
+  line-height: var(--spacer-3);
+}
+
+.refreshTokensTable table thead td {
+  font-weight: 500;
+}

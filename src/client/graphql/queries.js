@@ -30,6 +30,16 @@ const gqls = {
     }
   `,
 
+  refreshTokens: gql`
+    subscription RefreshTokens {
+      refreshToken(order_by: { created: desc }) {
+        id: loginTokenId
+        created
+        expires
+      }
+    }
+  `,
+
   watchLoginToken: gql`
     subscription WatchLoginToken($id: uuid!) {
       loginToken_by_pk(id: $id) {
@@ -75,6 +85,25 @@ export default {
     }
 
     return loginRequests;
+  },
+
+  refreshTokens: () => {
+    const result = useAdhocSubscription(gqls.refreshTokens, {
+      role: roles.self,
+    });
+
+    let refreshTokens = [];
+
+    if (
+      !result.error &&
+      result.data &&
+      Array.isArray(result.data.refreshToken)
+    ) {
+      // extract approved
+      refreshTokens = result.data.refreshToken;
+    }
+
+    return refreshTokens;
   },
 
   watchLoginToken: (id) => {
