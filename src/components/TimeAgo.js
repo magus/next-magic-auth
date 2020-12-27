@@ -21,7 +21,7 @@ export default function TimeAgo(props) {
       updateIntervalInSeconds={1}
     >
       {(formattedDate) => {
-        console.debug('[TimeAgo]', { formattedDate });
+        // console.debug('[TimeAgo]', { formattedDate });
 
         if (typeof props.children === 'function') {
           return props.children(formattedDate, getTimeAgoData(date));
