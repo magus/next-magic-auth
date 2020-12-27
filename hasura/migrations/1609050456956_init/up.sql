@@ -23,8 +23,7 @@ CREATE TABLE public."refreshToken" (
     created timestamp with time zone DEFAULT now() NOT NULL,
     expires timestamp with time zone NOT NULL,
     value text NOT NULL,
-    "loginTokenId" uuid NOT NULL,
-    "lastValue" text
+    "loginTokenId" uuid NOT NULL
 );
 CREATE TABLE public.role (
     id uuid DEFAULT public.gen_random_uuid() NOT NULL,
