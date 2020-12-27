@@ -63,6 +63,16 @@
           name: user
         column_mapping:
           userId: id
+  select_permissions:
+  - role: self
+    permission:
+      columns:
+      - created
+      - expires
+      - loginTokenId
+      filter:
+        userId:
+          _eq: X-Hasura-User-Id
 - table:
     schema: public
     name: role
