@@ -5,7 +5,7 @@ import graphql from 'src/client/graphql/queries';
 import styles from 'styles/LoginRequests.module.css';
 
 export default function LoginRequests() {
-  const loginRequests = graphql.loginRequests();
+  const loginRequests = graphql.watchLoginRequests();
 
   // console.debug({ loginRequests });
 

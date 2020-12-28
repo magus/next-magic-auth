@@ -8,6 +8,15 @@ import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
 
 const gqls = {
+  watchLoginToken: gql`
+    subscription WatchLoginToken {
+      loginToken {
+        approved
+        id
+      }
+    }
+  `,
+
   me: gql`
     query Me {
       me: user {
@@ -19,12 +28,9 @@ const gqls = {
     }
   `,
 
-  loginRequests: gql`
+  watchLoginRequests: gql`
     subscription LoginRequests {
-      loginToken(
-        order_by: { created: desc }
-        where: { approved: { _eq: false } }
-      ) {
+      loginToken(order_by: { created: desc }) {
         id
         created
         expires
@@ -33,7 +39,7 @@ const gqls = {
     }
   `,
 
-  refreshTokens: gql`
+  watchRefreshTokens: gql`
     subscription RefreshTokens {
       refreshToken(order_by: { created: desc }) {
         id: loginTokenId
@@ -42,19 +48,29 @@ const gqls = {
       }
     }
   `,
-
-  watchLoginToken: gql`
-    subscription WatchLoginToken {
-      loginToken {
-        approved
-        id
-      }
-    }
-  `,
 };
 
 export default {
   query,
+
+  watchLoginToken: (jwtToken) => {
+    const result = useAdhocSubscription(gqls.watchLoginToken, {
+      role: roles.login,
+      jwt: jwtToken.encoded,
+    });
+
+    let approved = false;
+
+    if (!result.error && result.data && result.data.loginToken) {
+      // extract approved
+      const [loginToken] = result.data.loginToken;
+      if (loginToken) {
+        approved = loginToken.approved;
+      }
+    }
+
+    return approved;
+  },
 
   me: () => {
     const [get, result] = useLazyQuery(gqls.me, {
@@ -76,8 +92,8 @@ export default {
     return [get, self];
   },
 
-  loginRequests: () => {
-    const result = useAdhocSubscription(gqls.loginRequests, {
+  watchLoginRequests: () => {
+    const result = useAdhocSubscription(gqls.watchLoginRequests, {
       role: roles.self,
     });
 
@@ -91,8 +107,8 @@ export default {
     return loginRequests;
   },
 
-  refreshTokens: () => {
-    const result = useAdhocSubscription(gqls.refreshTokens, {
+  watchRefreshTokens: () => {
+    const result = useAdhocSubscription(gqls.watchRefreshTokens, {
       role: roles.self,
     });
 
@@ -108,25 +124,6 @@ export default {
     }
 
     return refreshTokens;
-  },
-
-  watchLoginToken: (jwtToken) => {
-    const result = useAdhocSubscription(gqls.watchLoginToken, {
-      role: roles.login,
-      jwt: jwtToken.encoded,
-    });
-
-    let approved = false;
-
-    if (!result.error && result.data && result.data.loginToken) {
-      // extract approved
-      const [loginToken] = result.data.loginToken;
-      if (loginToken) {
-        approved = loginToken.approved;
-      }
-    }
-
-    return approved;
   },
 };
 

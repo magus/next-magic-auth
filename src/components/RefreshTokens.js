@@ -5,13 +5,13 @@ import graphql from 'src/client/graphql/queries';
 import styles from 'styles/RefreshTokens.module.css';
 
 export default function RefreshTokens() {
-  const refreshTokens = graphql.refreshTokens();
+  const refreshTokens = graphql.watchRefreshTokens();
 
   // console.debug({ refreshTokens });
 
   return (
     <div className={styles.refreshTokens}>
-      <div className={styles.refreshTokensHeader}>Refresh Tokens</div>
+      <div className={styles.refreshTokensHeader}>Sessions</div>
       <div className={styles.refreshTokensTable}>
         <table>
           <thead>
