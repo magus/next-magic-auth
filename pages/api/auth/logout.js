@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 import auth from 'src/server/auth';
 import graphql from 'src/server/graphql';
 
-export default async function loginRefresh(req, res) {
+export default async function logout(req, res) {
   try {
     auth.clearCookies(res);
 

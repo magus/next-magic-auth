@@ -10,6 +10,8 @@ import graphql from 'src/client/graphql/queries';
 
 import styles from 'styles/login.module.css';
 
+LoginPage.requireAuth = true;
+
 export default function LoginPage() {
   const router = useRouter();
   const { email } = router.query;

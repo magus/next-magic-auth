@@ -1,11 +1,15 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
+import { requirePageAuth } from 'src/components/AuthProvider';
 
 import styles from 'styles/auth-confirm.module.css';
 import request from 'graphql-request';
+
+LoginConfirm.requireAuth = false;
 
 export default function LoginConfirm() {
   const pageRef = React.useRef(null);
@@ -31,14 +35,12 @@ export default function LoginConfirm() {
       <div className={styles.instructions}>Go back to the original page.</div>
       <div className={styles.instructions}>This window can be closed.</div>
 
-      <a
-        className={styles.loginHereToo}
-        target="_blank"
-        href={`/?email=${email}`}
-      >
-        Click here to login here too (
-        <span className={styles.email}>{email}</span>)
-      </a>
+      <Link href={!email ? '/' : `/?email=${email}`}>
+        <a className={styles.loginHereToo}>
+          Click here to login here too
+          {!email ? null : <span className={styles.email}> ({email})</span>}
+        </a>
+      </Link>
     </Page>
   );
 }
