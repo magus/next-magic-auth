@@ -35,6 +35,7 @@ export default async function loginRefresh(req, res) {
     // refreshAuthentication takes care of setting auth cookie
     // returns jwt token for client side authentication
     const jwtToken = await auth.refreshAuthentication(
+      req,
       res,
       serverRefreshToken,
       authCookie,

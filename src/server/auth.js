@@ -6,6 +6,7 @@ import config from './config';
 import cookie from './cookie';
 import graphql from './graphql';
 import random from './random';
+import request from './request';
 
 import roles from 'src/shared/roles';
 
@@ -144,12 +145,14 @@ function generateHasuraToken(loginTokenId, user) {
   return jwtToken;
 }
 
-async function refreshAuthentication(res, serverToken, authCookie) {
+async function refreshAuthentication(req, res, serverToken, authCookie) {
   // verify serverToken is not expired
   if (Date.now() > new Date(serverToken.expires).getTime()) {
     // e.g. /auth/timeout
     throw new Error('token expired');
   }
+
+  const requestMetadata = request.parse(req);
 
   let loginTokenId;
 
@@ -171,6 +174,9 @@ async function refreshAuthentication(res, serverToken, authCookie) {
         userId: serverToken.user.id,
         value: refreshToken.encoded,
         expires: refreshToken.expires,
+
+        // metadata for refresh token (user agent, ip, etc.)
+        ...requestMetadata,
       },
     });
 
@@ -186,8 +192,14 @@ async function refreshAuthentication(res, serverToken, authCookie) {
       variables: {
         loginTokenId,
         expires: getExpires(config.JWT_REFRESH_TOKEN_EXPIRES),
+
+        // update metadata for refresh token (user agent, ip, etc.)
+        ...requestMetadata,
       },
     });
+
+    // update refresh token cookie (so the expires updates)
+    cookie.set(res, serverToken.value);
   } else {
     // authCookie did not match server stored refreshToken
     // todo generate static page for this
@@ -253,6 +265,9 @@ const setRefreshToken = gql`
     $loginTokenId: uuid!
     $value: String!
     $expires: timestamptz!
+    $ip: String!
+    $userAgent: String!
+    $userAgentRaw: String!
   ) {
     insert_refreshToken(
       objects: {
@@ -260,6 +275,9 @@ const setRefreshToken = gql`
         loginTokenId: $loginTokenId
         value: $value
         expires: $expires
+        ip: $ip
+        userAgent: $userAgent
+        userAgentRaw: $userAgentRaw
       }
     ) {
       returning {
@@ -270,10 +288,21 @@ const setRefreshToken = gql`
 `;
 
 const updateRefreshToken = gql`
-  mutation UpdateRefreshToken($loginTokenId: uuid!, $expires: timestamptz!) {
+  mutation UpdateRefreshToken(
+    $loginTokenId: uuid!
+    $expires: timestamptz!
+    $ip: String!
+    $userAgent: String!
+    $userAgentRaw: String!
+  ) {
     update_refreshToken_by_pk(
       pk_columns: { loginTokenId: $loginTokenId }
-      _set: { expires: $expires }
+      _set: {
+        expires: $expires
+        ip: $ip
+        userAgent: $userAgent
+        userAgentRaw: $userAgentRaw
+      }
     ) {
       loginTokenId
     }
