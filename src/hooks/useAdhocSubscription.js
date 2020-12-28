@@ -13,7 +13,8 @@ export default function useAdhocSubscription(
   { variables, anonymous, role = roles.user, ...options },
 ) {
   const auth = useAuth();
-  const [result, set_result] = React.useState(null);
+  const [data, set_data] = React.useState(null);
+  const [error, set_error] = React.useState(null);
 
   const definition = getMainDefinition(query);
   if (
@@ -43,16 +44,21 @@ export default function useAdhocSubscription(
       variables,
     });
 
-    const subscription = observable.subscribe(set_result, async (error) => {
-      if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
-        // refresh token and cause rebuild client (auth.jwt)
-        console.debug('[AdhocSubscription]', 'auth.actions.refreshTokens');
-        await auth.actions.refreshTokens();
-      }
+    const subscription = observable.subscribe(
+      (subscribeResult) => {
+        set_data(subscribeResult.data);
+      },
+      async (error) => {
+        if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
+          // refresh token and cause rebuild client (auth.jwt)
+          console.debug('[AdhocSubscription]', 'auth.actions.refreshTokens');
+          await auth.actions.refreshTokens();
+        }
 
-      // otherwise set error and continue
-      set_result({ error });
-    });
+        // otherwise set error and continue
+        set_error({ error });
+      },
+    );
 
     return function cleanup() {
       subscription.unsubscribe();
@@ -60,5 +66,5 @@ export default function useAdhocSubscription(
     };
   }, [jwtToken]);
 
-  return { ...result };
+  return { error, data, loading: !(error || data) };
 }
