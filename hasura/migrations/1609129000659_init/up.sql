@@ -16,14 +16,21 @@ CREATE TABLE public."loginToken" (
     approved boolean DEFAULT false NOT NULL,
     email text NOT NULL,
     secret text NOT NULL,
-    id uuid DEFAULT public.gen_random_uuid() NOT NULL
+    id uuid DEFAULT public.gen_random_uuid() NOT NULL,
+    ip text NOT NULL,
+    "userAgent" text NOT NULL,
+    "userAgentRaw" text NOT NULL
 );
 CREATE TABLE public."refreshToken" (
     "userId" uuid NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
     expires timestamp with time zone NOT NULL,
     value text NOT NULL,
-    "loginTokenId" uuid NOT NULL
+    "loginTokenId" uuid NOT NULL,
+    "lastActive" timestamp with time zone DEFAULT now() NOT NULL,
+    ip text NOT NULL,
+    "userAgent" text NOT NULL,
+    "userAgentRaw" text NOT NULL
 );
 CREATE TABLE public.role (
     id uuid DEFAULT public.gen_random_uuid() NOT NULL,
