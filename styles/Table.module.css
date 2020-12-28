@@ -1,4 +1,6 @@
 .container {
+  --data-font-size: var(--font-small);
+
   margin: var(--spacer-2) 0;
 }
 
@@ -20,8 +22,18 @@
 }
 
 .table table td {
+  font-size: var(--data-font-size);
   padding: var(--spacer-1);
   white-space: nowrap;
+}
+
+.table table tbody td {
+  font-weight: 200;
+  line-height: var(--spacer-3);
+}
+
+.table table thead td {
+  font-weight: 300;
 }
 
 .table table td:first-child {
@@ -36,13 +48,8 @@
   border-bottom: none;
 }
 
-.table table tbody td {
-  font-size: var(--font-small);
-  font-weight: 200;
-  line-height: var(--spacer-3);
-}
-
-.table table thead td {
-  font-weight: 300;
-  font-size: var(--font-small);
+.loading-td div {
+  width: 80%;
+  height: var(--data-font-size);
+  background: rgba(var(--black), 0.15);
 }

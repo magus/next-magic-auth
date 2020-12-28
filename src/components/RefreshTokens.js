@@ -6,51 +6,40 @@ import Table from 'src/components/Table';
 import TimeAgo from 'src/components/TimeAgo';
 import graphql from 'src/client/graphql/queries';
 
-export default function RefreshTokens({ refreshTokens }) {
+export default function RefreshTokens({ loading, refreshTokens }) {
   const auth = useAuth();
 
+  const header = `Active sessions${
+    loading ? '' : ` (${refreshTokens.length})`
+  }`;
+  const columns = ['', 'Device', 'IP', 'Last active', 'Details'];
+  const loadingWidths = [0, 200, 100, 100, 200];
+
   return (
-    <Table header="Active sessions">
-      <table>
-        <thead>
-          <tr>
-            <td></td>
+    <Table {...{ header, columns, loading, loadingWidths }}>
+      {refreshTokens.map((rt) => {
+        return (
+          <tr key={rt.id}>
+            <td>{auth.loginRequestId === rt.id ? '🎉' : ' '}</td>
 
-            <td>Device</td>
+            <td>{rt.userAgent}</td>
 
-            <td>IP</td>
+            <td>{rt.ip}</td>
 
-            <td>Last Active</td>
+            <td>
+              <TimeAgo date={rt.lastActive} />
+            </td>
 
-            <td>Details</td>
+            <td>
+              <TimeAgo date={rt.created}>
+                {(formattedDate, timeAgoData) => {
+                  return `Created ${formattedDate}`;
+                }}
+              </TimeAgo>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {refreshTokens.map((rt) => {
-            return (
-              <tr key={rt.id}>
-                <td>{auth.loginRequestId === rt.id ? '🎉' : ' '}</td>
-
-                <td>{rt.userAgent}</td>
-
-                <td>{rt.ip}</td>
-
-                <td>
-                  <TimeAgo date={rt.lastActive} />
-                </td>
-
-                <td>
-                  <TimeAgo date={rt.created}>
-                    {(formattedDate, timeAgoData) => {
-                      return `Created ${formattedDate}`;
-                    }}
-                  </TimeAgo>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+        );
+      })}
     </Table>
   );
 }
