@@ -2,6 +2,14 @@
     schema: public
     name: loginToken
   object_relationships:
+  - name: refreshToken
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: refreshToken
+        column_mapping:
+          id: loginTokenId
   - name: user
     using:
       foreign_key_constraint_on: userId

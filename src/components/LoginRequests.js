@@ -24,19 +24,17 @@ export default function LoginRequests({ loginRequests }) {
             return (
               <tr key={lr.id}>
                 <td>
-                  {lr.approved ? (
-                    '✅'
-                  ) : (
-                    <TimeAgo date={lr.expires}>
-                      {(formattedDate, timeAgoData) => {
-                        if (timeAgoData.isPast) {
-                          return '❌';
-                        }
+                  <TimeAgo date={lr.expires}>
+                    {(formattedDate, timeAgoData) => {
+                      if (timeAgoData.isPast) {
+                        return '❌';
+                      } else if (lr.approved) {
+                        return '✅';
+                      }
 
-                        return `⏳`;
-                      }}
-                    </TimeAgo>
-                  )}
+                      return `⏳`;
+                    }}
+                  </TimeAgo>
                 </td>
 
                 <td>{lr.userAgent}</td>
