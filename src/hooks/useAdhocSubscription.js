@@ -10,7 +10,7 @@ import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 // also allows us to handle errors on the socket and reset client
 export default function useAdhocSubscription(
   query,
-  { variables, anonymous, role = roles.user },
+  { variables, anonymous, role = roles.user, ...options },
 ) {
   const auth = useAuth();
   const [result, set_result] = React.useState(null);
@@ -29,9 +29,11 @@ export default function useAdhocSubscription(
     throw new Error('query is not a subscription');
   }
 
+  const jwtToken = options.jwt || auth.jwt;
+
   React.useEffect(() => {
     const client = buildApolloWebsocketClient({
-      jwtToken: auth.jwt,
+      jwtToken,
       anonymous,
       role,
     });
@@ -56,7 +58,7 @@ export default function useAdhocSubscription(
       subscription.unsubscribe();
       client.link.subscriptionClient.close();
     };
-  }, [auth.jwt]);
+  }, [jwtToken]);
 
   return { ...result };
 }

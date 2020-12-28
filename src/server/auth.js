@@ -82,6 +82,26 @@ function setLoginTokenCookie(res, loginTokenId) {
 
   // store login token to auth cookie
   cookie.set(res, encoded, { expires });
+
+  // generate a jwt to access the specific loginToken
+  const hasuraToken = encodeJwtToken(
+    TokenKinds.login,
+    config.LOGIN_TOKEN_EXPIRES,
+    {
+      hasuraData: {
+        [JwtFields.HasuraAllowedRoles]: [roles.login],
+        [JwtFields.HasuraDefaultRole]: roles.login,
+        // hijack hasura user id header and send loginToken id instead
+        [JwtFields.HasuraUserId]: loginTokenId,
+      },
+      magicData: {
+        [JwtFields.MagicLoginRequest]: loginTokenId,
+      },
+    },
+  );
+
+  // return login hasura token
+  return hasuraToken;
 }
 
 function generateRefreshToken(loginTokenId, user) {

@@ -47,7 +47,7 @@ exports.AUTH_COOKIE = AUTH_COOKIE || '__magic__rtk';
 exports.JWT_COOKIE_EXPIRES = JWT_COOKIE_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
 exports.JWT_REFRESH_TOKEN_EXPIRES = JWT_REFRESH_TOKEN_EXPIRES || 60 * 24 * 365; // expire cookies after 365 days
 exports.JWT_TOKEN_EXPIRES = JWT_TOKEN_EXPIRES || 15; // expire jwt token after 15 min
-exports.LOGIN_TOKEN_EXPIRES = LOGIN_TOKEN_EXPIRES || 60 * 2; // expire login token after 2 hours
+exports.LOGIN_TOKEN_EXPIRES = LOGIN_TOKEN_EXPIRES || 10; // expire login token after 10 minutes
 
 // one day if domain of front end and backend (hasura) match
 // we could set the cookie on the shared TLD and use it for hasura authentication

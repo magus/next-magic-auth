@@ -47,7 +47,8 @@ export default async function login(req, res) {
     ] = upsertLoginTokenWithUserResult.insert_loginToken.returning;
 
     // store loginToken id in cookie
-    auth.setLoginTokenCookie(res, loginTokenId);
+    // returns a jwtToken for requesting the single loginToken request
+    const jwtToken = auth.setLoginTokenCookie(res, loginTokenId);
 
     // calculate phrase for showing on login for confirmation with email
     const phrase = words.getPhraseFromToken(loginToken.secret);
@@ -55,7 +56,7 @@ export default async function login(req, res) {
     return res.status(200).json({
       error: false,
       phrase,
-      id: loginTokenId,
+      jwtToken,
     });
   } catch (e) {
     console.error(e);

@@ -44,9 +44,10 @@ const gqls = {
   `,
 
   watchLoginToken: gql`
-    subscription WatchLoginToken($id: uuid!) {
-      loginToken_by_pk(id: $id) {
+    subscription WatchLoginToken {
+      loginToken {
         approved
+        id
       }
     }
   `,
@@ -109,17 +110,18 @@ export default {
     return refreshTokens;
   },
 
-  watchLoginToken: (id) => {
+  watchLoginToken: (jwtToken) => {
     const result = useAdhocSubscription(gqls.watchLoginToken, {
-      variables: { id },
-      anonymous: true,
+      role: roles.login,
+      jwt: jwtToken.encoded,
     });
 
     let approved = false;
 
-    if (!result.error && result.data && result.data.loginToken_by_pk) {
+    if (!result.error && result.data && result.data.loginToken) {
       // extract approved
-      approved = result.data.loginToken_by_pk.approved;
+      const [loginToken] = result.data.loginToken;
+      approved = loginToken.approved;
     }
 
     return approved;

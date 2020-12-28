@@ -6,12 +6,14 @@
     using:
       foreign_key_constraint_on: userId
   select_permissions:
-  - role: anonymous
+  - role: login
     permission:
       columns:
       - approved
       - id
-      filter: {}
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
       limit: 1
   - role: self
     permission:
