@@ -41,7 +41,7 @@ export default async function loginRefresh(req, res) {
       authCookie,
     );
 
-    return res.status(200).json({ error: false, jwtToken });
+    return res.status(200).json({ error: false, jwtToken, loginRequestId });
   } catch (e) {
     console.error(e);
 

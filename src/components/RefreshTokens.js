@@ -1,10 +1,13 @@
 import * as React from 'react';
 
+import { useAuth } from 'src/components/AuthProvider';
+
 import TimeAgo from 'src/components/TimeAgo';
 import graphql from 'src/client/graphql/queries';
 import styles from 'styles/RefreshTokens.module.css';
 
 export default function RefreshTokens() {
+  const auth = useAuth();
   const refreshTokens = graphql.watchRefreshTokens();
 
   // console.debug({ refreshTokens });
@@ -16,6 +19,8 @@ export default function RefreshTokens() {
         <table>
           <thead>
             <tr>
+              <td></td>
+
               <td>Device</td>
 
               <td>IP</td>
@@ -29,6 +34,8 @@ export default function RefreshTokens() {
             {refreshTokens.map((rt) => {
               return (
                 <tr key={rt.id}>
+                  <td>{auth.loginRequestId === rt.id ? '🎉' : ' '}</td>
+
                   <td>{rt.userAgent}</td>
 
                   <td>{rt.ip}</td>

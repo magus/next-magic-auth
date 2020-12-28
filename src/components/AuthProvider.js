@@ -64,12 +64,13 @@ export function AuthProvider({ children }) {
     };
   }, [state.expires]);
 
-  async function setJWTToken(jwtToken) {
+  async function setAuthentication(json) {
+    const { jwtToken, loginRequestId } = json;
     const jwt = jwtToken.encoded;
     const expires = new Date(jwtToken.expires);
     const expireThreshold = ExpireDurationThreshold * (expires - Date.now());
 
-    set_state({ ...state, jwt, expires, expireThreshold });
+    set_state({ ...state, loginRequestId, jwt, expires, expireThreshold });
     return jwt;
   }
 
@@ -100,7 +101,7 @@ export function AuthProvider({ children }) {
     if (response.status === 200) {
       const json = await response.json();
       if (json.jwtToken) {
-        await setJWTToken(json.jwtToken);
+        await setAuthentication(json);
       }
     }
   }
@@ -117,7 +118,7 @@ export function AuthProvider({ children }) {
       await logout();
       return false;
     } else if (json.jwtToken) {
-      return await setJWTToken(json.jwtToken);
+      return await setAuthentication(json);
     } else if (response.status === 200) {
       // no-op, no cookie no refresh
       return false;

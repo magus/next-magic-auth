@@ -25,7 +25,7 @@ export default async function loginComplete(req, res) {
     // loginToken is approved, write authentication headers
     const jwtToken = await auth.refreshAuthentication(req, res, loginToken);
 
-    return res.status(200).json({ error: false, jwtToken });
+    return res.status(200).json({ error: false, jwtToken, loginRequestId });
   } catch (e) {
     console.error(e);
 

@@ -23,6 +23,10 @@
   white-space: nowrap;
 }
 
+.loginRequestsTable table td:first-child {
+  width: var(--spacer-4);
+}
+
 .refreshTokensTable table tr {
   border-bottom: 1px solid rgba(var(--black), 0.1);
 }
