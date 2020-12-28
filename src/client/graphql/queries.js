@@ -43,7 +43,7 @@ const gqls = {
 
   watchRefreshTokens: gql`
     subscription RefreshTokens {
-      refreshToken(order_by: { created: desc }) {
+      refreshToken(order_by: { lastActive: desc }) {
         id: loginTokenId
         created
         expires
