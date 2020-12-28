@@ -24,7 +24,7 @@ export default function ApolloProviderWrapper({ children }) {
     // for now just invalidate entire tree when auth.jwt is falsy (logged out)
     const key = !auth.jwt ? ++instance.current.key : instance.current.key;
 
-    console.debug('[ApolloProvider]', { key });
+    // console.debug('[ApolloProvider]', { key });
 
     return <ApolloProvider {...{ key, client }}>{children}</ApolloProvider>;
   }, [auth.jwt]);
