@@ -11,12 +11,16 @@ export default function LoginRequests() {
 
   return (
     <div className={styles.loginRequests}>
-      <div className={styles.loginRequestsHeader}>Login Requests</div>
+      <div className={styles.loginRequestsHeader}>Login requests</div>
       <div className={styles.loginRequestsTable}>
         <table>
           <thead>
             <tr>
               <td></td>
+
+              <td>Device</td>
+
+              <td>IP</td>
 
               <td>Details</td>
             </tr>
@@ -40,6 +44,10 @@ export default function LoginRequests() {
                       </TimeAgo>
                     )}
                   </td>
+
+                  <td>{lr.userAgent}</td>
+
+                  <td>{lr.ip}</td>
 
                   <td>
                     <TimeAgo date={lr.expires}>

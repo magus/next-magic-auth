@@ -152,7 +152,11 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
     throw new Error('token expired');
   }
 
-  const requestMetadata = request.parse(req);
+  // metadata for refresh token (user agent, ip, etc.)
+  const refreshMetadata = {
+    ...request.parse(req),
+    lastActive: new Date(),
+  };
 
   let loginTokenId;
 
@@ -174,9 +178,7 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
         userId: serverToken.user.id,
         value: refreshToken.encoded,
         expires: refreshToken.expires,
-
-        // metadata for refresh token (user agent, ip, etc.)
-        ...requestMetadata,
+        ...refreshMetadata,
       },
     });
 
@@ -192,9 +194,7 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
       variables: {
         loginTokenId,
         expires: getExpires(config.JWT_REFRESH_TOKEN_EXPIRES),
-
-        // update metadata for refresh token (user agent, ip, etc.)
-        ...requestMetadata,
+        ...refreshMetadata,
       },
     });
 
@@ -265,6 +265,7 @@ const setRefreshToken = gql`
     $loginTokenId: uuid!
     $value: String!
     $expires: timestamptz!
+    $lastActive: timestamptz!
     $ip: String!
     $userAgent: String!
     $userAgentRaw: String!
@@ -291,6 +292,7 @@ const updateRefreshToken = gql`
   mutation UpdateRefreshToken(
     $loginTokenId: uuid!
     $expires: timestamptz!
+    $lastActive: timestamptz!
     $ip: String!
     $userAgent: String!
     $userAgentRaw: String!
@@ -299,6 +301,7 @@ const updateRefreshToken = gql`
       pk_columns: { loginTokenId: $loginTokenId }
       _set: {
         expires: $expires
+        lastActive: $lastActive
         ip: $ip
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw

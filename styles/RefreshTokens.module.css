@@ -10,7 +10,12 @@
 
 .refreshTokensTable {
   min-width: 320px;
+  overflow-x: auto;
   border: 1px solid rgba(var(--black), 0.1);
+}
+
+.refreshTokensTable table {
+  border-collapse: collapse;
 }
 
 .refreshTokensTable table td {
@@ -18,27 +23,8 @@
   white-space: nowrap;
 }
 
-.refreshTokensTable table td:first-child {
-  width: var(--spacer-4);
-}
-
-.refreshTokensTable table td:nth-child(2) {
-  width: 300px;
-  overflow: hidden;
-}
-
 .refreshTokensTable table tr {
   border-bottom: 1px solid rgba(var(--black), 0.1);
-}
-
-.refreshTokensTable table thead tr {
-  display: block;
-}
-
-.refreshTokensTable table tbody {
-  display:block;
-  overflow: auto;
-  max-height: 300px;
 }
 
 .refreshTokensTable table tbody td {

@@ -11,12 +11,16 @@ export default function RefreshTokens() {
 
   return (
     <div className={styles.refreshTokens}>
-      <div className={styles.refreshTokensHeader}>Sessions</div>
+      <div className={styles.refreshTokensHeader}>Active sessions</div>
       <div className={styles.refreshTokensTable}>
         <table>
           <thead>
             <tr>
-              <td></td>
+              <td>Device</td>
+
+              <td>IP</td>
+
+              <td>Last Active</td>
 
               <td>Details</td>
             </tr>
@@ -25,25 +29,20 @@ export default function RefreshTokens() {
             {refreshTokens.map((rt) => {
               return (
                 <tr key={rt.id}>
-                  <td>✅</td>
+                  <td>{rt.userAgent}</td>
+
+                  <td>{rt.ip}</td>
 
                   <td>
-                    <TimeAgo date={rt.expires}>
-                      {(formattedDate, timeAgoData) => {
-                        if (timeAgoData.isPast) {
-                          return 'Expired';
-                        }
+                    <TimeAgo date={rt.lastActive} />
+                  </td>
 
-                        return `Expires ${formattedDate}`;
-                      }}
-                    </TimeAgo>{' '}
-                    (
+                  <td>
                     <TimeAgo date={rt.created}>
                       {(formattedDate, timeAgoData) => {
                         return `Created ${formattedDate}`;
                       }}
                     </TimeAgo>
-                    )
                   </td>
                 </tr>
               );

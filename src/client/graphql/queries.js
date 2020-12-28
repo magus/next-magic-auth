@@ -35,6 +35,8 @@ const gqls = {
         created
         expires
         approved
+        ip
+        userAgent
       }
     }
   `,
@@ -45,6 +47,9 @@ const gqls = {
         id: loginTokenId
         created
         expires
+        ip
+        lastActive
+        userAgent
       }
     }
   `,

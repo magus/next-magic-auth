@@ -102,9 +102,9 @@ function LoginForm(props) {
       <>
         <h1 className={styles.email}>{me.email}</h1>
 
-        <LoginRequests />
-
         <RefreshTokens />
+
+        <LoginRequests />
 
         <Button className={styles.button} onClick={auth.actions.logout}>
           Logout

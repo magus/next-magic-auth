@@ -10,7 +10,12 @@
 
 .loginRequestsTable {
   min-width: 320px;
+  overflow-x: auto;
   border: 1px solid rgba(var(--black), 0.1);
+}
+
+.loginRequestsTable table {
+  border-collapse: collapse;
 }
 
 .loginRequestsTable table td {
@@ -22,23 +27,8 @@
   width: var(--spacer-4);
 }
 
-.loginRequestsTable table td:nth-child(2) {
-  width: 300px;
-  overflow: hidden;
-}
-
 .loginRequestsTable table tr {
   border-bottom: 1px solid rgba(var(--black), 0.1);
-}
-
-.loginRequestsTable table thead tr {
-  display: block;
-}
-
-.loginRequestsTable table tbody {
-  display:block;
-  overflow: auto;
-  max-height: 300px;
 }
 
 .loginRequestsTable table tbody td {
