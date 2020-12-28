@@ -4,6 +4,7 @@ import Joi from 'joi';
 import graphql from 'src/server/graphql';
 import auth from 'src/server/auth';
 import words from 'src/server/words';
+import request from 'src/server/request';
 
 // schema for validating username and password
 const schema = Joi.object({
@@ -27,6 +28,8 @@ export default async function login(req, res) {
 
     const loginToken = auth.generateLoginToken();
 
+    const requestMetadata = request.parse(req);
+
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
     const upsertLoginTokenWithUserResult = await graphql.query(
@@ -36,6 +39,8 @@ export default async function login(req, res) {
           // user
           email,
 
+          // metadata for login token (user agent, ip, etc.)
+          ...requestMetadata,
           // loginToken contains secret and expires
           ...loginToken,
         },
@@ -72,6 +77,9 @@ const upsertLoginTokenWithUser = gql`
     $email: String!
     $secret: String!
     $expires: timestamptz!
+    $ip: String!
+    $userAgent: String!
+    $userAgentRaw: String!
   ) {
     insert_loginToken(
       objects: {
@@ -79,6 +87,9 @@ const upsertLoginTokenWithUser = gql`
         expires: $expires
         approved: false
         email: $email
+        ip: $ip
+        userAgent: $userAgent
+        userAgentRaw: $userAgentRaw
         user: {
           data: { email: $email }
           on_conflict: { constraint: user_email_key, update_columns: updated }

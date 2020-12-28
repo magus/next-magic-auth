@@ -121,7 +121,9 @@ export default {
     if (!result.error && result.data && result.data.loginToken) {
       // extract approved
       const [loginToken] = result.data.loginToken;
-      approved = loginToken.approved;
+      if (loginToken) {
+        approved = loginToken.approved;
+      }
     }
 
     return approved;

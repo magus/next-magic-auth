@@ -24,6 +24,7 @@
     "react-dom": "17.0.1",
     "react-intl": "^5.10.9",
     "subscriptions-transport-ws": "^0.9.18",
+    "ua-parser-js": "^0.7.23",
     "uuid": "^8.3.2"
   }
 }
