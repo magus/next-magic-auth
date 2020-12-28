@@ -1,42 +1,47 @@
-.loginRequests {
+.container {
   margin: var(--spacer-2) 0;
 }
 
-.loginRequestsHeader {
+.header {
   margin: var(--spacer-3) 0 var(--spacer-1) 0;
-  font-weight: 600;
+  font-weight: 300;
   font-size: var(--font-large);
 }
 
-.loginRequestsTable {
+.table {
   min-width: 320px;
   overflow-x: auto;
   border: 1px solid rgba(var(--black), 0.1);
 }
 
-.loginRequestsTable table {
+.table table {
   border-collapse: collapse;
 }
 
-.loginRequestsTable table td {
+.table table td {
   padding: var(--spacer-1);
   white-space: nowrap;
 }
 
-.loginRequestsTable table td:first-child {
+.table table td:first-child {
   width: var(--spacer-4);
 }
 
-.loginRequestsTable table tr {
+.table table tr {
   border-bottom: 1px solid rgba(var(--black), 0.1);
 }
 
-.loginRequestsTable table tbody td {
+.table table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table table tbody td {
   font-size: var(--font-small);
   font-weight: 200;
   line-height: var(--spacer-3);
 }
 
-.loginRequestsTable table thead td {
-  font-weight: 500;
+.table table thead td {
+  font-weight: 300;
+  font-size: var(--font-small);
 }

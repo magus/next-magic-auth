@@ -105,7 +105,6 @@ export default {
     let loginRequests = [];
 
     if (!result.error && result.data && Array.isArray(result.data.loginToken)) {
-      // extract approved
       loginRequests = result.data.loginToken;
     }
 
@@ -124,7 +123,6 @@ export default {
       result.data &&
       Array.isArray(result.data.refreshToken)
     ) {
-      // extract approved
       refreshTokens = result.data.refreshToken;
     }
 

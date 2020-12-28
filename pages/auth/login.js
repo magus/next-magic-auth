@@ -3,11 +3,11 @@ import { useRouter } from 'next/router';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
-import LoginRequests from 'src/components/LoginRequests';
-import RefreshTokens from 'src/components/RefreshTokens';
+import LoginActivity from 'src/components/LoginActivity';
 import { useAuth } from 'src/components/AuthProvider';
 import { useModal } from 'src/components/Modal';
 import graphql from 'src/client/graphql/queries';
+
 import styles from 'styles/login.module.css';
 
 export default function LoginPage() {
@@ -102,9 +102,7 @@ function LoginForm(props) {
       <>
         <h1 className={styles.email}>{me.email}</h1>
 
-        <RefreshTokens />
-
-        <LoginRequests />
+        <LoginActivity />
 
         <Button className={styles.button} onClick={auth.actions.logout}>
           Logout
