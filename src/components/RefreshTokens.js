@@ -4,6 +4,7 @@ import { useMutation } from '@apollo/client';
 
 import { useAuth } from 'src/components/AuthProvider';
 import Button from 'src/components/Button';
+import Location from 'src/components/Location';
 import Table from 'src/components/Table';
 import TimeAgo from 'src/components/TimeAgo';
 
@@ -17,7 +18,7 @@ export default function RefreshTokens({ loading, refreshTokens }) {
   const header = `Active sessions${
     loading ? '' : ` (${refreshTokens.length})`
   }`;
-  const columns = ['', 'Device', 'IP', 'Last active', 'Details'];
+  const columns = ['', 'Device', 'Location', 'IP', 'Last active', 'Details'];
   const loadingWidths = [0, 200, 100, 100, 200];
 
   // mark session as 'deleting'
@@ -49,10 +50,14 @@ export default function RefreshTokens({ loading, refreshTokens }) {
             </td>
 
             {deletingSessions[rt.id] ? (
-              <td colSpan="4">Logging out session...</td>
+              <td colSpan={`${columns.length - 1}`}>Logging out session...</td>
             ) : (
               <React.Fragment>
                 <td>{rt.userAgent}</td>
+
+                <td>
+                  <Location geo={rt.geo} />
+                </td>
 
                 <td>{rt.ip}</td>
 

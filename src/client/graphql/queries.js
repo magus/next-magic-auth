@@ -45,6 +45,7 @@ const gqls = {
         approved
         ip
         userAgent
+        geo
       }
     }
   `,
@@ -58,6 +59,7 @@ const gqls = {
         ip
         lastActive
         userAgent
+        geo
       }
     }
   `,
