@@ -3,12 +3,10 @@ import uaParser from 'ua-parser-js';
 export default { parse };
 
 function getDeviceDescription(device) {
-  if (device.vendor && device.model) {
-    return `${device.vendor} ${device.model}`;
-  } else if (device.vendor) {
-    return `${device.vendor}`;
-  } else if (device.model) {
+  if (device.model) {
     return `${device.model}`;
+  } else if (device.type === 'mobile') {
+    return 'Mobile';
   } else {
     return 'Desktop';
   }
@@ -22,7 +20,7 @@ function parse(req) {
   const parsedUserAgent = uaParser(userAgentRaw);
   const { device, os, browser } = parsedUserAgent;
   const deviceDescription = getDeviceDescription(device);
-  const commonDescription = `${browser.name} ${browser.major} / ${os.name} ${os.version}`;
+  const commonDescription = `${browser.name} / ${os.name}`;
   const userAgent = `${deviceDescription} (${commonDescription})`;
 
   return {
