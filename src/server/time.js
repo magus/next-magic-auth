@@ -1,5 +1,17 @@
 import { Duration } from 'luxon';
 
+export function convertHRTime(hrtime) {
+  const nanoseconds = hrtime[0] * 1e9 + hrtime[1];
+  const milliseconds = nanoseconds / 1e6;
+  const seconds = nanoseconds / 1e9;
+
+  return {
+    seconds,
+    milliseconds,
+    nanoseconds,
+  };
+}
+
 export function expiresMinutesDuration(expireMinutes) {
   const expireDuration = Duration.fromObject({ minutes: expireMinutes });
   const minutes = parseInt(expireDuration.toFormat('m'), 10);
