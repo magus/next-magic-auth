@@ -27,7 +27,7 @@ export default async function logout(req, res) {
 }
 
 const deleteLoginToken = gql`
-  mutation MyMutation($id: uuid!) {
+  mutation DeleteLoginToken($id: uuid!) {
     delete_loginToken_by_pk(id: $id) {
       id
     }
