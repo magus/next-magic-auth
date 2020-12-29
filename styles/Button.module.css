@@ -19,6 +19,10 @@
   justify-content: center;
 }
 
+.simple {
+  cursor: pointer;
+}
+
 .inlineBlock {
   display: inline-block;
 }
