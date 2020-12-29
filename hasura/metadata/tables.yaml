@@ -35,6 +35,12 @@
       filter:
         userId:
           _eq: X-Hasura-User-Id
+  delete_permissions:
+  - role: self
+    permission:
+      filter:
+        userId:
+          _eq: X-Hasura-User-Id
   event_triggers:
   - name: loginSendEmail
     definition:
