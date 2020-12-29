@@ -14,7 +14,10 @@ export default {
     const { subject, text, html } = options;
 
     const emailConfig = {
-      from: config.EMAIL_FROM,
+      from: {
+        email: config.EMAIL_FROM,
+        name: config.EMAIL_FROMNAME,
+      },
       to,
       subject,
       text,

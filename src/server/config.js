@@ -18,6 +18,7 @@ const {
 
   SENDGRID_API_KEY,
   EMAIL_FROM,
+  EMAIL_FROMNAME,
 } = process.env;
 
 exports.NODE_ENV = NODE_ENV || 'production';
@@ -59,6 +60,7 @@ exports.COOKIE_DOMAIN = COOKIE_DOMAIN;
 exports.SENDGRID_API_KEY = SENDGRID_API_KEY;
 // verified sender on sendgrid
 exports.EMAIL_FROM = EMAIL_FROM || 'magic@iamnoah.com';
+exports.EMAIL_FROMNAME = EMAIL_FROMNAME || 'Magic';
 
 if (process.browser) throw new Error('Do not import config in client code');
 if (!HASURA_ADMIN_SECRET) throw new Error('HASURA_ADMIN_SECRET is not defined');
