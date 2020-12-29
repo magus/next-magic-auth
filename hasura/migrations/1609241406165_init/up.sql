@@ -19,7 +19,8 @@ CREATE TABLE public."loginToken" (
     id uuid DEFAULT public.gen_random_uuid() NOT NULL,
     ip text NOT NULL,
     "userAgent" text NOT NULL,
-    "userAgentRaw" text NOT NULL
+    "userAgentRaw" text NOT NULL,
+    geo jsonb DEFAULT jsonb_build_object() NOT NULL
 );
 CREATE TABLE public."refreshToken" (
     "userId" uuid NOT NULL,
@@ -30,7 +31,8 @@ CREATE TABLE public."refreshToken" (
     "lastActive" timestamp with time zone DEFAULT now() NOT NULL,
     ip text NOT NULL,
     "userAgent" text NOT NULL,
-    "userAgentRaw" text NOT NULL
+    "userAgentRaw" text NOT NULL,
+    geo jsonb DEFAULT jsonb_build_object() NOT NULL
 );
 CREATE TABLE public.role (
     id uuid DEFAULT public.gen_random_uuid() NOT NULL,
