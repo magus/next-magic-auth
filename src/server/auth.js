@@ -269,6 +269,7 @@ const setRefreshToken = gql`
     $ip: String!
     $userAgent: String!
     $userAgentRaw: String!
+    $geo: jsonb!
   ) {
     insert_refreshToken(
       objects: {
@@ -279,6 +280,7 @@ const setRefreshToken = gql`
         ip: $ip
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw
+        geo: $geo
       }
     ) {
       returning {
@@ -296,6 +298,7 @@ const updateRefreshToken = gql`
     $ip: String!
     $userAgent: String!
     $userAgentRaw: String!
+    $geo: jsonb!
   ) {
     update_refreshToken_by_pk(
       pk_columns: { loginTokenId: $loginTokenId }
@@ -305,6 +308,7 @@ const updateRefreshToken = gql`
         ip: $ip
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw
+        geo: $geo
       }
     ) {
       loginTokenId

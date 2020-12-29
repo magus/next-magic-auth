@@ -1,6 +1,10 @@
+import geoip from 'geo-from-ip';
 import uaParser from 'ua-parser-js';
 
-export default { parse };
+export default {
+  getRealIP,
+  parse,
+};
 
 function getDeviceDescription(device) {
   if (device.model) {
@@ -12,9 +16,37 @@ function getDeviceDescription(device) {
   }
 }
 
+function getRealIP(req) {
+  return req.headers['x-real-ip'] || req.connection.remoteAddress;
+}
+
+function getGeoFromIP(ip) {
+  // {
+  //   "code": {
+  //     "state": "CA",
+  //     "country": "US",
+  //     "continent": "NA"
+  //   },
+  //   "city": "San Francisco",
+  //   "state": "California",
+  //   "country": "United States",
+  //   "continent": "North America",
+  //   "postal": "94105",
+  //   "location": {
+  //     "accuracy_radius": 1,
+  //     "latitude": 37.7852,
+  //     "longitude": -122.3874,
+  //     "metro_code": 807,
+  //     "time_zone": "America/Los_Angeles"
+  //   }
+  // }
+  const geo = geoip.allData(ip);
+  return geo;
+}
+
 function parse(req) {
-  const realip = req.headers['x-real-ip'] || req.connection.remoteAddress;
-  const ip = realip === '::1' ? 'localhost' : realip;
+  const ip = getRealIP(req);
+  const geo = getGeoFromIP(ip);
 
   const userAgentRaw = req.headers['user-agent'];
   const parsedUserAgent = uaParser(userAgentRaw);
@@ -27,5 +59,6 @@ function parse(req) {
     ip,
     userAgentRaw,
     userAgent,
+    geo,
   };
 }

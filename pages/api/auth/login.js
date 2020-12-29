@@ -80,6 +80,7 @@ const upsertLoginTokenWithUser = gql`
     $ip: String!
     $userAgent: String!
     $userAgentRaw: String!
+    $geo: jsonb!
   ) {
     insert_loginToken(
       objects: {
@@ -90,6 +91,7 @@ const upsertLoginTokenWithUser = gql`
         ip: $ip
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw
+        geo: $geo
         user: {
           data: { email: $email }
           on_conflict: { constraint: user_email_key, update_columns: updated }
