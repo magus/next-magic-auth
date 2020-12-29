@@ -29,6 +29,7 @@
       - approved
       - created
       - expires
+      - geo
       - id
       - ip
       - userAgent
@@ -87,6 +88,7 @@
       columns:
       - created
       - expires
+      - geo
       - ip
       - lastActive
       - loginTokenId
