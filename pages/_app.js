@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { IntlProvider } from 'react-intl';
 
 import { AuthProvider } from 'src/components/AuthProvider';
+import AuthWatchLoginToken from 'src/components/AuthWatchLoginToken';
 import ApolloProvider from 'src/components/ApolloProvider';
 import { ModalContextProvider } from 'src/components/Modal';
 
@@ -23,6 +24,7 @@ function AuthenticatedApp({ Component, pageProps }) {
   return (
     <AuthProvider>
       <ApolloProvider>
+        <AuthWatchLoginToken />
         <AppContent {...{ Component, pageProps }} />
       </ApolloProvider>
     </AuthProvider>

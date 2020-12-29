@@ -8,10 +8,18 @@ import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
 
 const gqls = {
-  watchLoginToken: gql`
-    subscription WatchLoginToken {
+  watchLoginRequest: gql`
+    subscription WatchLoginRequest {
       loginToken {
         approved
+        id
+      }
+    }
+  `,
+
+  watchLoginToken: gql`
+    subscription WatchLoginToken($loginTokenId: uuid!) {
+      loginToken: loginToken_by_pk(id: $loginTokenId) {
         id
       }
     }
@@ -58,8 +66,8 @@ const gqls = {
 export default {
   query,
 
-  watchLoginToken: (jwtToken) => {
-    const result = useAdhocSubscription(gqls.watchLoginToken, {
+  watchLoginRequest: (jwtToken) => {
+    const result = useAdhocSubscription(gqls.watchLoginRequest, {
       role: roles.login,
       jwt: jwtToken.encoded,
     });
@@ -75,6 +83,21 @@ export default {
     }
 
     return approved;
+  },
+
+  watchLoginToken: (loginTokenId) => {
+    const { loading, ...result } = useAdhocSubscription(gqls.watchLoginToken, {
+      role: roles.self,
+      variables: { loginTokenId },
+    });
+
+    let loginToken = null;
+
+    if (!result.error && result.data && result.data.loginToken) {
+      loginToken = result.data.loginToken;
+    }
+
+    return { loading, loginToken };
   },
 
   me: () => {
