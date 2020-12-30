@@ -1,15 +1,13 @@
 import * as React from 'react';
-import gql from 'graphql-tag';
-import { useMutation } from '@apollo/client';
+import Image from 'next/image';
 
 import { useAuth } from 'src/components/AuthProvider';
-import Button from 'src/components/Button';
+import DeleteSession from 'src/components/DeleteSession';
 import Location from 'src/components/Location';
 import Table from 'src/components/Table';
 import TimeAgo from 'src/components/TimeAgo';
 
-import headers from 'src/shared/headers';
-import roles from 'src/shared/roles';
+import styles from 'styles/RefreshTokens.module.css';
 
 export default function RefreshTokens({ loading, refreshTokens }) {
   const auth = useAuth();
@@ -18,8 +16,8 @@ export default function RefreshTokens({ loading, refreshTokens }) {
   const header = `Active sessions${
     loading ? '' : ` (${refreshTokens.length})`
   }`;
-  const columns = ['', 'Device', 'Location', 'IP', 'Last active', 'Details'];
-  const loadingWidths = [0, 200, 100, 100, 200];
+  const columns = ['', 'Device', 'Location', 'Last activity'];
+  const loadingWidths = [0, 100, 200, 200];
 
   // mark session as 'deleting'
   async function handleDeleteSession(id) {
@@ -33,95 +31,69 @@ export default function RefreshTokens({ loading, refreshTokens }) {
   }
 
   return (
-    <Table {...{ header, columns, loading, loadingWidths }}>
-      {refreshTokens.map((rt) => {
-        return (
-          <tr key={rt.id}>
-            <td>
-              {auth.loginRequestId === rt.id ? (
-                '🎉'
+    <React.Fragment>
+      <Table {...{ header, columns, loading, loadingWidths }}>
+        {refreshTokens.map((rt) => {
+          return (
+            <tr key={rt.id}>
+              <Table.IconColumn>
+                {auth.loginRequestId === rt.id ? (
+                  <div className={Table.styles.flexCenter}>
+                    <Image
+                      layout="fixed"
+                      src="/wand.png"
+                      alt="magic wand"
+                      title="Current session"
+                      width={32}
+                      height={32}
+                    />
+                  </div>
+                ) : (
+                  <DeleteSession
+                    id={rt.id}
+                    onDelete={handleDeleteSession}
+                    onError={handleDeleteSessionError}
+                    buttonTitleDeleting="Logging out session"
+                    buttonTitle="Logout this session"
+                  />
+                )}
+              </Table.IconColumn>
+
+              {deletingSessions[rt.id] ? (
+                <td colSpan={`${columns.length - 1}`}>
+                  Logging out session...
+                </td>
               ) : (
-                <DeleteSession
-                  id={rt.id}
-                  onDelete={handleDeleteSession}
-                  onError={handleDeleteSessionError}
-                />
+                <React.Fragment>
+                  <td>{rt.userAgent}</td>
+
+                  <td>
+                    <Location rowWithGeo={rt} /> ({rt.ip})
+                  </td>
+
+                  <td>
+                    <TimeAgo simpledate date={rt.lastActive} /> (
+                    <TimeAgo date={rt.lastActive} />)
+                  </td>
+                </React.Fragment>
               )}
-            </td>
+            </tr>
+          );
+        })}
+      </Table>
 
-            {deletingSessions[rt.id] ? (
-              <td colSpan={`${columns.length - 1}`}>Logging out session...</td>
-            ) : (
-              <React.Fragment>
-                <td>{rt.userAgent}</td>
-
-                <td>
-                  <Location rowWithGeo={rt} />
-                </td>
-
-                <td>{rt.ip}</td>
-
-                <td>
-                  <TimeAgo date={rt.lastActive} />
-                </td>
-
-                <td>
-                  <TimeAgo date={rt.created}>
-                    {(formattedDate, timeAgoData) => {
-                      return `Created ${formattedDate}`;
-                    }}
-                  </TimeAgo>
-                </td>
-              </React.Fragment>
-            )}
-          </tr>
-        );
-      })}
-    </Table>
+      {/* <div className={styles.legend}>
+        <div className={styles.legendImageSpacer}>
+          <Image
+            layout="fixed"
+            src="/wand.png"
+            alt="magic wand"
+            width={32}
+            height={32}
+          />
+        </div>
+        <span>indicates the current session</span>
+      </div> */}
+    </React.Fragment>
   );
 }
-
-function DeleteSession({ id, onDelete, onError }) {
-  const [deleteSession, { data, loading, error }] = useMutation(
-    deleteLoginToken,
-    {
-      variables: { id },
-      context: {
-        headers: {
-          [headers.role]: roles.self,
-        },
-      },
-    },
-  );
-
-  React.useEffect(() => {
-    if (error) {
-      onError(id);
-    }
-  }, [error]);
-
-  async function handleDeleteSession() {
-    onDelete(id);
-    deleteSession();
-    // // simulate error
-    // setTimeout(() => {
-    //   onError(id);
-    // }, 2000);
-  }
-
-  const title = loading ? 'Logout this session' : 'Logging out session';
-
-  return (
-    <Button simple title={title} onClick={handleDeleteSession}>
-      {loading ? '⏳' : '❌'}
-    </Button>
-  );
-}
-
-const deleteLoginToken = gql`
-  mutation DeleteLoginToken($id: uuid!) {
-    delete_loginToken_by_pk(id: $id) {
-      id
-    }
-  }
-`;

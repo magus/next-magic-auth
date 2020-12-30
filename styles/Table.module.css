@@ -1,11 +1,11 @@
 .container {
   --data-font-size: var(--font-small);
 
-  margin: var(--spacer-2) 0;
+  margin: var(--spacer-4) 0 var(--spacer-2) 0;
 }
 
 .header {
-  margin: var(--spacer-3) 0 var(--spacer-1) 0;
+  margin: var(--spacer-6) 0 var(--spacer-3) 0;
   font-weight: 300;
   font-size: var(--font-large);
 }
@@ -24,20 +24,25 @@
 .table table td {
   font-size: var(--data-font-size);
   padding: var(--spacer-1);
-  white-space: nowrap;
+  white-space: pre;
 }
 
 .table table tbody td {
   font-weight: 200;
-  line-height: var(--spacer-3);
+  line-height: var(--spacer-4);
 }
 
 .table table thead td {
   font-weight: 300;
 }
 
-.table table td:first-child {
+.table table td.tableIconColumn {
   width: var(--spacer-4);
+  height: var(--spacer-4);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .table table tr {
@@ -52,4 +57,10 @@
   width: 80%;
   height: var(--data-font-size);
   background: rgba(var(--black), 0.15);
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

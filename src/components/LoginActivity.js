@@ -26,7 +26,7 @@ export default function LoginActivity() {
       {},
     );
 
-    // filter out login requests that are refresh tokens
+    // filter out login requests that have refresh tokens
     // use activeSessionLookup to ensure we only filter when it is shown as an active session
     loginRequests = watchLoginRequests.loginRequests.filter((lr) => {
       if (activeSessionLookup[lr.id]) {

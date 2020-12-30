@@ -37,7 +37,7 @@ export default function Table({
                         colLoadingWidth !== 0
                       ) {
                         return (
-                          <Table.LoadingTD
+                          <Table.LoadingColumn
                             key={i}
                             width={px(colLoadingWidth)}
                           />
@@ -59,7 +59,13 @@ export default function Table({
   );
 }
 
-Table.LoadingTD = function LoadingTD({ children, width }) {
+Table.styles = styles;
+
+Table.IconColumn = function TableIconColumn({ children }) {
+  return <td className={styles.tableIconColumn}>{children}</td>;
+};
+
+Table.LoadingColumn = function TableLoadingColumn({ children, width }) {
   return (
     <td className={styles['loading-td']}>
       <div style={{ width }} />

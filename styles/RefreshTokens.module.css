@@ -1,0 +1,11 @@
+.legend {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: 100;
+  font-size: var(--font-small);
+}
+
+.legendImageSpacer {
+  margin: 0 var(--spacer-1) 0 0;
+}
