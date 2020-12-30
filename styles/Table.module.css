@@ -1,5 +1,7 @@
 .container {
   --data-font-size: var(--font-small);
+  --data-line-height: var(--spacer-4);
+  --cell-height: var(--spacer-6);
 
   margin: var(--spacer-4) 0 var(--spacer-2) 0;
 }
@@ -28,6 +30,7 @@
 }
 
 .table table tbody td {
+  height: var(--cell-height);
   font-weight: 200;
   line-height: var(--spacer-4);
 }
@@ -37,8 +40,6 @@
 }
 
 .table table td.tableIconColumn {
-  width: var(--spacer-4);
-  height: var(--spacer-4);
   text-align: center;
   display: flex;
   justify-content: center;
@@ -52,6 +53,7 @@
 .table table tbody tr:last-child {
   border-bottom: none;
 }
+
 
 .loading-td div {
   width: 80%;
