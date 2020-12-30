@@ -22,6 +22,7 @@ const ExpireTimerFrequencyMs = 5 * 1000;
 const ExpireDurationThreshold = 0.25;
 
 export function AuthProvider({ children }) {
+  const instance = React.useRef({ pendingRefresh: null });
   const [state, set_state] = React.useState(LoggedOutState);
 
   React.useEffect(() => {
@@ -110,24 +111,42 @@ export function AuthProvider({ children }) {
     // skip on server
     if (!process.browser) return;
 
-    const response = await fetch('/api/auth/refresh', { method: 'POST' });
+    if (instance.current.pendingRefresh) {
+      const capturedPendingRefresh = instance.current.pendingRefresh;
+      return await capturedPendingRefresh;
+    }
 
-    const json = await response.json();
+    async function handleRefreshTokens() {
+      const response = await fetch('/api/auth/refresh', { method: 'POST' });
 
-    if (json.error) {
-      await logout();
-      return false;
-    } else if (json.jwtToken) {
-      return await setAuthentication(json);
-    } else if (response.status === 200) {
-      // no-op, no cookie no refresh
+      const json = await response.json();
+
+      if (json.error) {
+        await logout();
+        return false;
+      } else if (json.jwtToken) {
+        return await setAuthentication(json);
+      } else if (response.status === 200) {
+        // no-op, no cookie no refresh
+        return false;
+      }
+
+      console.error('[AuthProvider]', 'unrecognized refresh response', {
+        response,
+      });
       return false;
     }
 
-    console.error('[AuthProvider]', 'unrecognized refresh response', {
-      response,
-    });
-    return false;
+    // set shared pendingRefresh
+    instance.current.pendingRefresh = handleRefreshTokens();
+
+    // wait shared pending refresh
+    const result = await instance.current.pendingRefresh;
+
+    // reset pendingRefresh back to null
+    instance.current.pendingRefresh = null;
+
+    return result;
   }
 
   const value = {

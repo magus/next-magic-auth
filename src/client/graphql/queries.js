@@ -88,7 +88,7 @@ export default {
   },
 
   watchLoginToken: (loginTokenId) => {
-    const { loading, ...result } = useAdhocSubscription(gqls.watchLoginToken, {
+    const result = useAdhocSubscription(gqls.watchLoginToken, {
       role: roles.self,
       variables: { loginTokenId },
     });
@@ -99,7 +99,7 @@ export default {
       loginToken = result.data.loginToken;
     }
 
-    return { loading, loginToken };
+    return { ...result, loginToken };
   },
 
   me: () => {

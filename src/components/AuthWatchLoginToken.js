@@ -4,18 +4,19 @@ import { useAuth } from 'src/components/AuthProvider';
 import graphql from 'src/client/graphql/queries';
 
 function WatchLoginToken({ loginTokenId, handleLogout }) {
-  const {
-    loading: watchLoginTokenLoading,
-    loginToken,
-  } = graphql.watchLoginToken(loginTokenId);
+  const { loginToken, ...result } = graphql.watchLoginToken(loginTokenId);
 
   React.useEffect(async () => {
-    if (!watchLoginTokenLoading && !loginToken) {
-      // loginToken is missing, logout
-      console.debug('[AuthProvider]', 'loginToken missing', 'logout');
+    if (!result.loading && !result.error && !loginToken) {
+      // loginToken is missing, logout immediately
+      console.debug(
+        '[AuthProvider]',
+        'no error and loginToken missing',
+        'logout',
+      );
       await handleLogout();
     }
-  }, [watchLoginTokenLoading, loginToken]);
+  }, [result.loading, loginToken]);
 
   return null;
 }

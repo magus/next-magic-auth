@@ -52,11 +52,15 @@ export default function useAdhocSubscription(
         if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
           // refresh token and cause rebuild client (auth.jwt)
           console.debug('[AdhocSubscription]', 'auth.actions.refreshTokens');
-          await auth.actions.refreshTokens();
-        }
+          const refreshTokenResult = await auth.actions.refreshTokens();
 
-        // otherwise set error and continue
-        set_error({ error });
+          if (!refreshTokenResult) {
+            console.error('[AdhocSubscription]', 'refreshTokens failure');
+          }
+        } else {
+          // otherwise set error and continue
+          set_error({ error });
+        }
       },
     );
 
