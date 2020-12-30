@@ -17,7 +17,7 @@ export default function LoginPage() {
   const auth = useAuth();
   const { email } = router.query;
 
-  console.debug('[LoginPage]', { auth });
+  // console.debug('[LoginPage]', { auth });
 
   return (
     <Page className={styles.container}>
