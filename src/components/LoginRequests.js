@@ -23,6 +23,10 @@ export default function LoginRequests({ loading, loginRequests }) {
     set_deletingSessions(new_deletingSessions);
   }
 
+  if (loginRequests.length === 0) {
+    return null;
+  }
+
   return (
     <Table {...{ header, columns, loading, loadingWidths }}>
       {loginRequests.map((lr) => {
