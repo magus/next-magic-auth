@@ -14,12 +14,15 @@ LoginPage.requireAuth = true;
 
 export default function LoginPage() {
   const router = useRouter();
+  const auth = useAuth();
   const { email } = router.query;
+
+  console.debug('[LoginPage]', { auth });
 
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        <LoginForm {...{ email }} />
+        {auth.init ? <LoginForm {...{ email }} /> : null}
       </div>
     </Page>
   );
@@ -99,10 +102,10 @@ function LoginForm(props) {
 
   const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
 
-  if (auth.isLoggedIn && me) {
+  if (auth.isLoggedIn) {
     return (
       <>
-        <h1 className={styles.email}>{me.email}</h1>
+        {!me ? null : <h1 className={styles.email}>{me.email}</h1>}
 
         <LoginActivity />
 
