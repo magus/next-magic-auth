@@ -1,12 +1,16 @@
-export default function Location({ geo }) {
-  if (geo.error) {
-    return 'Unknown';
-  } else if (geo.city && geo.state && geo.country) {
-    return `${geo.city} (${geo.state}, ${geo.country})`;
-  } else if (geo.city && geo.country) {
-    return `${geo.city} (${geo.country})`;
-  } else if (geo.country) {
-    return geo.country;
+export default function Location({ rowWithGeo }) {
+  if (rowWithGeo) {
+    const { geoCity, geoState, geoCountry, geoCountryFull } = rowWithGeo;
+
+    if (geoCity && geoState && geoCountry) {
+      return `${geoCity} (${geoState}, ${geoCountry})`;
+    } else if (geoCity && geoCountry) {
+      return `${geoCity} (${geoCountry})`;
+    } else if (geoState && geoCountry) {
+      return `${geoState} (${geoCountry})`;
+    } else if (geoCountryFull) {
+      return geoCountryFull;
+    }
   }
 
   return 'Unknown';

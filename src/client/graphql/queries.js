@@ -45,7 +45,10 @@ const gqls = {
         approved
         ip
         userAgent
-        geo
+        geoCity: geo(path: "city")
+        geoState: geo(path: "code.state")
+        geoCountry: geo(path: "code.country")
+        geoCountryFull: geo(path: "country")
       }
     }
   `,
@@ -59,7 +62,10 @@ const gqls = {
         ip
         lastActive
         userAgent
-        geo
+        geoCity: geo(path: "city")
+        geoState: geo(path: "code.state")
+        geoCountry: geo(path: "code.country")
+        geoCountryFull: geo(path: "country")
       }
     }
   `,

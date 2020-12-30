@@ -56,7 +56,7 @@ export default function RefreshTokens({ loading, refreshTokens }) {
                 <td>{rt.userAgent}</td>
 
                 <td>
-                  <Location geo={rt.geo} />
+                  <Location rowWithGeo={rt} />
                 </td>
 
                 <td>{rt.ip}</td>
