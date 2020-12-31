@@ -87,7 +87,7 @@ export default async function loginSendEmail(req, res) {
     });
 
     const emailResponse = await serverEmail.send(email, {
-      subject: 'Login with Magic',
+      subject: `Magic login confirmation (${phrase})`,
       html: emailHtml,
     });
 
