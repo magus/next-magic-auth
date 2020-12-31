@@ -40,10 +40,8 @@
 }
 
 .table table td.tableIconColumn {
+  width: var(--spacer-6);
   text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .table table tr {
