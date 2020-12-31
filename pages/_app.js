@@ -13,43 +13,41 @@ export default function MyApp({ Component, pageProps }) {
   // console.debug({ Component, pageProps });
   // console.debug('Component.requireAuth', Component.requireAuth);
 
-  if (Component.requireAuth) {
-    return <AuthenticatedApp {...{ Component, pageProps }} />;
-  }
-
-  return <LoggedOutApp {...{ Component, pageProps }} />;
-}
-
-function AuthenticatedApp({ Component, pageProps }) {
   return (
-    <AuthProvider>
-      <ApolloProvider>
-        <AuthWatchLoginToken />
-        <AppContent {...{ Component, pageProps }} />
-      </ApolloProvider>
-    </AuthProvider>
+    <ModalContextProvider>
+      <AuthenticatedApp {...{ Component, pageProps }} />
+    </ModalContextProvider>
   );
 }
 
-function LoggedOutApp({ Component, pageProps }) {
+function AuthenticatedApp({ Component, pageProps }) {
+  if (Component.requireAuth) {
+    return (
+      <AuthProvider>
+        <ApolloProvider>
+          <AuthWatchLoginToken />
+          <AppContent {...{ Component, pageProps }} />
+        </ApolloProvider>
+      </AuthProvider>
+    );
+  }
+
   return <AppContent {...{ Component, pageProps }} />;
 }
 
 function AppContent({ Component, pageProps }) {
   return (
     <IntlProvider locale="en" defaultLocale="en">
-      <ModalContextProvider>
-        <Head>
-          <title>Magic</title>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-            key="viewport"
-          />
-        </Head>
+      <Head>
+        <title>Magic</title>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+          key="viewport"
+        />
+      </Head>
 
-        <Component {...pageProps} />
-      </ModalContextProvider>
+      <Component {...pageProps} />
     </IntlProvider>
   );
 }
