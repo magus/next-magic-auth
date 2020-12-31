@@ -7,8 +7,10 @@ import cookie from './cookie';
 import graphql from './graphql';
 import random from './random';
 import request from './request';
+import words from './words';
 
 import roles from 'src/shared/roles';
+import { Token } from 'graphql';
 
 const JwtFields = {
   HasuraNamespace: 'https://hasura.io/jwt/claims',
@@ -66,7 +68,7 @@ function generateLoginToken() {
   return { secret, expires };
 }
 
-function setLoginTokenCookie(res, loginTokenId) {
+function setupLoginRequest(res, loginTokenId, loginTokenSecret) {
   // loginTokenId will be written inside cookie
   // requesting client will send in /api/auth/complete
 
@@ -85,7 +87,7 @@ function setLoginTokenCookie(res, loginTokenId) {
   cookie.set(res, encoded, { expires });
 
   // generate a jwt to access the specific loginToken
-  const hasuraToken = encodeJwtToken(
+  const jwtToken = encodeJwtToken(
     TokenKinds.login,
     config.LOGIN_TOKEN_EXPIRES,
     {
@@ -101,8 +103,11 @@ function setLoginTokenCookie(res, loginTokenId) {
     },
   );
 
-  // return login hasura token
-  return hasuraToken;
+  // calculate phrase for showing on login for confirmation with email
+  const phrase = words.getPhraseFromToken(loginTokenSecret);
+
+  // return login hasura token and phrase
+  return { jwtToken, phrase };
 }
 
 function generateRefreshToken(loginTokenId, user) {
@@ -211,6 +216,41 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
   return generateHasuraToken(loginTokenId, serverToken.user);
 }
 
+async function restoreLoginRequest(req, res, loginRequestId) {
+  const kind = getJwtField(getAuthCookie(req), JwtFields.MagicTokenKind);
+
+  if (kind === TokenKinds.login) {
+    const { loginToken } = await graphql.query(getLoginToken, {
+      variables: {
+        id: loginRequestId,
+      },
+    });
+
+    // verify login token is not expired
+    if (Date.now() > new Date(loginToken.expires).getTime()) {
+      // e.g. /auth/timeout
+      throw new Error('login token expired');
+    }
+
+    // if loginToken is approved, signal client to complete
+    if (loginToken.approved) {
+      return { approved: true };
+    }
+
+    // return loginRequest to restore on client
+    // will open check email modal and listen for login token changes
+    const loginRequest = setupLoginRequest(
+      res,
+      loginToken.id,
+      loginToken.secret,
+    );
+
+    return loginRequest;
+  }
+
+  return false;
+}
+
 function decodeJwtClaims(jwtToken) {
   if (!jwtToken) {
     return {};
@@ -235,9 +275,11 @@ export default {
   clearCookies: cookie.clear,
 
   generateLoginToken,
-  setLoginTokenCookie,
+  setupLoginRequest,
 
   refreshAuthentication,
+
+  restoreLoginRequest,
 
   getAuthCookie,
 
@@ -312,6 +354,36 @@ const updateRefreshToken = gql`
       }
     ) {
       loginTokenId
+    }
+  }
+`;
+
+const UserForLoginFragment = gql`
+  fragment UserForLoginFragment on user {
+    id
+    email
+    defaultRole
+    roles {
+      role {
+        name
+        id
+      }
+    }
+  }
+`;
+
+const getLoginToken = gql`
+  ${UserForLoginFragment}
+
+  query GetLoginToken($id: uuid!) {
+    loginToken: loginToken_by_pk(id: $id) {
+      id
+      approved
+      expires
+      secret
+      user {
+        ...UserForLoginFragment
+      }
     }
   }
 `;

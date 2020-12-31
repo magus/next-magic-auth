@@ -3,7 +3,6 @@ import Joi from 'joi';
 
 import graphql from 'src/server/graphql';
 import auth from 'src/server/auth';
-import words from 'src/server/words';
 import request from 'src/server/request';
 
 // schema for validating username and password
@@ -53,10 +52,12 @@ export default async function login(req, res) {
 
     // store loginToken id in cookie
     // returns a jwtToken for requesting the single loginToken request
-    const jwtToken = auth.setLoginTokenCookie(res, loginTokenId);
-
-    // calculate phrase for showing on login for confirmation with email
-    const phrase = words.getPhraseFromToken(loginToken.secret);
+    // returns phrase for check email modal
+    const { jwtToken, phrase } = auth.setupLoginRequest(
+      res,
+      loginTokenId,
+      loginToken.secret,
+    );
 
     return res.status(200).json({
       error: false,

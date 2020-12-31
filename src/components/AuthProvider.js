@@ -1,6 +1,8 @@
 import * as React from 'react';
 
+import { useModal } from 'src/components/Modal';
 import usePageVisibility from 'src/hooks/usePageVisibility';
+import CheckEmailModal from 'src/components/CheckEmailModal';
 
 const DefaultAuthContext = null;
 const AuthContext = React.createContext(DefaultAuthContext);
@@ -27,6 +29,7 @@ export function AuthProvider({ children }) {
   const instance = React.useRef({
     pendingRefresh: null,
   });
+  const modal = useModal();
   const [state, set_state] = React.useState(LoggedOutState);
   const [init, set_init] = React.useState(false);
 
@@ -110,10 +113,13 @@ export function AuthProvider({ children }) {
 
     if (response.status === 200) {
       const json = await response.json();
-      return json;
+      if (json) {
+        modal.open(CheckEmailModal, {
+          props: json,
+          disableBackgroundDismiss: true,
+        });
+      }
     }
-
-    return null;
   }
 
   async function completeLogin() {
@@ -144,6 +150,15 @@ export function AuthProvider({ children }) {
 
       if (json.error) {
         await logout();
+        return false;
+      } else if (json.loginRequestApproved) {
+        await completeLogin();
+        return false;
+      } else if (json.loginRequest) {
+        modal.open(CheckEmailModal, {
+          props: json.loginRequest,
+          disableBackgroundDismiss: true,
+        });
         return false;
       } else if (json.jwtToken) {
         return await setAuthentication(json);

@@ -7,7 +7,8 @@ export default async function loginRefresh(req, res) {
   try {
     const authCookie = auth.getAuthCookie(req);
 
-    // no auth cookie, return 200 with no jwtToken
+    // no auth cookie, valid logged out case
+    // return 200 with no jwtToken
     if (!authCookie) {
       return res.status(200).json({ error: false });
     }
@@ -15,7 +16,27 @@ export default async function loginRefresh(req, res) {
     const loginRequestId = auth.getLoginRequest(req);
 
     if (!loginRequestId) {
-      throw new Error('missing login request');
+      throw new Error('missing login request id');
+    }
+
+    // token kind is not refresh, valid logging-in case
+    // return 200 with state to restore check email modal login request listener
+    const loginRequest = await auth.restoreLoginRequest(
+      req,
+      res,
+      loginRequestId,
+    );
+    if (loginRequest) {
+      // if loginToken is approved, signal client to complete
+      if (loginRequest.approved) {
+        return res
+          .status(200)
+          .json({ error: false, loginRequestApproved: true });
+      }
+
+      // return loginRequest to restore on client
+      // will open check email modal and listen for login token changes
+      return res.status(200).json({ error: false, loginRequest });
     }
 
     // lookup refresh token in backend to compare against authCookie

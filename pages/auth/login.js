@@ -28,40 +28,6 @@ export default function LoginPage() {
   );
 }
 
-function CheckEmailModal({ dismiss, jwtToken, phrase }) {
-  const auth = useAuth();
-  const [getMe, me] = graphql.me();
-  const approved = graphql.watchLoginRequest(jwtToken);
-
-  React.useEffect(async () => {
-    if (approved) {
-      await auth.actions.completeLogin();
-    }
-  }, [approved]);
-
-  React.useEffect(() => {
-    if (auth.isLoggedIn) {
-      getMe();
-    }
-  }, [auth.isLoggedIn]);
-
-  React.useEffect(() => {
-    if (me) {
-      dismiss();
-    }
-  }, [me]);
-
-  return (
-    <div className={styles.checkEmailModal}>
-      <div className={styles.checkEmailModalKeepThisTab}>
-        Keep this tab open
-      </div>
-      <div>Use your phone to click the magic words in your email</div>
-      <Button className={styles.magicWords}>{phrase}</Button>
-    </div>
-  );
-}
-
 function LoginForm(props) {
   const auth = useAuth();
   const modal = useModal();
@@ -87,13 +53,7 @@ function LoginForm(props) {
     const email = elements.email.value;
 
     // make the login API call
-    const json = await auth.actions.login(email);
-    if (json) {
-      modal.open(CheckEmailModal, {
-        props: json,
-        disableBackgroundDismiss: true,
-      });
-    }
+    await auth.actions.login(email);
   }
 
   async function handleEmailInput(event) {
