@@ -23,12 +23,18 @@ const ExpireDurationThreshold = 0.25;
 
 export function AuthProvider({ children }) {
   const instance = React.useRef({
-    init: false,
     pendingRefresh: null,
   });
   const [state, set_state] = React.useState(LoggedOutState);
+  const [init, set_init] = React.useState(false);
 
-  // console.debug('[AuthProvider]', { state });
+  console.debug('[AuthProvider]', { init, state });
+
+  // init with a refresh
+  React.useEffect(async () => {
+    const success = await refreshTokens();
+    set_init(true);
+  }, []);
 
   React.useEffect(() => {
     let timeoutId;
@@ -155,9 +161,10 @@ export function AuthProvider({ children }) {
   }
 
   const isLoggedIn = !!state.jwt;
+
   const value = {
     ...state,
-    init: isLoggedIn || instance.current.init,
+    init: init || !!state.jwt,
     isLoggedIn,
     actions: {
       logout,
@@ -166,12 +173,6 @@ export function AuthProvider({ children }) {
       refreshTokens,
     },
   };
-
-  // init with a refresh
-  React.useEffect(async () => {
-    await refreshTokens();
-    instance.current.init = true;
-  }, []);
 
   return <AuthContext.Provider {...{ value }}>{children}</AuthContext.Provider>;
 }
