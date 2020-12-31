@@ -8,7 +8,7 @@
     "dev": "next dev",
     "deploy": "now",
     "deploy:prod": "now --prod",
-    "deploy:purge": "now rm dcsseeds --safe",
+    "deploy:purge": "now rm magic --safe",
     "server:purge": "now rm magic --safe"
   },
   "dependencies": {
