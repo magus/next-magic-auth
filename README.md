@@ -93,6 +93,19 @@ https://magicwords.vercel.app/
   dokku config:set --no-restart hasura DOKKU_LETSENCRYPT_EMAIL=letsencrypt@iamnoah.com
   # setup letsencrypt with hasura
   dokku letsencrypt hasura
+  # setup automatic certificate renewal (daily)
+  dokku letsencrypt:cron-job --add
+
+  # you can setup a MAILTO to ensure errors are emailed to you
+  # use a text editor to open the cron job
+  sudo -u dokku vim /var/lib/dokku/plugins/available/letsencrypt/cron-job
+  # add `MAILTO=your@email.tld` on the line above the PATH
+  #
+  # e.g.
+  #   MAILTO="magic-dokku-letsencrypt@iamnoah.com"
+  #   PATH=$PATH:/usr/local/bin
+  #   dokku letsencrypt:auto-renew &>> /var/log/dokku/letsencrypt.log
+
   ```
 
 - You should now be able to visit the Hasura admin console by navigating to the domain you setup above
@@ -131,4 +144,28 @@ You can use the migration under `hasura/migrations` to jump start your database 
 
 ```sh
 hasura migrate apply --endpoint https://magic.iamnoah.com
+```
+
+### remote ssh tricks
+
+Analyze disk usage
+
+```sh
+sudo apt-get install ncdu
+sudo ncdu /
+```
+
+### sql
+
+View all databases
+
+```sql
+SELECT datname FROM pg_database
+WHERE datistemplate = false;
+```
+
+View size of database in human friendly bytes
+
+```sql
+SELECT pg_size_pretty(pg_database_size('hasura_db'))
 ```
