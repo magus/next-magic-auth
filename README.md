@@ -1,6 +1,8 @@
 
 # next-magic-auth
 
+magic authentication with just your email, no third parties required
+
 # demo
 
 https://magicwords.vercel.app/
