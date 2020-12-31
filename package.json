@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "server:purge": "now rm magic --safe",
     "build": "next build",
     "start": "next start",
-    "dev": "next dev"
+    "dev": "next dev",
+    "deploy": "now",
+    "deploy:prod": "now --prod",
+    "deploy:purge": "now rm dcsseeds --safe",
+    "server:purge": "now rm magic --safe"
   },
   "dependencies": {
     "@apollo/client": "^3.3.6",
