@@ -2,6 +2,11 @@
 // so 4 characters of 64-bit values = 256 bits, enough to index into both word lists
 const charsPerWord = 4;
 
+function capitalize(word) {
+  const [firstChar, ...restChars] = word;
+  return `${firstChar.toUpperCase()}${restChars.join('')}`;
+}
+
 // convert base64 to decimal value of bits
 // then use decimal value to index into wordList for word
 // e.g. 'tE' = 46 + 5 = 51
@@ -10,8 +15,7 @@ function getWordFrom(base64String, wordList) {
     .split('')
     .reduce((sum, c) => sum + base64Chars[c], 0);
   const word = wordList[base64Bits % wordList.length];
-
-  return word;
+  return capitalize(word);
 }
 
 exports.getPhraseFromToken = function getPhraseFromToken(token) {
