@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
   const [state, set_state] = React.useState(LoggedOutState);
   const [init, set_init] = React.useState(false);
 
-  console.debug('[AuthProvider]', { init, state });
+  // console.debug('[AuthProvider]', { init, state });
 
   // init with a refresh
   React.useEffect(async () => {
