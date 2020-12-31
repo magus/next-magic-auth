@@ -44,47 +44,64 @@ export function AuthProvider({ children }) {
   // init with a page visiblity listener
   usePageVisibility(async (isVisible) => {
     if (isVisible) {
-      await refreshTokens();
+      const timeUntilThreshold = timeUntilExpireThresholdMs();
+      // console.debug('[AuthProvider]', 'usePageVisibility', {
+      //   timeUntilThreshold,
+      // });
+      if (typeof timeUntilThreshold === 'number' && timeUntilThreshold <= 0) {
+        // refresh needed
+        await refreshTokens();
+      }
     }
   });
 
+  function timeUntilExpireThresholdMs() {
+    if (state.expires instanceof Date) {
+      const timeLeftMs = state.expires.getTime() - Date.now();
+      // calculate time in ms until threshold
+      const timeUntilThreshold = timeLeftMs - state.expireThreshold;
+      return timeUntilThreshold;
+    }
+
+    return null;
+  }
+
   // track expires time to refresh jwt as needed
   React.useEffect(() => {
+    // do nothing if expires is not a date
+    if (!(state.expires instanceof Date)) {
+      // console.debug('[AuthProvider]', 'checkExpires', 'skip');
+      return;
+    }
+
     let timeoutId;
 
     async function checkExpires() {
-      const { expires, expireThreshold } = state;
+      // calculate time in ms until threshold
+      const timeUntilThreshold = timeUntilExpireThresholdMs();
 
-      if (expires instanceof Date) {
-        const timeLeftMs = expires.getTime() - Date.now();
-
-        // refresh token if within expireThreshold
-        if (timeLeftMs < expireThreshold) {
-          await refreshTokens();
-        }
-
-        // calculate time in ms until threshold
-        const timeUntilThreshold = timeLeftMs - expireThreshold;
-        // wait until threshold or ping at default frequency
-        const nextTimeoutMs =
-          timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
-
-        // console.debug({
-        //   timeLeftMs,
-        //   expireThreshold,
-        //   timeUntilThreshold,
-        //   nextTimeoutMs,
-        // });
-
-        // call again near expire threshold
-        timeoutId = setTimeout(checkExpires, nextTimeoutMs);
+      // refresh token if within expireThreshold
+      if (timeUntilThreshold <= 0) {
+        await refreshTokens();
       }
+      // wait until threshold or ping at default frequency
+      const nextTimeoutMs =
+        timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
+
+      // console.debug('[AuthProvider]', 'checkExpires', {
+      //   timeUntilThreshold,
+      //   nextTimeoutMs,
+      // });
+
+      // call again near expire threshold
+      timeoutId = setTimeout(checkExpires, nextTimeoutMs);
     }
 
     // start checking expires
-    checkExpires();
+    timeoutId = setTimeout(checkExpires, ExpireTimerFrequencyMs);
 
     return function cleanup() {
+      // console.debug('checkExpires', 'cleanup');
       clearTimeout(timeoutId);
     };
   }, [state.expires]);
