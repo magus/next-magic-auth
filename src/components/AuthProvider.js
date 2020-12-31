@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import usePageVisibility from 'src/hooks/usePageVisibility';
+
 const DefaultAuthContext = null;
 const AuthContext = React.createContext(DefaultAuthContext);
 
@@ -36,6 +38,14 @@ export function AuthProvider({ children }) {
     set_init(true);
   }, []);
 
+  // init with a page visiblity listener
+  usePageVisibility(async (isVisible) => {
+    if (isVisible) {
+      await refreshTokens();
+    }
+  });
+
+  // track expires time to refresh jwt as needed
   React.useEffect(() => {
     let timeoutId;
 
