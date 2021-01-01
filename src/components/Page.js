@@ -20,23 +20,23 @@ export default function Page({
 
   const windowHeight = useWindowHeight();
 
+  const containerStyle = {};
   const containerClassNames = [styles.container];
 
   if (className) {
     containerClassNames.push(className);
   }
 
-  const style = {};
-
   if (forceWindowHeight) {
-    style.height = windowHeight;
+    containerClassNames.push(styles.forceWindowHeight);
+    containerStyle.height = windowHeight;
   }
 
   return (
     <div
       className={containerClassNames.join(' ')}
       ref={pageRef}
-      {...{ style }}
+      {...{ style: containerStyle }}
       {...restProps}
     >
       {children}

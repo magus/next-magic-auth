@@ -9,6 +9,8 @@ import { useModal } from 'src/components/Modal';
 import graphql from 'src/client/graphql/queries';
 
 import styles from 'styles/login.module.css';
+import { FormattedNumberParts } from 'react-intl';
+import loadCustomRoutes from 'next/dist/lib/load-custom-routes';
 
 LoginPage.requireAuth = true;
 
@@ -65,7 +67,7 @@ function LoginForm(props) {
   if (auth.isLoggedIn) {
     return (
       <>
-        {!me ? null : <h1 className={styles.email}>{me.email}</h1>}
+        <h1 className={styles.email}>{!me ? <span>&lrm;</span> : me.email}</h1>
 
         <LoginActivity />
 

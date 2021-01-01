@@ -5,41 +5,55 @@ import { IntlProvider } from 'react-intl';
 import { AuthProvider } from 'src/components/AuthProvider';
 import AuthWatchLoginToken from 'src/components/AuthWatchLoginToken';
 import ApolloProvider from 'src/components/ApolloProvider';
-import { ModalContextProvider } from 'src/components/Modal';
+import { ModalContainer, ModalContextProvider } from 'src/components/Modal';
+import Page from 'src/components/Page';
+import LoginGate from 'src/components/LoginGate';
+import { useAuth } from 'src/components/AuthProvider';
 
 import 'styles/globals.css';
 
-export default function MyApp({ Component, pageProps }) {
-  // console.debug({ Component, pageProps });
-  // console.debug('Component.requireAuth', Component.requireAuth);
+export default function MyApp(props) {
+  // console.debug({ props });
 
-  return (
-    <ModalContextProvider>
-      <AuthenticatedApp {...{ Component, pageProps }} />
-    </ModalContextProvider>
-  );
-}
-
-function AuthenticatedApp({ Component, pageProps }) {
-  if (Component.requireAuth) {
+  if (!props.Component.requireAuth) {
     return (
-      <AuthProvider>
-        <ApolloProvider>
-          <AuthWatchLoginToken />
-          <AppContent {...{ Component, pageProps }} />
-        </ApolloProvider>
-      </AuthProvider>
+      <Providers>
+        <AppContent {...props} />
+      </Providers>
     );
   }
 
-  return <AppContent {...{ Component, pageProps }} />;
+  return (
+    <Providers>
+      <AuthProviders {...props}>
+        <LoginGate>
+          <AppContent {...props} />
+        </LoginGate>
+      </AuthProviders>
+    </Providers>
+  );
 }
 
-function AppContent({ Component, pageProps }) {
+function Providers({ children }) {
+  return <ModalContextProvider>{children}</ModalContextProvider>;
+}
+
+function AuthProviders({ children }) {
+  return (
+    <AuthProvider>
+      <ApolloProvider>
+        <AuthWatchLoginToken />
+        {children}
+      </ApolloProvider>
+    </AuthProvider>
+  );
+}
+
+function AppContent({ children, Component, pageProps }) {
   return (
     <IntlProvider locale="en" defaultLocale="en">
       <Head>
-        <title>Magic</title>
+        <title key="title">Magic</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -48,6 +62,8 @@ function AppContent({ Component, pageProps }) {
       </Head>
 
       <Component {...pageProps} />
+
+      <ModalContainer />
     </IntlProvider>
   );
 }
