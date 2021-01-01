@@ -10,7 +10,7 @@ export default function LoginRequests({ loading, loginRequests }) {
 
   const header = `Login requests${loading ? '' : ` (${loginRequests.length})`}`;
   const columns = ['', 'Device', 'Location', 'Details'];
-  const loadingWidths = [32, 200, 400, 200];
+  const loadingWidths = [32, 150, 250, 150];
 
   // mark session as 'deleting'
   async function handleDeleteSession(id) {
