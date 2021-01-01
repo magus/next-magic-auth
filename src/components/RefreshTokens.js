@@ -17,7 +17,7 @@ export default function RefreshTokens({ loading, refreshTokens }) {
     loading ? '' : ` (${refreshTokens.length})`
   }`;
   const columns = ['', 'Device', 'Location', 'Last activity'];
-  const loadingWidths = [0, 100, 200, 200];
+  const loadingWidths = [32, 200, 400, 200];
 
   // mark session as 'deleting'
   async function handleDeleteSession(id) {
