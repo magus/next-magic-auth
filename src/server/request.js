@@ -3,6 +3,7 @@ import uaParser from 'ua-parser-js';
 
 export default {
   getRealIP,
+  getUserAgent,
   parse,
 };
 
@@ -44,10 +45,7 @@ function getGeoFromIP(ip) {
   return geo;
 }
 
-function parse(req) {
-  const ip = getRealIP(req);
-  const geo = getGeoFromIP(ip);
-
+function getUserAgent(req) {
   const userAgentRaw = req.headers['user-agent'];
   const parsedUserAgent = uaParser(userAgentRaw);
   const { device, os, browser } = parsedUserAgent;
@@ -56,9 +54,17 @@ function parse(req) {
   const userAgent = `${deviceDescription} (${commonDescription})`;
 
   return {
-    ip,
     userAgentRaw,
     userAgent,
-    geo,
+  };
+}
+
+function parse(req) {
+  const ip = getRealIP(req);
+
+  return {
+    ip,
+    geo: getGeoFromIP(ip),
+    ...getUserAgent(req),
   };
 }
