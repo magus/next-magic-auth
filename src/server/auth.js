@@ -269,10 +269,11 @@ function getJwtField(jwtToken, field) {
   return claims[field];
 }
 
-const getAuthCookie = (req) => req.cookies[config.AUTH_COOKIE];
+const getAuthCookie = cookie.get;
 
 export default {
   clearCookies: cookie.clear,
+  getAuthCookie,
 
   generateLoginToken,
   setupLoginRequest,
@@ -280,8 +281,6 @@ export default {
   refreshAuthentication,
 
   restoreLoginRequest,
-
-  getAuthCookie,
 
   getLoginRequest: (req) =>
     getJwtField(getAuthCookie(req), JwtFields.MagicLoginRequest),

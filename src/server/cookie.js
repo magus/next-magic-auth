@@ -5,14 +5,21 @@ import config from './config';
 export default {
   clear: clearCookies,
   set: setCookie,
+  get: getCookie,
 };
+
+const COOKIE_NAME = '__magic__rtk';
 
 function clearCookies(res) {
   setCookie(res, '', { expires: new Date(0) });
 }
 
+function getCookie(req) {
+  return req.cookies[COOKIE_NAME];
+}
+
 function setCookie(res, value, cookieOptions) {
-  const cookie = generateCookie(config.AUTH_COOKIE, value, {
+  const cookie = generateCookie(COOKIE_NAME, value, {
     ...cookieOptions,
   });
 
