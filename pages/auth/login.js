@@ -3,16 +3,11 @@ import { useRouter } from 'next/router';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
-import LoginActivity from 'src/components/LoginActivity';
 import { useAuth } from 'src/components/AuthProvider';
-import { useModal } from 'src/components/Modal';
-import graphql from 'src/client/graphql/queries';
 
-import styles from 'styles/login.module.css';
-import { FormattedNumberParts } from 'react-intl';
-import loadCustomRoutes from 'next/dist/lib/load-custom-routes';
+import styles from 'styles/Login.module.css';
 
-LoginPage.requireAuth = true;
+LoginPage.title = 'Login';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,7 +19,11 @@ export default function LoginPage() {
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        {auth.init ? <LoginForm {...{ email }} /> : null}
+        {auth.isLoggedIn ? (
+          <Button onClick={auth.actions.logout}>Logout</Button>
+        ) : (
+          <LoginForm {...{ email }} />
+        )}
       </div>
     </Page>
   );
@@ -32,8 +31,6 @@ export default function LoginPage() {
 
 function LoginForm(props) {
   const auth = useAuth();
-  const modal = useModal();
-  const [getMe, me] = graphql.me();
   const [email, set_email] = React.useState('');
 
   React.useEffect(() => {
@@ -41,12 +38,6 @@ function LoginForm(props) {
       set_email(props.email);
     }
   }, [props.email]);
-
-  React.useEffect(() => {
-    if (auth.isLoggedIn) {
-      getMe();
-    }
-  }, [auth.isLoggedIn]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -64,20 +55,6 @@ function LoginForm(props) {
 
   const buttonStyles = email ? styles.loginButtonEnabled : styles.loginButton;
 
-  if (auth.isLoggedIn) {
-    return (
-      <>
-        <h1 className={styles.email}>{!me ? <span>&lrm;</span> : me.email}</h1>
-
-        <LoginActivity />
-
-        <Button className={styles.button} onClick={auth.actions.logout}>
-          Logout
-        </Button>
-      </>
-    );
-  }
-
   return (
     <>
       <form className={styles.loginForm} onSubmit={handleSubmit}>
@@ -92,6 +69,7 @@ function LoginForm(props) {
           value={email}
           onChange={handleEmailInput}
         />
+
         <Button className={buttonStyles}>Login</Button>
       </form>
     </>

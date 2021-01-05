@@ -15,27 +15,29 @@ import 'styles/globals.css';
 export default function MyApp(props) {
   // console.debug({ props });
 
-  if (!props.Component.requireAuth) {
+  const { Component, pageProps } = props;
+
+  if (Component.disableAuth) {
     return (
       <Providers>
-        <AppContent {...props} />
+        <AppShell {...props}>
+          <Component {...pageProps} />
+        </AppShell>
       </Providers>
     );
   }
 
   return (
     <Providers>
-      <AuthProviders {...props}>
-        <LoginGate>
-          <AppContent {...props} />
-        </LoginGate>
+      <AuthProviders>
+        <AppShell {...props}>
+          <LoginGate>
+            <Component {...pageProps} />
+          </LoginGate>
+        </AppShell>
       </AuthProviders>
     </Providers>
   );
-}
-
-function Providers({ children }) {
-  return <ModalContextProvider>{children}</ModalContextProvider>;
 }
 
 function AuthProviders({ children }) {
@@ -49,11 +51,17 @@ function AuthProviders({ children }) {
   );
 }
 
-function AppContent({ children, Component, pageProps }) {
+function Providers({ children }) {
+  return <ModalContextProvider>{children}</ModalContextProvider>;
+}
+
+function AppShell({ children, Component, pageProps }) {
   return (
     <IntlProvider locale="en" defaultLocale="en">
       <Head>
-        <title key="title">Magic</title>
+        <title key="title">
+          {Component.title ? `Magic - ${Component.title}` : 'Magic'}
+        </title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -61,7 +69,7 @@ function AppContent({ children, Component, pageProps }) {
         />
       </Head>
 
-      <Component {...pageProps} />
+      {children}
 
       <ModalContainer />
     </IntlProvider>

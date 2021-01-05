@@ -3,6 +3,7 @@ import Image from 'next/image';
 
 import { useAuth } from 'src/components/AuthProvider';
 import Page from 'src/components/Page';
+import LoginPage from 'pages/auth/login';
 
 import styles from 'styles/LoginGate.module.css';
 
@@ -48,6 +49,10 @@ export default function LoginGate({ children }) {
         })} */}
       </Page>
     );
+  }
+
+  if (!auth.isLoggedIn) {
+    return <LoginPage />;
   }
 
   return children;

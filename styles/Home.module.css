@@ -1,0 +1,23 @@
+.container {
+  --button-height: var(--spacer-6);
+
+  margin: var(--spacer-6) 0 0 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.containerContent {
+  padding: var(--spacer-3);
+  max-height: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+}
+
+.email {
+  font-size: var(--spacer-3);
+  font-weight: 100;
+}
+

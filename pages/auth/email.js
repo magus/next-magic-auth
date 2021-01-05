@@ -7,6 +7,8 @@ import Button from 'src/components/Button';
 
 import styles from 'styles/email.module.css';
 
+Email.disableAuth = true;
+
 export default function Email() {
   const router = useRouter();
   const {

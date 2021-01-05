@@ -4,7 +4,7 @@ import Button from 'src/components/Button';
 import { useAuth } from 'src/components/AuthProvider';
 import graphql from 'src/client/graphql/queries';
 
-import styles from 'styles/login.module.css';
+import styles from 'styles/Login.module.css';
 
 export default function CheckEmailModal({ dismiss, jwtToken, phrase }) {
   const auth = useAuth();

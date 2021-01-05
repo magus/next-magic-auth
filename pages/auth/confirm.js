@@ -9,7 +9,8 @@ import { requirePageAuth } from 'src/components/AuthProvider';
 import styles from 'styles/auth-confirm.module.css';
 import request from 'graphql-request';
 
-LoginConfirm.requireAuth = false;
+LoginConfirm.disableAuth = true;
+LoginConfirm.title = 'Login confirmed';
 
 export default function LoginConfirm() {
   const pageRef = React.useRef(null);
