@@ -2,13 +2,13 @@ import * as React from 'react';
 import Head from 'next/head';
 import { IntlProvider } from 'react-intl';
 
-import { AuthProvider } from 'src/components/AuthProvider';
-import AuthWatchLoginToken from 'src/components/AuthWatchLoginToken';
-import ApolloProvider from 'src/components/ApolloProvider';
-import { ModalContainer, ModalContextProvider } from 'src/components/Modal';
-import Page from 'src/components/Page';
-import LoginGate from 'src/components/LoginGate';
-import { useAuth } from 'src/components/AuthProvider';
+import { AuthProvider } from '@components/AuthProvider';
+import AuthWatchLoginToken from '@components/AuthWatchLoginToken';
+import ApolloProvider from '@components/ApolloProvider';
+import { ModalContainer, ModalContextProvider } from '@components/Modal';
+import Page from '@components/Page';
+import LoginGate from '@components/LoginGate';
+import { useAuth } from '@components/AuthProvider';
 
 import 'styles/globals.css';
 
