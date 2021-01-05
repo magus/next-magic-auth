@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 import { useAuth } from 'src/components/AuthProvider';
@@ -7,11 +8,18 @@ import LoginPage from 'pages/auth/login';
 
 import styles from 'styles/LoginGate.module.css';
 
-export default function LoginGate({ children }) {
+export default function LoginGate(props) {
+  return (
+    <React.Fragment>
+      <LoginGateContent {...props} />
+      <LoginGateCover />
+    </React.Fragment>
+  );
+}
+
+function LoginGateCover() {
   const auth = useAuth();
   const [loading, set_loading] = React.useState(!auth.init);
-
-  const overrideProps = {};
 
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -27,29 +35,48 @@ export default function LoginGate({ children }) {
     set_loading(false);
   }
 
-  if (loading) {
-    return (
-      <Page forceWindowHeight>
-        <div
-          className={styles.wandAnimation}
-          onAnimationEnd={handleAnimationEnd}
+  return (
+    <AnimatePresence>
+      {!loading ? null : (
+        <motion.div
+          className={styles.loginGateCover}
+          initial={false}
+          animate={{ opacity: 1.0 }}
+          exit={{ opacity: 0.0 }}
         >
-          <Image
-            priority
-            layout="fixed"
-            src="/wand.png"
-            alt="magic wand"
-            width={128}
-            height={128}
-          />
-        </div>
+          <Page forceWindowHeight>
+            <div
+              className={styles.wandAnimation}
+              onAnimationEnd={handleAnimationEnd}
+            >
+              <Image
+                priority
+                layout="fixed"
+                src="/wand.png"
+                alt="magic wand"
+                width={128}
+                height={128}
+              />
+            </div>
 
-        {/* {new Array(500).fill(1).map((_, i) => {
-          return <div style={{ height: 100 }}>Content</div>;
-        })} */}
-      </Page>
-    );
-  }
+            {/* <div>
+      {new Array(500).fill(1).map((_, i) => {
+        return (
+          <div key={i} style={{ height: 100 }}>
+            {i}
+          </div>
+        );
+      })}
+    </div> */}
+          </Page>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function LoginGateContent({ children }) {
+  const auth = useAuth();
 
   if (!auth.isLoggedIn) {
     return <LoginPage />;
