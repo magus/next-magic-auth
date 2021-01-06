@@ -11,6 +11,8 @@ https://magicwords.vercel.app/
 - ✅ 🔥 Real-time login activty details
 - ✅ 📧 Email only
 
+> Inspired by [Magic](https://magic.link/)
+
 
 # setup
 
