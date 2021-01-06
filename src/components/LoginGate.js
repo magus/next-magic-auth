@@ -60,14 +60,14 @@ function LoginGateCover() {
             </div>
 
             {/* <div>
-      {new Array(500).fill(1).map((_, i) => {
-        return (
-          <div key={i} style={{ height: 100 }}>
-            {i}
-          </div>
-        );
-      })}
-    </div> */}
+              {new Array(500).fill(1).map((_, i) => {
+                return (
+                  <div key={i} style={{ height: 100 }}>
+                    {i}
+                  </div>
+                );
+              })}
+            </div> */}
           </Page>
         </motion.div>
       )}
