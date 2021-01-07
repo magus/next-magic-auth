@@ -161,33 +161,41 @@ export function AuthProvider({ children }) {
     }
 
     async function handleRefreshTokens() {
-      const response = await fetch('/api/auth/refresh', { method: 'POST' });
+      try {
+        const response = await fetch('/api/auth/refresh', { method: 'POST' });
 
-      const json = await response.json();
+        const json = await response.json();
 
-      if (json.error) {
-        await logout();
+        if (json.error) {
+          await logout();
+          return false;
+        } else if (json.loginRequestApproved) {
+          await completeLogin();
+          return false;
+        } else if (json.loginRequest) {
+          modal.open(CheckEmailModal, {
+            props: json.loginRequest,
+            disableBackgroundDismiss: true,
+          });
+          return false;
+        } else if (json.jwtToken) {
+          return await setAuthentication(json);
+        } else if (response.status === 200) {
+          // no-op, no cookie no refresh
+          return false;
+        }
+
+        console.error(
+          '[AuthProvider]',
+          'handleRefreshTokens',
+          'unrecognized refresh response',
+          { response },
+        );
         return false;
-      } else if (json.loginRequestApproved) {
-        await completeLogin();
-        return false;
-      } else if (json.loginRequest) {
-        modal.open(CheckEmailModal, {
-          props: json.loginRequest,
-          disableBackgroundDismiss: true,
-        });
-        return false;
-      } else if (json.jwtToken) {
-        return await setAuthentication(json);
-      } else if (response.status === 200) {
-        // no-op, no cookie no refresh
+      } catch (error) {
+        console.error('[AuthProvider]', 'handleRefreshTokens', error);
         return false;
       }
-
-      console.error('[AuthProvider]', 'unrecognized refresh response', {
-        response,
-      });
-      return false;
     }
 
     // set shared pendingRefresh
