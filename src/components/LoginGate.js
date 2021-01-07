@@ -35,9 +35,11 @@ function LoginGateCover() {
     set_loading(false);
   }
 
+  const hideLoginGate = !loading && auth.init;
+
   return (
     <AnimatePresence>
-      {!loading ? null : (
+      {hideLoginGate ? null : (
         <motion.div
           className={styles.loginGateCover}
           initial={false}
