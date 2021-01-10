@@ -12,7 +12,6 @@ import { onError } from '@apollo/client/link/error';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
 import { useAuth } from 'src/components/AuthProvider';
-import config from 'src/client/config';
 import roles from 'src/shared/roles';
 import headers from 'src/shared/headers';
 import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
@@ -85,7 +84,7 @@ export function buildApolloClient(auth) {
             needsRefresh = true;
           } else {
             // unhandled error, log it
-            if (config.__DEV__) {
+            if (__DEV__) {
               console.error('[graphql]', 'gqlError', gqlError);
             }
           }

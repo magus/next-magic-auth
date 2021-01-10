@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import ClientConfig from 'src/client/config';
-
 const DefaultModalContext = null;
 const ModalContext = React.createContext(DefaultModalContext);
 
@@ -33,7 +31,7 @@ export function ModalContextProvider({ children }) {
     close,
   };
 
-  if (process.browser && ClientConfig.__DEV__) {
+  if (process.browser && __DEV__) {
     if (!window.__magic) window.__magic = {};
     window.__magic.ModalContext = value;
     // e.g. __magic.ModalContext.open(() => 'Hi')

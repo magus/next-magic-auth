@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^10.0.5",
+    "@zeit/next-source-maps": "^0.0.3",
     "cross-env": "^7.0.3"
   }
 }
