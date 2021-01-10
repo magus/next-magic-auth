@@ -1,11 +1,5 @@
-const { NODE_ENV, SENTRY_TOKEN_HEADER } = process.env;
-
-// some environmental variables required from .env or vercel sercrets
-// e.g. now env ls (vercel env ls)
-if (!SENTRY_TOKEN_HEADER) throw new Error('SENTRY_TOKEN_HEADER is not defined');
-
 const EnvConfig = {
-  DEV: NODE_ENV !== 'production',
+  DEV: process.env.NODE_ENV !== 'production',
 
   APP_NAME: 'Magic',
 

@@ -58,6 +58,11 @@ exports.SENDGRID_API_KEY = SENDGRID_API_KEY;
 exports.EMAIL_FROM = EMAIL_FROM || 'magic@iamnoah.com';
 exports.EMAIL_FROMNAME = EMAIL_FROMNAME || 'Magic';
 
+// This is server config only
 if (process.browser) throw new Error('Do not import config in client code');
+
+// some environmental variables required from .env or vercel sercrets
+// e.g. now env ls (vercel env ls)
 if (!HASURA_ADMIN_SECRET) throw new Error('HASURA_ADMIN_SECRET is not defined');
 if (!SENDGRID_API_KEY) throw new Error('SENDGRID_API_KEY is not defined');
+if (!process.env.SENTRY_TOKEN_HEADER) throw new Error('SENTRY_TOKEN_HEADER is not defined');
