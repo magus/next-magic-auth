@@ -1,45 +1,11 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useModal } from '@components/Modal';
+
 import styles from 'styles/modal.module.css';
 
-const DefaultModalContext = null;
-const ModalContext = React.createContext(DefaultModalContext);
-
-export function useModal() {
-  const modal = React.useContext(ModalContext);
-
-  if (modal === DefaultModalContext) {
-    throw new Error('ModalContextProvider must be setup in React tree');
-  }
-
-  return modal;
-}
-
-export function ModalContextProvider({ children }) {
-  const [config, set_config] = React.useState({ component: null });
-
-  function open(component, config) {
-    set_config({ component, ...config });
-  }
-
-  function close() {
-    set_config({ component: null });
-  }
-
-  const value = {
-    isOpen: config.component !== null,
-    config,
-    open,
-    close,
-  };
-
-  return (
-    <ModalContext.Provider {...{ value }}>{children}</ModalContext.Provider>
-  );
-}
-
-export function ModalContainer() {
+export default function ModalContainer() {
   const modal = useModal();
 
   return (

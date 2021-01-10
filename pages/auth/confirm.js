@@ -4,10 +4,8 @@ import Link from 'next/link';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
-import { requirePageAuth } from 'src/components/AuthProvider';
 
 import styles from 'styles/auth-confirm.module.css';
-import request from 'graphql-request';
 
 LoginConfirm.disableAuth = true;
 LoginConfirm.title = 'Login confirmed';
