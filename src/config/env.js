@@ -1,4 +1,8 @@
-const { NODE_ENV } = process.env;
+const { NODE_ENV, SENTRY_TOKEN_HEADER } = process.env;
+
+// some environmental variables required from .env or vercel sercrets
+// e.g. now env ls (vercel env ls)
+if (!SENTRY_TOKEN_HEADER) throw new Error('SENTRY_TOKEN_HEADER is not defined');
 
 const EnvConfig = {
   DEV: NODE_ENV !== 'production',
@@ -8,7 +12,7 @@ const EnvConfig = {
   PROTOCOL: 'https',
   HOSTNAME: 'magicwords.vercel.app',
 
-  SENTRY_DSN: 'https://c30a968049c246739657687af5d2fabb@o438648.ingest.sentry.io/5403737',
+  SENTRY_DSN: 'https://8a5fc1e07b4f49cea19f8151261a1788@o502635.ingest.sentry.io/5585227',
   GOOGLE_ANALYTICS_UA: 'UA-106090287-2',
 };
 

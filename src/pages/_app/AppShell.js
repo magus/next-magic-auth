@@ -5,11 +5,15 @@ import { IntlProvider } from 'react-intl';
 
 const DynamicModalContainer = dynamic(() => import('@components/Modal/ModalContainer'));
 
+const { APP_NAME } = process.env;
+
 export default function AppShell({ children, Component, pageProps }) {
+  const title = Component && Component.title ? `${APP_NAME} - ${Component.title}` : APP_NAME;
+
   return (
     <IntlProvider locale="en" defaultLocale="en">
       <Head>
-        <title key="title">{Component.title ? `Magic - ${Component.title}` : 'Magic'}</title>
+        <title key="title">{title}</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"

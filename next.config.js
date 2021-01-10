@@ -8,18 +8,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const EnvConfig = require('./src/config/env');
 
-// Forward server environmental variables to client config
-const { SENTRY_TOKEN_HEADER } = process.env;
-
 const __CONFIG = {
   // --------------------------------------------------
   // withSourceMaps: source maps + sentry configuration
   env: {
     // include all non-secret config constants
     ...EnvConfig,
-
-    // include secret .env environmental variables (now env ls)
-    SENTRY_TOKEN_HEADER,
   },
 
   webpack: (config, { isServer, buildId }) => {

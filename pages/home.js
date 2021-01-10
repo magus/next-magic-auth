@@ -20,6 +20,14 @@ export default function HomePage(props) {
       <div className={styles.containerContent}>
         <h1 className={styles.email}>{!auth.user ? <span>&lrm;</span> : auth.user.email}</h1>
 
+        <button
+          onClick={() => {
+            throw new Error('purposeful error');
+          }}
+        >
+          THROW ERROR
+        </button>
+
         <LoginActivity />
 
         <Button onClick={auth.actions.logout}>Logout</Button>
