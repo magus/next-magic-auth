@@ -6,11 +6,12 @@ const SentryIntegrations = require('@sentry/integrations');
 const Cookie = require('js-cookie');
 
 const DEBUG = false;
-const IGNORE_ERRORS = process.env.NODE_ENV !== 'production';
+const IGNORE_ERRORS = false && process.env.NODE_ENV !== 'production';
+const RELEASE_DEFAULT = process.env.SENTRY_RELEASE;
 
 // process.env.SENTRY_RELEASE will override the argument passed
 // (app.buildId) in server/server.js
-module.exports = function configureSentry(release = process.env.SENTRY_RELEASE) {
+module.exports = function configureSentry(release = RELEASE_DEFAULT) {
   const sentryOptions = {
     dsn: process.env.SENTRY_DSN,
     release,
@@ -28,7 +29,7 @@ module.exports = function configureSentry(release = process.env.SENTRY_RELEASE) 
     // Don't actually send the errors to Sentry
     // Instead, dump the errors to the console
     sentryOptions.beforeSend = (...args) => {
-      console.debug('sentry', 'beforeSend', args);
+      console.debug('[SentryConfig]', 'beforeSend', args);
       return null;
     };
 
@@ -55,6 +56,8 @@ module.exports = function configureSentry(release = process.env.SENTRY_RELEASE) 
   return {
     Sentry,
     captureException: (err, ctx) => {
+      console.debug('[SentryConfig]', 'captureException', { err, ctx });
+
       Sentry.configureScope((scope) => {
         if (err.message) {
           // De-duplication currently doesn't work correctly for SSR / browser errors
