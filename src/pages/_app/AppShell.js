@@ -16,7 +16,7 @@ export default function AppShell({ children, Component, pageProps }) {
     <IntlProvider locale="en" defaultLocale="en">
       <Head>
         <title key="title">{title}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" key="viewport" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" key="viewport" />
         <link
           key="favicon"
           rel="icon"
