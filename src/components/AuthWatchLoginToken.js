@@ -9,11 +9,7 @@ function WatchLoginToken({ loginTokenId, handleLogout }) {
   React.useEffect(async () => {
     if (!result.loading && !result.error && !loginToken) {
       // loginToken is missing, logout immediately
-      console.debug(
-        '[AuthProvider]',
-        'no error and loginToken missing',
-        'logout',
-      );
+      console.debug('[AuthProvider]', 'no error and loginToken missing', 'logout');
       await handleLogout();
     }
   }, [result.loading, loginToken]);
@@ -25,12 +21,7 @@ export default function AuthWatchLoginToken() {
   const auth = useAuth();
 
   if (auth.isLoggedIn) {
-    return (
-      <WatchLoginToken
-        loginTokenId={auth.loginRequestId}
-        handleLogout={auth.actions.logout}
-      />
-    );
+    return <WatchLoginToken loginTokenId={auth.loginRequestId} handleLogout={auth.actions.logout} />;
   }
 
   return null;

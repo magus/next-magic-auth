@@ -4,14 +4,7 @@ import styles from 'styles/Table.module.css';
 
 const px = (pixels) => `${pixels}px`;
 
-export default function Table({
-  header,
-  columns = [],
-  children,
-  loading,
-  loadingRows = 4,
-  loadingWidths = [],
-}) {
+export default function Table({ header, columns = [], children, loading, loadingRows = 4, loadingWidths = [] }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>{header}</div>
@@ -32,16 +25,8 @@ export default function Table({
                   <tr key={i}>
                     {columns.map((_, i) => {
                       const colLoadingWidth = loadingWidths[i];
-                      if (
-                        typeof colLoadingWidth === 'number' &&
-                        colLoadingWidth !== 0
-                      ) {
-                        return (
-                          <Table.LoadingColumn
-                            key={i}
-                            width={px(colLoadingWidth)}
-                          />
-                        );
+                      if (typeof colLoadingWidth === 'number' && colLoadingWidth !== 0) {
+                        return <Table.LoadingColumn key={i} width={px(colLoadingWidth)} />;
                       }
 
                       return <td key={i} />;

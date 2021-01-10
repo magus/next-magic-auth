@@ -37,7 +37,5 @@ export function ModalContextProvider({ children }) {
     // e.g. __magic.ModalContext.open(() => 'Hi')
   }
 
-  return (
-    <ModalContext.Provider {...{ value }}>{children}</ModalContext.Provider>
-  );
+  return <ModalContext.Provider {...{ value }}>{children}</ModalContext.Provider>;
 }

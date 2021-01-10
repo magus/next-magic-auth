@@ -22,18 +22,12 @@ export default function Email() {
   const expiresIn = expiresMinutesDuration(expireMinutes);
 
   return (
-    <table
-      className={styles.container}
-      cellPadding="0"
-      cellSpacing="0"
-      border="0"
-    >
+    <table className={styles.container} cellPadding="0" cellSpacing="0" border="0">
       <tbody>
         <tr>
           <td>
             <span className={styles.paragraph}>
-              Click the magic words below to login as{' '}
-              <strong className={styles.email}>{email}</strong>.
+              Click the magic words below to login as <strong className={styles.email}>{email}</strong>.
               <br />
               The magic words will only work for the next {expiresIn}.
             </span>
@@ -48,9 +42,7 @@ export default function Email() {
 
         <tr>
           <td>
-            <span className={styles.paragraph}>
-              Ensure the magic words match what you saw on the login page.
-            </span>
+            <span className={styles.paragraph}>Ensure the magic words match what you saw on the login page.</span>
           </td>
         </tr>
       </tbody>

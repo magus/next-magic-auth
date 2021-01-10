@@ -18,13 +18,10 @@ export default function LoginActivity() {
     refreshTokens = watchRefreshTokens.refreshTokens;
 
     // build active session lookup
-    const activeSessionLookup = watchRefreshTokens.refreshTokens.reduce(
-      (lookup, rt) => {
-        lookup[rt.id] = rt;
-        return lookup;
-      },
-      {},
-    );
+    const activeSessionLookup = watchRefreshTokens.refreshTokens.reduce((lookup, rt) => {
+      lookup[rt.id] = rt;
+      return lookup;
+    }, {});
 
     // filter out login requests that have refresh tokens
     // use activeSessionLookup to ensure we only filter when it is shown as an active session

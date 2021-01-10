@@ -3,13 +3,7 @@ import useWindowHeight from 'src/hooks/useWindowHeight';
 
 import styles from 'styles/Page.module.css';
 
-export default function Page({
-  children,
-  className,
-  innerRef,
-  forceWindowHeight,
-  ...restProps
-}) {
+export default function Page({ children, className, innerRef, forceWindowHeight, ...restProps }) {
   const pageRef = React.useRef();
   // sync pageRef and innerRef
   React.useEffect(() => {
@@ -33,12 +27,7 @@ export default function Page({
   }
 
   return (
-    <div
-      className={containerClassNames.join(' ')}
-      ref={pageRef}
-      {...{ style: containerStyle }}
-      {...restProps}
-    >
+    <div className={containerClassNames.join(' ')} ref={pageRef} {...{ style: containerStyle }} {...restProps}>
       {children}
     </div>
   );

@@ -43,9 +43,7 @@ export default function LoginRequests({ loading, loginRequests }) {
             </Table.IconColumn>
 
             {deletingSessions[lr.id] ? (
-              <td colSpan={`${columns.length - 1}`}>
-                Deleting login request...
-              </td>
+              <td colSpan={`${columns.length - 1}`}>Deleting login request...</td>
             ) : (
               <React.Fragment>
                 <td>{lr.userAgent}</td>

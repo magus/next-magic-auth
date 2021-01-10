@@ -19,11 +19,7 @@ export default function LoginPage() {
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        {auth.isLoggedIn ? (
-          <Button onClick={auth.actions.logout}>Logout</Button>
-        ) : (
-          <LoginForm {...{ email }} />
-        )}
+        {auth.isLoggedIn ? <Button onClick={auth.actions.logout}>Logout</Button> : <LoginForm {...{ email }} />}
       </div>
     </Page>
   );

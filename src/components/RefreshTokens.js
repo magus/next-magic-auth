@@ -13,9 +13,7 @@ export default function RefreshTokens({ loading, refreshTokens }) {
   const auth = useAuth();
   const [deletingSessions, set_deletingSessions] = React.useState({});
 
-  const header = `Active sessions${
-    loading ? '' : ` (${refreshTokens.length})`
-  }`;
+  const header = `Active sessions${loading ? '' : ` (${refreshTokens.length})`}`;
   const columns = ['', 'Device', 'Location', 'Last activity'];
   const loadingWidths = [32, 150, 250, 150];
 
@@ -60,9 +58,7 @@ export default function RefreshTokens({ loading, refreshTokens }) {
               </Table.IconColumn>
 
               {deletingSessions[rt.id] ? (
-                <td colSpan={`${columns.length - 1}`}>
-                  Logging out session...
-                </td>
+                <td colSpan={`${columns.length - 1}`}>Logging out session...</td>
               ) : (
                 <React.Fragment>
                   <td>{rt.userAgent}</td>

@@ -3,17 +3,13 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { IntlProvider } from 'react-intl';
 
-const DynamicModalContainer = dynamic(() =>
-  import('@components/Modal/ModalContainer'),
-);
+const DynamicModalContainer = dynamic(() => import('@components/Modal/ModalContainer'));
 
 export default function AppShell({ children, Component, pageProps }) {
   return (
     <IntlProvider locale="en" defaultLocale="en">
       <Head>
-        <title key="title">
-          {Component.title ? `Magic - ${Component.title}` : 'Magic'}
-        </title>
+        <title key="title">{Component.title ? `Magic - ${Component.title}` : 'Magic'}</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"

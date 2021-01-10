@@ -129,12 +129,9 @@ export default {
   },
 
   watchLoginRequests: () => {
-    const { loading, ...result } = useAdhocSubscription(
-      gqls.watchLoginRequests,
-      {
-        role: roles.self,
-      },
-    );
+    const { loading, ...result } = useAdhocSubscription(gqls.watchLoginRequests, {
+      role: roles.self,
+    });
 
     let loginRequests = [];
 
@@ -146,20 +143,13 @@ export default {
   },
 
   watchRefreshTokens: () => {
-    const { loading, ...result } = useAdhocSubscription(
-      gqls.watchRefreshTokens,
-      {
-        role: roles.self,
-      },
-    );
+    const { loading, ...result } = useAdhocSubscription(gqls.watchRefreshTokens, {
+      role: roles.self,
+    });
 
     let refreshTokens = [];
 
-    if (
-      !result.error &&
-      result.data &&
-      Array.isArray(result.data.refreshToken)
-    ) {
+    if (!result.error && result.data && Array.isArray(result.data.refreshToken)) {
       refreshTokens = result.data.refreshToken;
     }
 
@@ -167,11 +157,7 @@ export default {
   },
 };
 
-async function query(
-  client,
-  query,
-  { headers, variables, role = roles.user } = {},
-) {
+async function query(client, query, { headers, variables, role = roles.user } = {}) {
   const queryResult = await client.query({
     query,
     variables,

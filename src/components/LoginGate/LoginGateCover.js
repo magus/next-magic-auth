@@ -9,18 +9,8 @@ export default function LoginGateCover({ onAnimationEnd }) {
   return (
     <div className={styles.loginGateCover}>
       <Page forceWindowHeight>
-        <div
-          className={!onAnimationEnd ? undefined : styles.wandAnimation}
-          onAnimationEnd={onAnimationEnd}
-        >
-          <Image
-            priority
-            layout="fixed"
-            src="/wand.png"
-            alt="magic wand"
-            width={128}
-            height={128}
-          />
+        <div className={!onAnimationEnd ? undefined : styles.wandAnimation} onAnimationEnd={onAnimationEnd}>
+          <Image priority layout="fixed" src="/wand.png" alt="magic wand" width={128} height={128} />
         </div>
 
         {/* <div>

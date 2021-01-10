@@ -7,24 +7,15 @@ import Button from 'src/components/Button';
 import headers from 'src/shared/headers';
 import roles from 'src/shared/roles';
 
-export default function DeleteSession({
-  id,
-  onDelete,
-  onError,
-  buttonTitle,
-  buttonTitleDeleting,
-}) {
-  const [deleteSession, { data, called, error }] = useMutation(
-    deleteLoginToken,
-    {
-      variables: { id },
-      context: {
-        headers: {
-          [headers.role]: roles.self,
-        },
+export default function DeleteSession({ id, onDelete, onError, buttonTitle, buttonTitleDeleting }) {
+  const [deleteSession, { data, called, error }] = useMutation(deleteLoginToken, {
+    variables: { id },
+    context: {
+      headers: {
+        [headers.role]: roles.self,
       },
     },
-  );
+  });
 
   React.useEffect(() => {
     if (error) {
@@ -44,12 +35,7 @@ export default function DeleteSession({
   const title = called && !error ? buttonTitleDeleting : buttonTitle;
 
   return (
-    <Button
-      simple
-      title={title}
-      onClick={handleDeleteSession}
-      style={{ fontSize: 20 }}
-    >
+    <Button simple title={title} onClick={handleDeleteSession} style={{ fontSize: 20 }}>
       {called && !error ? '⏳' : '❌'}
     </Button>
   );

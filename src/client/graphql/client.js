@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  ApolloClient,
-  ApolloLink,
-  HttpLink,
-  InMemoryCache,
-  Observable,
-  split,
-} from '@apollo/client';
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, Observable, split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { WebSocketLink } from '@apollo/client/link/ws';
@@ -31,9 +24,7 @@ function getAuthHeaders(jwtToken) {
 }
 
 export function buildApolloWebsocketClient(options = {}) {
-  const authHeaders = getAuthHeaders(
-    options.anonymous ? null : options.jwtToken,
-  );
+  const authHeaders = getAuthHeaders(options.anonymous ? null : options.jwtToken);
 
   // can only use web socket link in browser
   // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
@@ -67,55 +58,53 @@ export function buildApolloClient(auth) {
 
   const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
 
-  const errorLink = onError(
-    ({ graphQLErrors, networkError, operation, forward }) => {
-      // Ignoring errors
-      // https://www.apollographql.com/docs/link/links/error/#ignoring-errors
+  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+    // Ignoring errors
+    // https://www.apollographql.com/docs/link/links/error/#ignoring-errors
 
-      if (networkError) {
-        console.error('[graphql]', 'networkError', networkError);
-      }
+    if (networkError) {
+      console.error('[graphql]', 'networkError', networkError);
+    }
 
-      if (graphQLErrors) {
-        let needsRefresh = false;
+    if (graphQLErrors) {
+      let needsRefresh = false;
 
-        graphQLErrors.map((gqlError) => {
-          if (JWT_VERIFY_FAIL_REGEX.test(gqlError.message)) {
-            needsRefresh = true;
-          } else {
-            // unhandled error, log it
-            if (__DEV__) {
-              console.error('[graphql]', 'gqlError', gqlError);
-            }
+      graphQLErrors.map((gqlError) => {
+        if (JWT_VERIFY_FAIL_REGEX.test(gqlError.message)) {
+          needsRefresh = true;
+        } else {
+          // unhandled error, log it
+          if (__DEV__) {
+            console.error('[graphql]', 'gqlError', gqlError);
           }
-        });
-
-        if (needsRefresh) {
-          // Refresh JWT token
-          return new Observable(async (observer) => {
-            console.debug('[ApolloClient]', 'auth.actions.refreshTokens');
-            await auth.actions.refreshTokens();
-
-            // if jwtToken refreshed, rebuild auth headers and forward to replay request
-
-            // if (jwtToken) {
-            //   authHeaders = getAuthHeaders(jwtToken);
-
-            //   const subscriber = {
-            //     next: observer.next.bind(observer),
-            //     error: observer.error.bind(observer),
-            //     complete: observer.complete.bind(observer),
-            //   };
-
-            //   forward(operation).subscribe(subscriber);
-            // }
-          });
         }
+      });
 
-        return forward(operation);
+      if (needsRefresh) {
+        // Refresh JWT token
+        return new Observable(async (observer) => {
+          console.debug('[ApolloClient]', 'auth.actions.refreshTokens');
+          await auth.actions.refreshTokens();
+
+          // if jwtToken refreshed, rebuild auth headers and forward to replay request
+
+          // if (jwtToken) {
+          //   authHeaders = getAuthHeaders(jwtToken);
+
+          //   const subscriber = {
+          //     next: observer.next.bind(observer),
+          //     error: observer.error.bind(observer),
+          //     complete: observer.complete.bind(observer),
+          //   };
+
+          //   forward(operation).subscribe(subscriber);
+          // }
+        });
       }
-    },
-  );
+
+      return forward(operation);
+    }
+  });
 
   const authMiddleware = new ApolloLink((operation, forward) => {
     // add the authorization to the headers

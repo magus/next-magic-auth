@@ -18,9 +18,7 @@ export default function HomePage(props) {
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        <h1 className={styles.email}>
-          {!auth.user ? <span>&lrm;</span> : auth.user.email}
-        </h1>
+        <h1 className={styles.email}>{!auth.user ? <span>&lrm;</span> : auth.user.email}</h1>
 
         <LoginActivity />
 

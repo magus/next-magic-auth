@@ -85,8 +85,7 @@ export function AuthProvider({ children }) {
         await refreshTokens();
       }
       // wait until threshold or ping at default frequency
-      const nextTimeoutMs =
-        timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
+      const nextTimeoutMs = timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
 
       // console.debug('[AuthProvider]', 'checkExpires', {
       //   timeUntilThreshold,
@@ -192,12 +191,7 @@ export function AuthProvider({ children }) {
           return false;
         }
 
-        console.error(
-          '[AuthProvider]',
-          'handleRefreshTokens',
-          'unrecognized refresh response',
-          { response },
-        );
+        console.error('[AuthProvider]', 'handleRefreshTokens', 'unrecognized refresh response', { response });
         return false;
       } catch (error) {
         console.error('[AuthProvider]', 'handleRefreshTokens', error);

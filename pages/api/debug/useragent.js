@@ -8,7 +8,5 @@ export default async function handleUserAgent(req, res) {
 
   const time = convertHRTime(process.hrtime(start));
 
-  return res
-    .status(200)
-    .json(JSON.stringify({ error: false, ...userAgent, time }, null, 2));
+  return res.status(200).json(JSON.stringify({ error: false, ...userAgent, time }, null, 2));
 }

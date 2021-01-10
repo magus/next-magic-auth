@@ -21,17 +21,11 @@ export default async function loginRefresh(req, res) {
 
     // token kind is not refresh, valid logging-in case
     // return 200 with state to restore check email modal login request listener
-    const loginRequest = await auth.restoreLoginRequest(
-      req,
-      res,
-      loginRequestId,
-    );
+    const loginRequest = await auth.restoreLoginRequest(req, res, loginRequestId);
     if (loginRequest) {
       // if loginToken is approved, signal client to complete
       if (loginRequest.approved) {
-        return res
-          .status(200)
-          .json({ error: false, loginRequestApproved: true });
+        return res.status(200).json({ error: false, loginRequestApproved: true });
       }
 
       // return loginRequest to restore on client
@@ -48,29 +42,18 @@ export default async function loginRefresh(req, res) {
     });
 
     if (!serverRefreshToken) {
-      throw new Error(
-        'no valid login sessions found in backend, logout and try again',
-      );
+      throw new Error('no valid login sessions found in backend, logout and try again');
     }
 
     // refreshAuthentication takes care of setting auth cookie
     // returns jwt token for client side authentication
-    const jwtToken = await auth.refreshAuthentication(
-      req,
-      res,
-      serverRefreshToken,
-      authCookie,
-    );
+    const jwtToken = await auth.refreshAuthentication(req, res, serverRefreshToken, authCookie);
 
-    return res
-      .status(200)
-      .json({ error: false, jwtToken, loginRequestId, user });
+    return res.status(200).json({ error: false, jwtToken, loginRequestId, user });
   } catch (e) {
     console.error(e);
 
-    return res
-      .status(400)
-      .json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
 

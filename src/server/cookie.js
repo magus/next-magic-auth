@@ -29,8 +29,7 @@ function setCookie(res, value, cookieOptions) {
 }
 
 function generateCookie(name, value, extraOptions = {}) {
-  const stringValue =
-    typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);
+  const stringValue = typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);
 
   const options = {
     maxAge: config.JWT_COOKIE_EXPIRES * 60 * 1000,

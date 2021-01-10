@@ -11,9 +11,7 @@ function capitalize(word) {
 // then use decimal value to index into wordList for word
 // e.g. 'tE' = 46 + 5 = 51
 function getWordFrom(base64String, wordList) {
-  const base64Bits = base64String
-    .split('')
-    .reduce((sum, c) => sum + base64Chars[c], 0);
+  const base64Bits = base64String.split('').reduce((sum, c) => sum + base64Chars[c], 0);
   const word = wordList[base64Bits % wordList.length];
   return capitalize(word);
 }

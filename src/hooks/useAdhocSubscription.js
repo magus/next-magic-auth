@@ -8,22 +8,13 @@ import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 
 // adhoc useSubscription to prevent opening web socket in client setup
 // also allows us to handle errors on the socket and reset client
-export default function useAdhocSubscription(
-  query,
-  { variables, anonymous, role = roles.user, ...options },
-) {
+export default function useAdhocSubscription(query, { variables, anonymous, role = roles.user, ...options }) {
   const auth = useAuth();
   const [data, set_data] = React.useState(null);
   const [error, set_error] = React.useState(null);
 
   const definition = getMainDefinition(query);
-  if (
-    !definition ||
-    !(
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
-    )
-  ) {
+  if (!definition || !(definition.kind === 'OperationDefinition' && definition.operation === 'subscription')) {
     console.error('[useAdhocSubscription]', 'query is not a subscription', {
       query,
     });

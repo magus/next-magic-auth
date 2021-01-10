@@ -36,9 +36,7 @@ export default function CheckEmailModal({ dismiss, jwtToken, phrase }) {
 
   return (
     <div className={styles.checkEmailModal}>
-      <div className={styles.checkEmailModalKeepThisTab}>
-        Keep this tab open
-      </div>
+      <div className={styles.checkEmailModalKeepThisTab}>Keep this tab open</div>
       <div>Use your phone to click the magic words in your email</div>
       <Button className={styles.magicWords}>{phrase}</Button>
 

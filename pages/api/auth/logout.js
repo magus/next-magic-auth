@@ -20,9 +20,7 @@ export default async function logout(req, res) {
   } catch (e) {
     console.error(e);
 
-    return res
-      .status(400)
-      .json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
 

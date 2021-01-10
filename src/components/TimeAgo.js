@@ -75,12 +75,7 @@ export default function TimeAgo(props) {
   }
 
   return (
-    <FormattedRelativeTime
-      value={timeAgoData.secondsAgo}
-      numeric="auto"
-      style="long"
-      updateIntervalInSeconds={1}
-    >
+    <FormattedRelativeTime value={timeAgoData.secondsAgo} numeric="auto" style="long" updateIntervalInSeconds={1}>
       {(formattedRelativeTime) => {
         // console.debug('[TimeAgo]', { formattedRelativeTime });
 

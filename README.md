@@ -2,7 +2,7 @@
 
 https://magicwords.vercel.app/
 
- **[magic email authentication for your nextjs app](https://magicwords.vercel.app/)**
+**[magic email authentication for your nextjs app](https://magicwords.vercel.app/)**
 
 - ✅ 🙈 No passwords
 - ✅ 👋 No third parties (Say goodbye to Facebook, Google, etc.)
@@ -13,10 +13,10 @@ https://magicwords.vercel.app/
 
 > Inspired by [Magic](https://magic.link/)
 
-
 # setup
 
 This authentication can be added to any NextJS app by following the setup instructions below.
+
 ## secrets
 
 In order for this package to function correctly, four mandatory environmental variables are required.
@@ -29,51 +29,51 @@ For example, if you are using Vercel for your deployments you can [store it as a
 
 1. `HASURA_ADMIN_SECRET`
 
-    Secret password to access Hasura as an admin, used by backend to make authenticated GraphQL requests in order to create, update and verify authenticated login requests and sessions.
+   Secret password to access Hasura as an admin, used by backend to make authenticated GraphQL requests in order to create, update and verify authenticated login requests and sessions.
 
-    Generate this value using a secure password tool
+   Generate this value using a secure password tool
 
 1. `JWT_SECRET`
 
-    The secret key used to generate secured JSON web tokens. For example, we have a value of
+   The secret key used to generate secured JSON web tokens. For example, we have a value of
 
-    ```
-    {
-      "type":"HS512",
-      "key": "zNZmbXfZuv/1cvMuieq9oW2ygtBOdJlu0x25Tyy0q9qkpNK6sa++Y2dj7z6xhTTa4mYuLfetsm6GfbKrkXkc9g=="
-    }
-    ```
+   ```
+   {
+     "type":"HS512",
+     "key": "zNZmbXfZuv/1cvMuieq9oW2ygtBOdJlu0x25Tyy0q9qkpNK6sa++Y2dj7z6xhTTa4mYuLfetsm6GfbKrkXkc9g=="
+   }
+   ```
 
-    This means we use `HS512` as the hashing algorithm and the `key` is the actual secret value.
+   This means we use `HS512` as the hashing algorithm and the `key` is the actual secret value.
 
-    You can use the commands and explanations below to generate a secure value for your use
+   You can use the commands and explanations below to generate a secure value for your use
 
-    ```sh
-    # output all system information
-    uname -a
-    # e.g. Linux magic-auth 5.4.0-51-generic #56-Ubuntu SMP Mon Oct 5 14:28:49 UTC 2020 x86_64 x86_64
-    # NOTE: `x86_64` indicates 64-bit
-    # we will select HS512 which uses SHA-512 since it is both
-    #   1. more secure than SHA-256 and
-    #   2. ~1.5x faster than SHA-256 on 64-bit systems (64-bit arithmetic internally)
-    # for 512 bits of entropy for HS512, encoded as base64 (6 bits per character)
-    # 512 / 6 = 85.33... characters ~= 86 characters
-    # generate a random string with 512-bits (64-bytes) of entropy and encode in base64
-    # this value will be our JWT_SECRET, used to sign our authentication keys and should be kept secure
-    openssl rand -base64 64
-    ```
+   ```sh
+   # output all system information
+   uname -a
+   # e.g. Linux magic-auth 5.4.0-51-generic #56-Ubuntu SMP Mon Oct 5 14:28:49 UTC 2020 x86_64 x86_64
+   # NOTE: `x86_64` indicates 64-bit
+   # we will select HS512 which uses SHA-512 since it is both
+   #   1. more secure than SHA-256 and
+   #   2. ~1.5x faster than SHA-256 on 64-bit systems (64-bit arithmetic internally)
+   # for 512 bits of entropy for HS512, encoded as base64 (6 bits per character)
+   # 512 / 6 = 85.33... characters ~= 86 characters
+   # generate a random string with 512-bits (64-bytes) of entropy and encode in base64
+   # this value will be our JWT_SECRET, used to sign our authentication keys and should be kept secure
+   openssl rand -base64 64
+   ```
 
-2. `SENDGRID_API_KEY`
+1. `SENDGRID_API_KEY`
 
-    Used to send emails to the login email address to authenticate login requests and sessions.
+   Used to send emails to the login email address to authenticate login requests and sessions.
 
-    [Signup for SendGrid](https://signup.sendgrid.com/) and [generate an API key](https://app.sendgrid.com/settings/api_keys) for use in this field.
+   [Signup for SendGrid](https://signup.sendgrid.com/) and [generate an API key](https://app.sendgrid.com/settings/api_keys) for use in this field.
 
-3. `MAXMIND_LICENSE_KEY`
+1. `MAXMIND_LICENSE_KEY`
 
-    [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) is a free, open source set of IP geolocation databases which can be used to secure your login sessions and requests.
+   [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) is a free, open source set of IP geolocation databases which can be used to secure your login sessions and requests.
 
-    Under [your account](https://www.maxmind.com/en/account) generate the license key under [**Services > My License Key**](https://www.maxmind.com/en/account)
+   Under [your account](https://www.maxmind.com/en/account) generate the license key under [**Services > My License Key**](https://www.maxmind.com/en/account)
 
 With these three values prepared we can proceed with the rest of the setup.
 
@@ -106,13 +106,12 @@ loginSendEmail  /api/events/loginSendEmail
 
 Now that we have included the required API routes, we should ensure all the configuration variables are set to the correct values. In general, sane defaults are chosen and you there are only a few which you **must** change, indicated with the ❗️, e.g. ❗️FRONTEND_HOST.
 
-| Config | Default | Description |
-| --- | --- | --- |
-| ❗️FRONTEND_HOST | `'https://magicwords.vercel.app'` | The full URL to the frontend host of this application |
-| ❗️EMAIL_FROM | `'magic@iamnoah.com'` | Email from address, you must verify this sender in SendGrid |
-| ❗️EMAIL_LOGIN_CONFIRM | `'/api/auth/confirm'` | The path to the `NextMagicAuth.API.Auth.confirm` route, setup in the route setup above |
-| ❗️EMAIL_LOGIN_CONFIRM_REDIRECT | `'/auth/confirm'` | The path to the page to show |
-
+| Config                          | Default                           | Description                                                                            |
+| ------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| ❗️FRONTEND_HOST                | `'https://magicwords.vercel.app'` | The full URL to the frontend host of this application                                  |
+| ❗️EMAIL_FROM                   | `'magic@iamnoah.com'`             | Email from address, you must verify this sender in SendGrid                            |
+| ❗️EMAIL_LOGIN_CONFIRM          | `'/api/auth/confirm'`             | The path to the `NextMagicAuth.API.Auth.confirm` route, setup in the route setup above |
+| ❗️EMAIL_LOGIN_CONFIRM_REDIRECT | `'/auth/confirm'`                 | The path to the page to show                                                           |
 
 ## postgres database
 
@@ -267,8 +266,8 @@ if (auth.isLoggedIn) {
 }
 ```
 
-
 # learn more
+
 ### migrations
 
 You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.

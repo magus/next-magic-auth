@@ -18,9 +18,7 @@ export default async function login(req, res) {
     if (error) {
       const [errorDetail] = error.details;
 
-      return res
-        .status(400)
-        .json({ error: true, message: errorDetail.message });
+      return res.status(400).json({ error: true, message: errorDetail.message });
     }
 
     const { email } = value;
@@ -31,33 +29,24 @@ export default async function login(req, res) {
 
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
-    const upsertLoginTokenWithUserResult = await graphql.query(
-      upsertLoginTokenWithUser,
-      {
-        variables: {
-          // user
-          email,
+    const upsertLoginTokenWithUserResult = await graphql.query(upsertLoginTokenWithUser, {
+      variables: {
+        // user
+        email,
 
-          // metadata for login token (user agent, ip, etc.)
-          ...requestMetadata,
-          // loginToken contains secret and expires
-          ...loginToken,
-        },
+        // metadata for login token (user agent, ip, etc.)
+        ...requestMetadata,
+        // loginToken contains secret and expires
+        ...loginToken,
       },
-    );
+    });
 
-    const [
-      { id: loginTokenId, userId },
-    ] = upsertLoginTokenWithUserResult.insert_loginToken.returning;
+    const [{ id: loginTokenId, userId }] = upsertLoginTokenWithUserResult.insert_loginToken.returning;
 
     // store loginToken id in cookie
     // returns a jwtToken for requesting the single loginToken request
     // returns phrase for check email modal
-    const { jwtToken, phrase } = auth.setupLoginRequest(
-      res,
-      loginTokenId,
-      loginToken.secret,
-    );
+    const { jwtToken, phrase } = auth.setupLoginRequest(res, loginTokenId, loginToken.secret);
 
     return res.status(200).json({
       error: false,
@@ -67,9 +56,7 @@ export default async function login(req, res) {
   } catch (e) {
     console.error(e);
 
-    return res
-      .status(400)
-      .json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
 
@@ -93,10 +80,7 @@ const upsertLoginTokenWithUser = gql`
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw
         geo: $geo
-        user: {
-          data: { email: $email }
-          on_conflict: { constraint: user_email_key, update_columns: updated }
-        }
+        user: { data: { email: $email }, on_conflict: { constraint: user_email_key, update_columns: updated } }
       }
     ) {
       returning {

@@ -59,9 +59,7 @@ export default async function loginSendEmail(req, res) {
 
     // if approved, ignore event
     if (approved) {
-      return res
-        .status(200)
-        .json({ error: false, data: { message: 'approved, ignored event' } });
+      return res.status(200).json({ error: false, data: { message: 'approved, ignored event' } });
     }
 
     // not approved, send email
@@ -95,8 +93,6 @@ export default async function loginSendEmail(req, res) {
   } catch (e) {
     console.error(e);
 
-    return res
-      .status(400)
-      .json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }

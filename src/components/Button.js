@@ -3,13 +3,7 @@ import Link from 'next/link';
 
 import styles from 'styles/Button.module.css';
 
-export default function Button({
-  className,
-  children,
-  href,
-  simple,
-  ...restProps
-}) {
+export default function Button({ className, children, href, simple, ...restProps }) {
   if (simple) {
     return (
       <button className={[styles.simple, className].join(' ')} {...restProps}>
@@ -19,10 +13,7 @@ export default function Button({
   } else if (href) {
     return (
       <Link href={href}>
-        <a
-          className={[className, styles.inlineBlock, styles.button].join(' ')}
-          {...restProps}
-        >
+        <a className={[className, styles.inlineBlock, styles.button].join(' ')} {...restProps}>
           {children}
         </a>
       </Link>

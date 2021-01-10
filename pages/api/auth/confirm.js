@@ -45,24 +45,17 @@ export default async function loginConfirm(req, res) {
     //     </head>
     //   </html>
     // `);
-    return res
-      .status(302)
-      .redirect(`${loginConfirmUrl}?email=${data.loginToken.email}`);
+    return res.status(302).redirect(`${loginConfirmUrl}?email=${data.loginToken.email}`);
   } catch (e) {
     console.error(e);
 
-    return res
-      .status(400)
-      .json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
 
 const approveLoginToken = gql`
   mutation ApproveLoginToken($id: uuid!) {
-    loginToken: update_loginToken_by_pk(
-      pk_columns: { id: $id }
-      _set: { approved: true }
-    ) {
+    loginToken: update_loginToken_by_pk(pk_columns: { id: $id }, _set: { approved: true }) {
       secret
       expires
       email

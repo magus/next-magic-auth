@@ -32,8 +32,7 @@ const TokenKinds = {
   jwt: 'jwt',
 };
 
-const getExpires = (expiresMinutes) =>
-  new Date(Date.now() + expiresMinutes * 60 * 1000);
+const getExpires = (expiresMinutes) => new Date(Date.now() + expiresMinutes * 60 * 1000);
 
 function encodeJwtToken(kind, expiresMinutes, extraData) {
   const data = {
@@ -73,35 +72,27 @@ function setupLoginRequest(res, loginTokenId, loginTokenSecret) {
   // requesting client will send in /api/auth/complete
 
   // sign the login token kind and store in cookie
-  const { encoded, expires } = encodeJwtToken(
-    TokenKinds.login,
-    config.LOGIN_TOKEN_EXPIRES,
-    {
-      magicData: {
-        [JwtFields.MagicLoginRequest]: loginTokenId,
-      },
+  const { encoded, expires } = encodeJwtToken(TokenKinds.login, config.LOGIN_TOKEN_EXPIRES, {
+    magicData: {
+      [JwtFields.MagicLoginRequest]: loginTokenId,
     },
-  );
+  });
 
   // store login token to auth cookie
   cookie.set(res, encoded, { expires });
 
   // generate a jwt to access the specific loginToken
-  const jwtToken = encodeJwtToken(
-    TokenKinds.login,
-    config.LOGIN_TOKEN_EXPIRES,
-    {
-      hasuraData: {
-        [JwtFields.HasuraAllowedRoles]: [roles.login],
-        [JwtFields.HasuraDefaultRole]: roles.login,
-        // hijack hasura user id header and send loginToken id instead
-        [JwtFields.HasuraUserId]: loginTokenId,
-      },
-      magicData: {
-        [JwtFields.MagicLoginRequest]: loginTokenId,
-      },
+  const jwtToken = encodeJwtToken(TokenKinds.login, config.LOGIN_TOKEN_EXPIRES, {
+    hasuraData: {
+      [JwtFields.HasuraAllowedRoles]: [roles.login],
+      [JwtFields.HasuraDefaultRole]: roles.login,
+      // hijack hasura user id header and send loginToken id instead
+      [JwtFields.HasuraUserId]: loginTokenId,
     },
-  );
+    magicData: {
+      [JwtFields.MagicLoginRequest]: loginTokenId,
+    },
+  });
 
   // calculate phrase for showing on login for confirmation with email
   const phrase = words.getPhraseFromToken(loginTokenSecret);
@@ -111,20 +102,16 @@ function setupLoginRequest(res, loginTokenId, loginTokenSecret) {
 }
 
 function generateRefreshToken(loginTokenId, user) {
-  const refreshToken = encodeJwtToken(
-    TokenKinds.refresh,
-    config.JWT_REFRESH_TOKEN_EXPIRES,
-    {
-      hasuraData: {
-        [JwtFields.HasuraAllowedRoles]: [roles.self],
-        [JwtFields.HasuraDefaultRole]: roles.self,
-        [JwtFields.HasuraUserId]: user.id,
-      },
-      magicData: {
-        [JwtFields.MagicLoginRequest]: loginTokenId,
-      },
+  const refreshToken = encodeJwtToken(TokenKinds.refresh, config.JWT_REFRESH_TOKEN_EXPIRES, {
+    hasuraData: {
+      [JwtFields.HasuraAllowedRoles]: [roles.self],
+      [JwtFields.HasuraDefaultRole]: roles.self,
+      [JwtFields.HasuraUserId]: user.id,
     },
-  );
+    magicData: {
+      [JwtFields.MagicLoginRequest]: loginTokenId,
+    },
+  });
 
   return refreshToken;
 }
@@ -239,11 +226,7 @@ async function restoreLoginRequest(req, res, loginRequestId) {
 
     // return loginRequest to restore on client
     // will open check email modal and listen for login token changes
-    const loginRequest = setupLoginRequest(
-      res,
-      loginToken.id,
-      loginToken.secret,
-    );
+    const loginRequest = setupLoginRequest(res, loginToken.id, loginToken.secret);
 
     return loginRequest;
   }
@@ -256,10 +239,10 @@ function decodeJwtClaims(jwtToken) {
     return {};
   }
 
-  const {
-    [JwtFields.HasuraNamespace]: hasuraClaims,
-    [JwtFields.MagicNamespace]: magicClaims,
-  } = jwt.decode(jwtToken, config.JWT_SECRET.key);
+  const { [JwtFields.HasuraNamespace]: hasuraClaims, [JwtFields.MagicNamespace]: magicClaims } = jwt.decode(
+    jwtToken,
+    config.JWT_SECRET.key,
+  );
 
   return { ...hasuraClaims, ...magicClaims };
 }
@@ -282,11 +265,9 @@ export default {
 
   restoreLoginRequest,
 
-  getLoginRequest: (req) =>
-    getJwtField(getAuthCookie(req), JwtFields.MagicLoginRequest),
+  getLoginRequest: (req) => getJwtField(getAuthCookie(req), JwtFields.MagicLoginRequest),
 
-  getJwtTokenUserId: (req) =>
-    getJwtField(getAuthCookie(req), JwtFields.HasuraUserId),
+  getJwtTokenUserId: (req) => getJwtField(getAuthCookie(req), JwtFields.HasuraUserId),
 };
 
 // {
