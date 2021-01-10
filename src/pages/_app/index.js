@@ -7,19 +7,16 @@ import LoadingApp from './LoadingApp';
 let SentryConfig;
 
 if (process.browser) {
-  console.log('[SentryConfig]', 'setup');
-
   // Dynamically setup Sentry for client errors
   import('src/config/sentry').then((SentryConfigModule) => {
     SentryConfig = SentryConfigModule.default();
 
     window.addEventListener('error', (event) => {
-      console.log('[SentryConfig]', 'window.error', { event });
+      console.debug('[SentryConfig]', 'window.error', { event });
       SentryConfig.captureException(event.error, { errorSource: 'browser.window.error' });
+      // prevent bubbling to the Sentry.Integration.TryCatch
+      // handler which wraps all `addEventListener` functions
       event.stopPropagation();
-      event.stopImmediatePropagation();
-      event.preventDefault();
-      return false;
     });
   });
 } else {
@@ -54,7 +51,7 @@ export default class MyApp extends NextApp {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.log('componentDidCatch');
+    console.debug('componentDidCatch');
 
     if (SentryConfig) {
       const errorEventId = SentryConfig.captureException(error, {

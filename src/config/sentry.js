@@ -1,31 +1,63 @@
 // NOTE: This require will be replaced with `@sentry/browser`
 // client side thanks to the webpack config in next.config.js
 const Sentry = require('@sentry/node');
-const { Integrations } = require('@sentry/tracing');
-const SentryIntegrations = require('@sentry/integrations');
+const {
+  Integrations: { BrowserTracing: SentryIntegrationsBrowserTracing },
+} = require('@sentry/tracing');
+const { Debug: SentryIntegrationsDebug } = require('@sentry/integrations');
 const Cookie = require('js-cookie');
 
 const DEBUG = false;
-const IGNORE_ERRORS = false && process.env.NODE_ENV !== 'production';
+const IGNORE_ERRORS = process.env.NODE_ENV !== 'production';
 const RELEASE_DEFAULT = process.env.SENTRY_RELEASE;
+
+const ignoreErrors = [
+  // string or regex to match error message
+];
 
 // process.env.SENTRY_RELEASE will override the argument passed
 // (app.buildId) in server/server.js
 module.exports = function configureSentry(release = RELEASE_DEFAULT) {
+  // https://docs.sentry.io/clients/javascript/config/
   const sentryOptions = {
     dsn: process.env.SENTRY_DSN,
     release,
-
-    // do not default handle unhandled errors
-    defaultIntegrations: false,
-
-    // https://github.com/getsentry/sentry-javascript/blob/master/packages/tracing/src/browser/browsertracing.ts
-    integrations: [new Integrations.BrowserTracing()],
+    ignoreErrors,
     tracesSampleRate: 1.0,
-
     maxBreadcrumbs: 50,
     attachStacktrace: true,
   };
+
+  if (process.browser) {
+    // do not default integrations, setup manually
+    sentryOptions.defaultIntegrations = false;
+    // client side integrations (default integrations + browser tracing)
+    // https://github.com/getsentry/sentry-javascript/blob/4b2d249bfa274de50d96704c2e365c2b488e7eaa/packages/browser/src/sdk.ts
+    sentryOptions.integrations = [
+      new Sentry.Integrations.InboundFilters(),
+      new Sentry.Integrations.FunctionToString(),
+      // new Sentry.Integrations.TryCatch(),
+      new Sentry.Integrations.Breadcrumbs({
+        beacon: true, // Log HTTP requests done with the Beacon API
+        console: true, // Log calls to `console.log`, `console.debug`, etc
+        dom: true, // Log all click and keypress events
+        fetch: true, // Log HTTP requests done with the Fetch API
+        history: true, // Log calls to `history.pushState` and friends
+        sentry: true, // Log whenever we send an event to the server
+        xhr: true, // Log HTTP requests done with the XHR API
+      }),
+      // // https://docs.sentry.io/platforms/javascript/configuration/integrations/default/#globalhandlers
+      // new Sentry.Integrations.GlobalHandlers({
+      //   onerror: false,
+      //   onunhandledrejection: false,
+      // }),
+      new Sentry.Integrations.LinkedErrors(),
+      new Sentry.Integrations.UserAgent(),
+
+      // https://github.com/getsentry/sentry-javascript/blob/master/packages/tracing/src/browser/browsertracing.ts
+      new SentryIntegrationsBrowserTracing(),
+    ];
+  }
 
   // When we're developing locally
   if (IGNORE_ERRORS) {
@@ -46,7 +78,7 @@ module.exports = function configureSentry(release = RELEASE_DEFAULT) {
       // debugger set to true will pause in devtools debugger for every event
       // https://docs.sentry.io/platforms/node/integrations/pluggable-integrations/#debug
       sentryOptions.integrations.push(
-        new SentryIntegrations.Debug({
+        new SentryIntegrationsDebug({
           // Trigger DevTools debugger instead of using console.log
           debugger: false,
         }),
