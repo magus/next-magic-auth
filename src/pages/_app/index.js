@@ -17,6 +17,9 @@ if (process.browser) {
       console.log('[SentryConfig]', 'window.error', { event });
       SentryConfig.captureException(event.error, { errorSource: 'browser.window.error' });
       event.stopPropagation();
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      return false;
     });
   });
 } else {

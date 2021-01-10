@@ -16,6 +16,9 @@ module.exports = function configureSentry(release = RELEASE_DEFAULT) {
     dsn: process.env.SENTRY_DSN,
     release,
 
+    // do not default handle unhandled errors
+    defaultIntegrations: false,
+
     // https://github.com/getsentry/sentry-javascript/blob/master/packages/tracing/src/browser/browsertracing.ts
     integrations: [new Integrations.BrowserTracing()],
     tracesSampleRate: 1.0,
