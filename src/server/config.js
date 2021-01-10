@@ -1,8 +1,4 @@
 const {
-  NODE_ENV,
-
-  FRONTEND_HOST,
-
   HASURA_ADMIN_SECRET,
 
   USER_DB_SCHEMA_NAME,
@@ -20,16 +16,6 @@ const {
   EMAIL_FROM,
   EMAIL_FROMNAME,
 } = process.env;
-
-exports.NODE_ENV = NODE_ENV || 'production';
-
-const isProd = NODE_ENV === 'production';
-const LOCALHOST_FRONTEND = 'http://localhost:3000';
-
-exports.__DEV__ = !isProd;
-exports.__PROD__ = isProd;
-
-exports.FRONTEND_HOST = isProd ? FRONTEND_HOST || 'https://magicwords.vercel.app' : LOCALHOST_FRONTEND;
 
 exports.HASURA_ADMIN_SECRET = HASURA_ADMIN_SECRET;
 

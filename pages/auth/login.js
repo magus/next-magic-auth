@@ -54,10 +54,8 @@ function LoginForm(props) {
   return (
     <>
       <form className={styles.loginForm} onSubmit={handleSubmit}>
-        <label className={styles.loginLabel} htmlFor="email">
-          Email
-        </label>
         <input
+          id="email"
           className={styles.loginInput}
           name="email"
           type="email"
@@ -65,6 +63,9 @@ function LoginForm(props) {
           value={email}
           onChange={handleEmailInput}
         />
+        <label htmlFor="email" className={styles.loginLabel}>
+          Email
+        </label>
 
         <Button className={buttonStyles}>Login</Button>
       </form>

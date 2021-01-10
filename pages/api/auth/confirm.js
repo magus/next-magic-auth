@@ -4,7 +4,7 @@ import config from 'src/server/config';
 import graphql from 'src/server/graphql';
 import auth from 'src/server/auth';
 
-const loginConfirmUrl = `${config.FRONTEND_HOST}/auth/confirm`;
+const loginConfirmUrl = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/auth/confirm`;
 
 export default async function loginConfirm(req, res) {
   try {

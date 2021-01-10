@@ -104,14 +104,20 @@ loginSendEmail  /api/events/loginSendEmail
 
 ## configuration
 
-Now that we have included the required API routes, we should ensure all the configuration variables are set to the correct values. In general, sane defaults are chosen and you there are only a few which you **must** change, indicated with the ❗️, e.g. ❗️FRONTEND_HOST.
+Now that we have included the required API routes, we should ensure all the configuration variables are set to the correct values. In general, sane defaults are chosen and you there are only a few which you **must** change, indicated with the ❗️, e.g. ❗️HOSTNAME.
+
 
 | Config                          | Default                           | Description                                                                            |
 | ------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
-| ❗️FRONTEND_HOST                | `'https://magicwords.vercel.app'` | The full URL to the frontend host of this application                                  |
-| ❗️EMAIL_FROM                   | `'magic@iamnoah.com'`             | Email from address, you must verify this sender in SendGrid                            |
-| ❗️EMAIL_LOGIN_CONFIRM          | `'/api/auth/confirm'`             | The path to the `NextMagicAuth.API.Auth.confirm` route, setup in the route setup above |
-| ❗️EMAIL_LOGIN_CONFIRM_REDIRECT | `'/auth/confirm'`                 | The path to the page to show                                                           |
+| ❗️HOSTNAME                      | `'magicwords.vercel.app'`         | Hostname of this application                                                           |
+
+### server
+
+| Config                          | Default                           | Description                                                                            |
+| ------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| ❗️EMAIL_FROM                    | `'magic@iamnoah.com'`             | Email from address, you must verify this sender in SendGrid                            |
+| ❗️EMAIL_LOGIN_CONFIRM           | `'/api/auth/confirm'`             | The path to the `NextMagicAuth.API.Auth.confirm` route, setup in the route setup above |
+| ❗️EMAIL_LOGIN_CONFIRM_REDIRECT  | `'/auth/confirm'`                 | The path to the page to show                                                           |
 
 ## postgres database
 

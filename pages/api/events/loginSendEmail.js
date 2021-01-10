@@ -74,7 +74,7 @@ export default async function loginSendEmail(req, res) {
       })
       .join('&');
 
-    const loginConfirmUrl = `${config.FRONTEND_HOST}/api/auth/confirm?${queryParams}`;
+    const loginConfirmUrl = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/api/auth/confirm?${queryParams}`;
     const phrase = words.getPhraseFromToken(secret);
     const expiresIn = expiresMinutesDuration(config.LOGIN_TOKEN_EXPIRES);
     const emailHtml = loginConfirmEmail({

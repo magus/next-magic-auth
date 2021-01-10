@@ -1,8 +1,6 @@
 const EnvConfig = {
   DEV: process.env.NODE_ENV !== 'production',
 
-  APP_NAME: 'Magic',
-
   PROTOCOL: 'https',
   HOSTNAME: 'magicwords.vercel.app',
 

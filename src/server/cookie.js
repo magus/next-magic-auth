@@ -33,7 +33,7 @@ function generateCookie(name, value, extraOptions = {}) {
 
   const options = {
     maxAge: config.JWT_COOKIE_EXPIRES * 60 * 1000,
-    secure: config.__DEV__ ? false : true,
+    secure: __DEV__ ? false : true,
     httpOnly: true,
     path: '/',
     ...extraOptions,

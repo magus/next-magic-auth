@@ -8,7 +8,7 @@ export default class MyDocument extends Document {
 
   render() {
     return (
-      <Html>
+      <Html lang="en">
         <Head>
           {/*
           https://developers.google.com/analytics/devguides/collection/gtagjs/events
