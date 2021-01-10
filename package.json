@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn server:run",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "NODE_ENV=production yarn server:run",
     "server:run": "node src/server/server.js",
     "deploy": "now",
