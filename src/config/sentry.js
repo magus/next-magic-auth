@@ -6,7 +6,7 @@ const SentryIntegrations = require('@sentry/integrations');
 const Cookie = require('js-cookie');
 
 const DEBUG = false;
-const IGNORE_ERRORS = false && process.env.NODE_ENV !== 'production';
+const IGNORE_ERRORS = process.env.NODE_ENV !== 'production';
 
 // process.env.SENTRY_RELEASE will override the argument passed
 // (app.buildId) in server/server.js
