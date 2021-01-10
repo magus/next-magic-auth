@@ -40,12 +40,12 @@ export default async function loginRefresh(req, res) {
     }
 
     // lookup refresh token in backend to compare against authCookie
-    const { refreshToken_by_pk: serverRefreshToken } = await graphql.query(
-      getRefreshToken,
-      {
-        variables: { loginRequestId },
-      },
-    );
+    const {
+      refreshToken_by_pk: serverRefreshToken,
+      loginTokenUser: { user },
+    } = await graphql.query(getRefreshToken, {
+      variables: { loginRequestId },
+    });
 
     if (!serverRefreshToken) {
       throw new Error(
@@ -62,7 +62,9 @@ export default async function loginRefresh(req, res) {
       authCookie,
     );
 
-    return res.status(200).json({ error: false, jwtToken, loginRequestId });
+    return res
+      .status(200)
+      .json({ error: false, jwtToken, loginRequestId, user });
   } catch (e) {
     console.error(e);
 
@@ -71,6 +73,15 @@ export default async function loginRefresh(req, res) {
       .json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
+
+const UserForSelfFragment = gql`
+  fragment UserForSelfFragment on user {
+    id
+    email
+    created
+    updated
+  }
+`;
 
 const UserForLoginFragment = gql`
   fragment UserForLoginFragment on user {
@@ -89,7 +100,15 @@ const UserForLoginFragment = gql`
 const getRefreshToken = gql`
   ${UserForLoginFragment}
 
+  ${UserForSelfFragment}
+
   query GetRefreshToken($loginRequestId: uuid!) {
+    loginTokenUser: loginToken_by_pk(id: $loginRequestId) {
+      user {
+        ...UserForSelfFragment
+      }
+    }
+
     refreshToken_by_pk(loginTokenId: $loginRequestId) {
       loginTokenId
       value

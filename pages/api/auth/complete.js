@@ -11,7 +11,10 @@ export default async function loginComplete(req, res) {
       throw new Error('missing login request');
     }
 
-    const { loginToken } = await graphql.query(getLoginToken, {
+    const {
+      loginToken,
+      loginTokenUser: { user },
+    } = await graphql.query(getLoginToken, {
       variables: {
         id: loginRequestId,
       },
@@ -25,7 +28,9 @@ export default async function loginComplete(req, res) {
     // loginToken is approved, write authentication headers
     const jwtToken = await auth.refreshAuthentication(req, res, loginToken);
 
-    return res.status(200).json({ error: false, jwtToken, loginRequestId });
+    return res
+      .status(200)
+      .json({ error: false, jwtToken, loginRequestId, user });
   } catch (e) {
     console.error(e);
 
@@ -34,6 +39,15 @@ export default async function loginComplete(req, res) {
       .json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
+
+const UserForSelfFragment = gql`
+  fragment UserForSelfFragment on user {
+    id
+    email
+    created
+    updated
+  }
+`;
 
 const UserForLoginFragment = gql`
   fragment UserForLoginFragment on user {
@@ -52,7 +66,15 @@ const UserForLoginFragment = gql`
 const getLoginToken = gql`
   ${UserForLoginFragment}
 
+  ${UserForSelfFragment}
+
   query GetLoginToken($id: uuid!) {
+    loginTokenUser: loginToken_by_pk(id: $id) {
+      user {
+        ...UserForSelfFragment
+      }
+    }
+
     loginToken: loginToken_by_pk(id: $id) {
       id
       approved

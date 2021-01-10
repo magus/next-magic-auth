@@ -12,16 +12,15 @@ HomePage.title = null;
 
 export default function HomePage(props) {
   const auth = useAuth();
-  const [getMe, me] = graphql.me();
 
-  React.useEffect(() => {
-    getMe();
-  }, []);
+  // console.debug('[Home]', { auth });
 
   return (
     <Page className={styles.container}>
       <div className={styles.containerContent}>
-        <h1 className={styles.email}>{!me ? <span>&lrm;</span> : me.email}</h1>
+        <h1 className={styles.email}>
+          {!auth.user ? <span>&lrm;</span> : auth.user.email}
+        </h1>
 
         <LoginActivity />
 

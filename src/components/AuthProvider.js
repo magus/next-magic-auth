@@ -107,12 +107,19 @@ export function AuthProvider({ children }) {
   }, [state.expires]);
 
   async function setAuthentication(json) {
-    const { jwtToken, loginRequestId } = json;
+    const { jwtToken, loginRequestId, user } = json;
     const jwt = jwtToken.encoded;
     const expires = new Date(jwtToken.expires);
     const expireThreshold = ExpireDurationThreshold * (expires - Date.now());
 
-    set_state({ ...state, loginRequestId, jwt, expires, expireThreshold });
+    set_state({
+      ...state,
+      loginRequestId,
+      user,
+      jwt,
+      expires,
+      expireThreshold,
+    });
     return jwt;
   }
 
