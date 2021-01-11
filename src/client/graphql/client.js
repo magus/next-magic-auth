@@ -63,7 +63,7 @@ export function buildApolloClient(auth) {
     // https://www.apollographql.com/docs/link/links/error/#ignoring-errors
 
     if (networkError) {
-      console.error('[graphql]', 'networkError', networkError);
+      console.error('[ApolloClient]', 'networkError', networkError);
     }
 
     if (graphQLErrors) {
@@ -75,7 +75,7 @@ export function buildApolloClient(auth) {
         } else {
           // unhandled error, log it
           if (__DEV__) {
-            console.error('[graphql]', 'gqlError', gqlError);
+            console.error('[ApolloClient]', 'gqlError', gqlError);
           }
         }
       });
