@@ -112,9 +112,7 @@ export default {
     const [get, result] = useLazyQuery(gqls.me, {
       fetchPolicy: 'cache-and-network',
       context: {
-        headers: {
-          [headers.role]: roles.self,
-        },
+        role: roles.self,
       },
     });
 

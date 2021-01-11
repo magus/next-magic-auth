@@ -11,7 +11,7 @@ import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 
 const graphqlHost = 'magic.iamnoah.com/v1/graphql';
 
-const SharedHttpCache = new InMemoryCache();
+const SharedCache = new InMemoryCache();
 
 function getAuthHeaders(jwtToken) {
   if (!jwtToken) {
@@ -23,41 +23,58 @@ function getAuthHeaders(jwtToken) {
   };
 }
 
-export function buildApolloWebsocketClient(options = {}) {
-  const authHeaders = getAuthHeaders(options.anonymous ? null : options.jwtToken);
-
+function buildWebsocketLink(authHeaders, role) {
   // can only use web socket link in browser
   // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
-  const wsLink = !process.browser
-    ? null
-    : new WebSocketLink({
-        uri: `wss://${graphqlHost}`,
-        options: {
-          reconnect: true,
-          connectionParams: {
-            headers: {
-              ...authHeaders,
-              [headers.role]: options.anonymous ? undefined : options.role,
-            },
-          },
+  const wsLink = new WebSocketLink({
+    uri: `wss://${graphqlHost}`,
+    options: {
+      reconnect: true,
+      connectionParams: {
+        headers: {
+          ...authHeaders,
+          [headers.role]: role,
         },
-      });
+      },
+    },
+  });
 
-  const link = ApolloLink.from([wsLink]);
+  return wsLink;
+}
 
+export function buildApolloWebsocketClient(auth, options = {}) {
+  const errorLink = buildErrorLink(auth);
+
+  const jwtToken = options.jwt || auth.jwt;
+  const authHeaders = getAuthHeaders(options.anonymous ? null : jwtToken);
+  const role = options.anonymous ? undefined : options.role;
+  const wsLink = buildWebsocketLink(authHeaders, role);
+
+  const link = ApolloLink.from([errorLink, wsLink]);
   const cache = new InMemoryCache();
 
-  return new ApolloClient({
+  const client = new ApolloClient({
     link,
     cache,
   });
+
+  return { client, wsLink };
 }
 
 export function buildApolloClient(auth) {
-  let authHeaders = getAuthHeaders(auth.jwt);
+  const errorLink = buildErrorLink(auth);
+  const transportLink = buildTransportLink(auth);
 
-  const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
+  return new ApolloClient({
+    ssrMode: !process.browser,
+    link: ApolloLink.from([errorLink, transportLink]),
+    cache: SharedCache,
+  });
 
+  return client;
+}
+
+function buildErrorLink(auth) {
   const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
     // Ignoring errors
     // https://www.apollographql.com/docs/link/links/error/#ignoring-errors
@@ -84,7 +101,11 @@ export function buildApolloClient(auth) {
         // Refresh JWT token
         return new Observable(async (observer) => {
           console.debug('[ApolloClient]', 'auth.actions.refreshTokens');
-          await auth.actions.refreshTokens();
+          const refreshTokenResult = await auth.actions.refreshTokens();
+
+          if (!refreshTokenResult) {
+            console.error('[ApolloClient]', 'refreshTokens failure', { refreshTokenResult });
+          }
 
           // if jwtToken refreshed, rebuild auth headers and forward to replay request
 
@@ -106,18 +127,32 @@ export function buildApolloClient(auth) {
     }
   });
 
+  return errorLink;
+}
+
+function buildTransportLink(auth) {
+  let authHeaders = getAuthHeaders(auth.jwt);
+
+  const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
+
+  // add headers for auth http requests
+  // create wsLink instance for specific role
   const authMiddleware = new ApolloLink((operation, forward) => {
     // add the authorization to the headers
     // use prevContext to ensure we add to existing context
     operation.setContext((prevContext) => {
+      const role = prevContext.role || roles.user;
+
       const newContext = {
         ...prevContext,
         headers: {
-          [headers.role]: roles.user,
+          [headers.role]: role,
           ...prevContext.headers,
           ...authHeaders,
         },
       };
+
+      // console.debug('[ApolloClient]', 'authMiddleware', { role, prevContext, newContext });
 
       return newContext;
     });
@@ -125,11 +160,5 @@ export function buildApolloClient(auth) {
     return forward(operation);
   });
 
-  const link = ApolloLink.from([errorLink, authMiddleware, httpLink]);
-
-  return new ApolloClient({
-    ssrMode: !process.browser,
-    link,
-    cache: SharedHttpCache,
-  });
+  return ApolloLink.from([authMiddleware, httpLink]);
 }

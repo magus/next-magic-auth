@@ -8,7 +8,6 @@ import styles from 'styles/Login.module.css';
 
 export default function CheckEmailModal({ dismiss, jwtToken, phrase }) {
   const auth = useAuth();
-  const [getMe, me] = graphql.me();
   const approved = graphql.watchLoginRequest(jwtToken);
 
   React.useEffect(async () => {
@@ -19,15 +18,9 @@ export default function CheckEmailModal({ dismiss, jwtToken, phrase }) {
 
   React.useEffect(() => {
     if (auth.isLoggedIn) {
-      getMe();
-    }
-  }, [auth.isLoggedIn]);
-
-  React.useEffect(() => {
-    if (me) {
       dismiss();
     }
-  }, [me]);
+  }, [auth.isLoggedIn]);
 
   async function handleCancel() {
     await auth.actions.logout();

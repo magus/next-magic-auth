@@ -8,6 +8,12 @@ export default function LoginActivity() {
   const watchLoginRequests = graphql.watchLoginRequests();
   const watchRefreshTokens = graphql.watchRefreshTokens();
 
+  // // test auth graphql http request
+  // const [getMe] = graphql.me();
+  // React.useEffect(() => {
+  //   getMe();
+  // }, []);
+
   // by default empty results
   let loginRequests = [];
   let refreshTokens = [];

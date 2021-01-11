@@ -8,28 +8,82 @@ import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 
 // adhoc useSubscription to prevent opening web socket in client setup
 // also allows us to handle errors on the socket and reset client
-export default function useAdhocSubscription(query, { variables, anonymous, role = roles.user, ...options }) {
+
+// map of websocket clients for each role
+const websocketClients = {};
+const websocketSubscribers = {};
+
+function getWebsocketClientKey({ role, anonymous }) {
+  return anonymous ? 'anonymous' : role;
+}
+
+function createWebsocketClient(auth, options) {
+  const key = getWebsocketClientKey(options);
+  const needsCreate = !websocketClients[key] || websocketClients[key].jwtToken !== auth.jwt;
+
+  if (needsCreate) {
+    // close previous socket
+    closeWebsocketClient(key);
+
+    // console.debug('[useAdhocSubscription]', 'createWebsocketClient', { key });
+    websocketClients[key] = {
+      ...buildApolloWebsocketClient(auth, options),
+      jwtToken: auth.jwt,
+    };
+  }
+}
+
+function getWebsocketClient(auth, options) {
+  const key = getWebsocketClientKey(options);
+
+  createWebsocketClient(auth, options);
+
+  // increment count of subscribers
+  if (typeof websocketSubscribers[key] !== 'number') {
+    websocketSubscribers[key] = 0;
+  }
+  websocketSubscribers[key]++;
+
+  return websocketClients[key].client;
+}
+
+function closeWebsocketClient(key) {
+  if (websocketClients[key]) {
+    // console.debug('[useAdhocSubscription]', 'closeWebsocketClient', { key });
+    websocketClients[key].wsLink.subscriptionClient.close();
+    delete websocketClients[key];
+  }
+}
+
+function cleanupWebsocketClient(options) {
+  const key = getWebsocketClientKey(options);
+
+  // decrement count of subscribers
+  websocketSubscribers[key]--;
+
+  // console.debug('[useAdhocSubscription]', 'cleanupWebsocketClient', JSON.stringify({ key, websocketSubscribers }));
+
+  // if this is the last only subscriber, then close the websocket connection entirely
+  // client.link.subscriptionClient.close();
+  if (websocketSubscribers[key] === 0) {
+    closeWebsocketClient(key);
+  }
+}
+
+export default function useAdhocSubscription(query, { variables, ...options }) {
   const auth = useAuth();
   const [data, set_data] = React.useState(null);
   const [error, set_error] = React.useState(null);
 
-  const definition = getMainDefinition(query);
-  if (!definition || !(definition.kind === 'OperationDefinition' && definition.operation === 'subscription')) {
-    console.error('[useAdhocSubscription]', 'query is not a subscription', {
-      query,
-    });
-    throw new Error('query is not a subscription');
-  }
+  const client = React.useMemo(() => {
+    // get websocket client, creating it if needed
+    const client = getWebsocketClient(auth, options);
 
-  const jwtToken = options.jwt || auth.jwt;
+    // console.debug('[useAdhocSubscription]', 'getWebsocketClient', JSON.stringify({ options, websocketSubscribers }));
+    return client;
+  }, [auth.jwt]);
 
   React.useEffect(() => {
-    const client = buildApolloWebsocketClient({
-      jwtToken,
-      anonymous,
-      role,
-    });
-
     const observable = client.subscribe({
       query,
       variables,
@@ -40,26 +94,33 @@ export default function useAdhocSubscription(query, { variables, anonymous, role
         set_data(subscribeResult.data);
       },
       async (error) => {
-        if (JWT_VERIFY_FAIL_REGEX.test(error.message)) {
-          // refresh token and cause rebuild client (auth.jwt)
-          console.debug('[AdhocSubscription]', 'auth.actions.refreshTokens');
-          const refreshTokenResult = await auth.actions.refreshTokens();
-
-          if (!refreshTokenResult) {
-            console.error('[AdhocSubscription]', 'refreshTokens failure');
-          }
-        } else {
-          // otherwise set error and continue
-          set_error({ error });
-        }
+        // set error and continue
+        set_error(error);
       },
     );
 
     return function cleanup() {
+      // unsubscribe for subscription instance
       subscription.unsubscribe();
-      client.link.subscriptionClient.close();
+      cleanupWebsocketClient(options);
     };
-  }, [jwtToken]);
+  }, [client]);
+
+  if (!isSubscription(query)) {
+    console.error('[useAdhocSubscription]', 'query is not a subscription', {
+      query,
+    });
+    throw new Error('query is not a subscription');
+  }
 
   return { error, data, loading: !(error || data) };
+}
+
+function isSubscription(query) {
+  const definition = getMainDefinition(query);
+
+  if (!definition) return false;
+
+  const isSubscription = definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+  return isSubscription;
 }
