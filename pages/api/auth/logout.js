@@ -19,8 +19,9 @@ export default async function logout(req, res) {
     return res.status(200).json({ error: false });
   } catch (e) {
     console.error(e);
-
-    return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    // always return a 200 to ensure this never fails
+    // return res.status(400).json({ error: true, message: e.message, stack: e.stack.split('\n') });
+    return res.status(200).json({ error: true, message: e.message, stack: e.stack.split('\n') });
   }
 }
 
