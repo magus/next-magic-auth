@@ -2,6 +2,7 @@
   "name": "next-magic-auth",
   "version": "0.1.0",
   "private": true,
+  "workspaces": ["game"],
   "scripts": {
     "dev": "yarn server:run",
     "build": "NODE_ENV=production next build",

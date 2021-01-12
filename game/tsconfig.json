@@ -1,0 +1,31 @@
+// https://www.typescriptlang.org/tsconfig
+
+{
+    "compilerOptions": {
+        // node 14
+        "target": "es2020",
+        "lib": ["es2020"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+
+        "rootDir": "./src",
+        "outDir": "./build",
+        "sourceMap": true,
+        "allowJs": true,
+        "declaration": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+      "**/*.js",
+      "**/*.ts"
+    ]
+}
