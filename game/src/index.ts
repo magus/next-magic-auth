@@ -38,7 +38,6 @@ class CustomRelayRoom extends RelayRoom {
 
 // Define "relay" room
 gameServer.define('relay', CustomRelayRoom, { maxClients: 4 });
-matchMaker.createRoom('relay', /* options */ { test: 42 });
 
 // // Define "chat" room
 // gameServer.define("chat", ChatRoom)
@@ -75,11 +74,18 @@ matchMaker.createRoom('relay', /* options */ { test: 42 });
 //   console.log(`game server is going down.`);
 // });
 
-gameServer.listen(port);
-
 // process.on("uncaughtException", (e) => {
 //   console.log(e.stack);
 //   process.exit(1);
 // });
 
-console.log(`Listening on http://localhost:${port}`);
+async function setup() {
+  const room = await matchMaker.createRoom('relay', /* options */ { test: 42 });
+  console.debug('[setup]', { room });
+
+  gameServer.listen(port);
+
+  console.log(`Listening on http://localhost:${port}`);
+}
+
+setup();
