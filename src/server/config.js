@@ -37,7 +37,7 @@ exports.LOGIN_TOKEN_EXPIRES = LOGIN_TOKEN_EXPIRES || 10; // expire login token a
 // then we could use http only cookies for the jwt too (more secure)
 // https://github.com/hasura/graphql-engine/issues/2183
 // https://github.com/hasura/graphql-engine/pull/2327
-exports.COOKIE_DOMAIN = COOKIE_DOMAIN;
+exports.COOKIE_DOMAIN = COOKIE_DOMAIN || 'iamnoah.com';
 
 exports.SENDGRID_API_KEY = SENDGRID_API_KEY;
 // verified sender on sendgrid

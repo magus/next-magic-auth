@@ -39,7 +39,7 @@ function generateCookie(name, value, extraOptions = {}) {
     ...extraOptions,
   };
 
-  if (config.COOKIE_DOMAIN) {
+  if (!__DEV__ && config.COOKIE_DOMAIN) {
     options.domain = config.COOKIE_DOMAIN;
   }
 
