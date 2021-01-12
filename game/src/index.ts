@@ -31,13 +31,21 @@ const gameServer = new Server({
 // gameServer.define("lobby", LobbyRoom);
 
 class CustomRelayRoom extends RelayRoom {
+  // maxClients = 100;
+  autoDispose = false;
+
   onCreate(options) {
-    console.debug('CustomRelayRoom', 'onCreate');
+    console.debug('CustomRelayRoom', 'onCreate', { options });
   }
 }
 
 // Define "relay" room
-gameServer.define('relay', CustomRelayRoom, { maxClients: 4 });
+gameServer
+  .define('relay', CustomRelayRoom, /* default options */ { default: 'blah' })
+  .on('create', (room) => console.debug('[relay]', 'room created', room.roomId))
+  .on('dispose', (room) => console.debug('[relay]', 'room disposed', room.roomId))
+  .on('join', (room, client) => console.debug('[relay]', client.id, 'joined', room.roomId))
+  .on('leave', (room, client) => console.debug('[relay]', client.id, 'left', room.roomId));
 
 // // Define "chat" room
 // gameServer.define("chat", ChatRoom)
@@ -80,7 +88,7 @@ gameServer.define('relay', CustomRelayRoom, { maxClients: 4 });
 // });
 
 async function setup() {
-  const room = await matchMaker.createRoom('relay', /* options */ { test: 42 });
+  const room = await matchMaker.createRoom('relay', /* options */ { blah: 42 });
   console.debug('[setup]', { room });
 
   gameServer.listen(port);
