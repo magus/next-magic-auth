@@ -72,8 +72,10 @@ function cleanupWebsocketClient(options) {
 
 export default function useAdhocSubscription(query, { variables, ...options }) {
   const auth = useAuth();
-  const [data, set_data] = React.useState(null);
-  const [error, set_error] = React.useState(null);
+  const [result, set_result] = React.useState({
+    error: null,
+    data: null,
+  });
 
   const client = React.useMemo(() => {
     // get websocket client, creating it if needed
@@ -91,11 +93,12 @@ export default function useAdhocSubscription(query, { variables, ...options }) {
 
     const subscription = observable.subscribe(
       (subscribeResult) => {
-        set_data(subscribeResult.data);
+        const { data } = subscribeResult;
+        set_result((r) => ({ ...r, data, error: null }));
       },
       async (error) => {
         // set error and continue
-        set_error(error);
+        set_result((r) => ({ ...r, error }));
       },
     );
 
@@ -113,7 +116,10 @@ export default function useAdhocSubscription(query, { variables, ...options }) {
     throw new Error('query is not a subscription');
   }
 
-  return { error, data, loading: !(error || data) };
+  return {
+    ...result,
+    loading: !(result.error || result.data),
+  };
 }
 
 function isSubscription(query) {
