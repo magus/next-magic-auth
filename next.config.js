@@ -16,6 +16,7 @@ const __CONFIG = {
     ...EnvConfig,
   },
 
+  // https://nextjs.org/docs/api-reference/next.config.js/custom-webpack-config
   webpack: (config, { isServer, buildId }) => {
     config.plugins.push(
       new webpack.DefinePlugin({
