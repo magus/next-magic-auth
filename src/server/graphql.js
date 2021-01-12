@@ -2,7 +2,7 @@ import { GraphQLClient } from 'graphql-request';
 
 import config from './config';
 
-const endpoint = 'https://magic.iamnoah.com/v1/graphql';
+const endpoint = 'https://magic-graphql.iamnoah.com/v1/graphql';
 const client = new GraphQLClient(endpoint);
 
 export default {

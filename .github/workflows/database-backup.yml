@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  HASURA_HOST: https://magic.iamnoah.com
+  HASURA_HOST: https://magic-graphql.iamnoah.com
   TMP_DIR: ./database-backup
   VERSION: 1
 

@@ -150,7 +150,7 @@ The authentication mechanisms rely on a centralized database to store the login 
   sudo dokku plugin:install https://github.com/dokku/dokku-postgres.git
 
   # setup hostname you should replace with the domain you would like to use
-  dokku domains:add hasura magic.iamnoah.com
+  dokku domains:add hasura magic-graphql.iamnoah.com
 
   # setup postgres database hasura-db
   dokku postgres:create hasura-db
@@ -203,7 +203,7 @@ The authentication mechanisms rely on a centralized database to store the login 
 
 - You should now be able to visit the Hasura admin console by navigating to the domain you setup above
 
-  > e.g. https://magic.iamnoah.com/
+  > e.g. https://magic-graphql.iamnoah.com/
 
 - Now that you have confirmed everything is setup properly you can disable the admin console. Don't worry you can still access it locally but making it unavailable publically is a best practice for production.
 
@@ -216,8 +216,10 @@ The authentication mechanisms rely on a centralized database to store the login 
   > https://hasura.io/docs/1.0/graphql/core/migrations/migrations-setup.html#migrations-setup
 
   ```sh
-  hasura init hasura --endpoint https://magic.iamnoah.com
+  # Create a directory with endpoint and admin secret configured
+  hasura init hasura --endpoint https://magic-graphql.iamnoah.com
   export HASURA_GRAPHQL_ADMIN_SECRET=<ADMIN_SECRET>
+  cd hasura
   hasura console
   # this will open a browser tab pointed at a local server running the hasura admin console
   ```
@@ -281,14 +283,19 @@ You can now use the admin console to create new tables, view and edit rows, etc.
 As you make migrations you can squash from a particular migration all the way up to the latest, keeping them concise to avoid many migration folders initially when making many changes to setup the database.
 
 ```sh
+# Setup migration files for the first time by introspecting a server:
+hasura migrate create "init" --from-server
+```
+
+```sh
 # squash all migrations from version 1608459932016 to the latest
 hasura migrate squash --from 1608459932016
 ```
 
-You can use the migration under `hasura/migrations` to jump start your database with the models used by this demo. Be sure to replace https://magic.iamnoah.com with the domain you setup above.
+You can use the migration under `hasura/migrations` to jump start your database with the models used by this demo. Be sure to replace https://magic-graphql.iamnoah.com with the domain you setup above.
 
 ```sh
-hasura migrate apply --endpoint https://magic.iamnoah.com
+hasura migrate apply --endpoint https://magic-graphql.iamnoah.com
 ```
 
 ### remote ssh tricks

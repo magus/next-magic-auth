@@ -1,5 +1,5 @@
 version: 2
-endpoint: https://magic.iamnoah.com
+endpoint: https://magic-graphql.iamnoah.com
 metadata_directory: metadata
 actions:
   kind: synchronous
