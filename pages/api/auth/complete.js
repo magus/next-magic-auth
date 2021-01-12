@@ -8,7 +8,7 @@ export default async function loginComplete(req, res) {
     const loginRequestId = auth.getLoginRequest(req);
 
     if (!loginRequestId) {
-      throw new Error('missing login request');
+      throw new Error('missing login request in cookie, check cookie');
     }
 
     const {

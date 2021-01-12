@@ -16,7 +16,7 @@ export default async function loginRefresh(req, res) {
     const loginRequestId = auth.getLoginRequest(req);
 
     if (!loginRequestId) {
-      throw new Error('missing login request id');
+      throw new Error('missing login request in cookie, check cookie');
     }
 
     // token kind is not refresh, valid logging-in case
