@@ -25,7 +25,7 @@ function getAuthHeaders(jwtToken) {
 
 export function buildApolloClient(auth) {
   const errorLink = buildErrorLink(auth);
-  const { transportLink, cleanup } = buildTransportLink(auth);
+  const { transportLink, cleanup } = buildTransportLink(auth, { default: 'http' });
 
   const client = new ApolloClient({
     ssrMode: !process.browser,
@@ -36,8 +36,28 @@ export function buildApolloClient(auth) {
   return { client, cleanup };
 }
 
-function buildTransportLink(auth) {
+export function buildApolloWebsocketClient(auth, options = {}) {
+  const errorLink = buildErrorLink(auth);
+
+  const jwtToken = options.jwt || auth.jwt;
+  const authHeaders = getAuthHeaders(options.anonymous ? null : jwtToken);
+  const role = options.anonymous ? undefined : options.role;
+  const wsLink = buildWebsocketLink(authHeaders, role);
+
+  const link = ApolloLink.from([errorLink, wsLink]);
+  const cache = new InMemoryCache();
+
+  const client = new ApolloClient({
+    link,
+    cache,
+  });
+
+  return { client, wsLink };
+}
+
+function buildTransportLink(auth, options) {
   const authHttpLink = buildAuthenticatedHttpLink(auth);
+  const defaultWebsocket = options.default === 'websocket';
 
   if (!process.browser) {
     return {
@@ -55,7 +75,15 @@ function buildTransportLink(auth) {
   const transportLink = split(
     (operation) => {
       const context = operation.getContext();
-      return context.http;
+
+      // console.debug('[ApolloClient]', 'transport split', { context });
+
+      // allow context flags to force a transport type
+      if (context.http) return true;
+      if (context.websocket) return false;
+
+      // otherwise use default from options
+      return !defaultWebsocket;
     },
     authHttpLink,
     wsLinks,
@@ -102,25 +130,6 @@ function buildRoleWebsocketLinks(auth) {
   }, defaultLink);
 
   return { wsLinks, cleanupWebsocketConnections };
-}
-
-export function buildApolloWebsocketClient(auth, options = {}) {
-  const errorLink = buildErrorLink(auth);
-
-  const jwtToken = options.jwt || auth.jwt;
-  const authHeaders = getAuthHeaders(options.anonymous ? null : jwtToken);
-  const role = options.anonymous ? undefined : options.role;
-  const wsLink = buildWebsocketLink(authHeaders, role);
-
-  const link = ApolloLink.from([errorLink, wsLink]);
-  const cache = new InMemoryCache();
-
-  const client = new ApolloClient({
-    link,
-    cache,
-  });
-
-  return { client, wsLink };
 }
 
 function buildWebsocketLink(authHeaders, role) {
