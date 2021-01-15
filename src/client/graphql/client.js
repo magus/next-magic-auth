@@ -3,6 +3,7 @@ import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, Observable, split } 
 import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { WebSocketLink } from '@apollo/client/link/ws';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
 
 import { useAuth } from 'src/components/AuthProvider';
 import roles from 'src/shared/roles';
@@ -10,7 +11,6 @@ import headers from 'src/shared/headers';
 import { JWT_VERIFY_FAIL_REGEX } from 'src/client/graphql/constants';
 
 const graphqlHost = 'magic-graphql.iamnoah.com/v1/graphql';
-
 const SharedCache = new InMemoryCache();
 
 function getAuthHeaders(jwtToken) {
@@ -23,23 +23,85 @@ function getAuthHeaders(jwtToken) {
   };
 }
 
-function buildWebsocketLink(authHeaders, role) {
-  // can only use web socket link in browser
-  // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
-  const wsLink = new WebSocketLink({
-    uri: `wss://${graphqlHost}`,
-    options: {
-      reconnect: true,
-      connectionParams: {
-        headers: {
-          ...authHeaders,
-          [headers.role]: role,
-        },
-      },
-    },
+export function buildApolloClient(auth) {
+  const errorLink = buildErrorLink(auth);
+  const { transportLink, cleanup } = buildTransportLink(auth);
+
+  const client = new ApolloClient({
+    ssrMode: !process.browser,
+    link: ApolloLink.from([errorLink, transportLink]),
+    cache: SharedCache,
   });
 
-  return wsLink;
+  return { client, cleanup };
+}
+
+function buildTransportLink(auth) {
+  const authHttpLink = buildAuthenticatedHttpLink(auth);
+
+  if (!process.browser) {
+    return {
+      transportLink: authHttpLink,
+      cleanup: () => {},
+    };
+  }
+
+  // can only use web socket link in browser
+  // https://github.com/apollographql/subscriptions-transport-ws/issues/333#issuecomment-359261024
+
+  // client, setup websocket clients
+  const { wsLinks, cleanupWebsocketConnections } = buildRoleWebsocketLinks(auth);
+
+  const transportLink = split(
+    (operation) => {
+      const context = operation.getContext();
+      return context.http;
+    },
+    authHttpLink,
+    wsLinks,
+  );
+
+  return {
+    transportLink,
+    cleanup: cleanupWebsocketConnections,
+  };
+}
+
+function buildRoleWebsocketLinks(auth) {
+  const _wsLinkRefs = {};
+  function cleanupWebsocketConnections() {
+    Object.values(_wsLinkRefs).forEach((link) => {
+      link.subscriptionClient.close();
+    });
+  }
+
+  const defaultLink = buildWebsocketLink();
+  const authHeaders = getAuthHeaders(auth.jwt);
+
+  _wsLinkRefs.default = defaultLink;
+
+  const wsLinks = Object.keys(roles).reduce((nextLink, role) => {
+    const roleLink = buildWebsocketLink(authHeaders, role);
+
+    // store ref to link for closing websocket when client refreshes
+    _wsLinkRefs[role] = roleLink;
+
+    // return this split so that we can attach next roleLink to this split
+    // end result is nested splits that will ultimately hit defaultLink if none match
+    // e.g. (linkA, linkB) is a split
+    //      (user, (self, (admin, (login, anonymous)))
+    return split(
+      (operation) => {
+        const context = operation.getContext();
+        // console.debug('split', context.role, { role });
+        return context.role === role;
+      },
+      roleLink,
+      nextLink,
+    );
+  }, defaultLink);
+
+  return { wsLinks, cleanupWebsocketConnections };
 }
 
 export function buildApolloWebsocketClient(auth, options = {}) {
@@ -61,17 +123,19 @@ export function buildApolloWebsocketClient(auth, options = {}) {
   return { client, wsLink };
 }
 
-export function buildApolloClient(auth) {
-  const errorLink = buildErrorLink(auth);
-  const transportLink = buildTransportLink(auth);
-
-  return new ApolloClient({
-    ssrMode: !process.browser,
-    link: ApolloLink.from([errorLink, transportLink]),
-    cache: SharedCache,
+function buildWebsocketLink(authHeaders, role) {
+  const subscriptionClient = new SubscriptionClient(`wss://${graphqlHost}`, {
+    lazy: true,
+    reconnect: true,
+    connectionParams: {
+      headers: {
+        ...authHeaders,
+        [headers.role]: role,
+      },
+    },
   });
 
-  return client;
+  return new WebSocketLink(subscriptionClient);
 }
 
 function buildErrorLink(auth) {
@@ -130,8 +194,8 @@ function buildErrorLink(auth) {
   return errorLink;
 }
 
-function buildTransportLink(auth) {
-  let authHeaders = getAuthHeaders(auth.jwt);
+function buildAuthenticatedHttpLink(auth) {
+  const authHeaders = getAuthHeaders(auth.jwt);
 
   const httpLink = new HttpLink({ uri: `https://${graphqlHost}` });
 

@@ -5,15 +5,31 @@ import { useAuth } from 'src/components/AuthProvider';
 import { buildApolloClient } from 'src/client/graphql/client';
 
 export default function ApolloProviderWrapper({ children }) {
-  const instance = React.useRef({ key: 1 });
+  const instance = React.useRef({
+    key: 1,
+    cleanup: () => {},
+  });
+
   const auth = useAuth();
 
   // console.debug('[ApolloProvider]', 'auth change', { auth });
 
+  React.useEffect(() => {
+    return function unmount() {
+      // console.debug('[ApolloProvider]', 'unmount');
+      // close websocket connections on client
+      instance.current.cleanup();
+    };
+  }, []);
+
   // rebuild apollo client when auth changes
   return React.useMemo(() => {
     // setup new client
-    const client = buildApolloClient(auth);
+    const { client, cleanup } = buildApolloClient(auth);
+
+    // cleanup last client and store ref to new cleanup
+    instance.current.cleanup();
+    instance.current.cleanup = cleanup;
 
     // console.debug('[ApolloProvider]', 'rebuild client', { client });
 
