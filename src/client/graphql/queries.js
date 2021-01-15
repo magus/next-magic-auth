@@ -108,11 +108,12 @@ export default {
     return { ...result, loginToken };
   },
 
-  me: () => {
+  me: (websocket) => {
     const [get, result] = useLazyQuery(gqls.me, {
       fetchPolicy: 'cache-and-network',
       context: {
         role: roles.self,
+        websocket,
       },
     });
 

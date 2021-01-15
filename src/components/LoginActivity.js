@@ -9,7 +9,7 @@ export default function LoginActivity() {
   const watchRefreshTokens = graphql.watchRefreshTokens();
 
   // // test auth graphql http request
-  // const [getMe, me] = graphql.me();
+  // const [getMe, me] = graphql.me(true /* websocket */);
   // console.debug({ me });
   // React.useEffect(() => {
   //   getMe();
