@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "game"
+    "game-server"
   ],
   "scripts": {
     "dev": "yarn server:run",
