@@ -23,7 +23,7 @@ export default function ApolloProviderWrapper({ children }) {
   }, []);
 
   // rebuild apollo client when auth changes
-  return React.useMemo(() => {
+  const { client, key } = React.useMemo(() => {
     // setup new client
     const { client, cleanup } = buildApolloClient(auth);
 
@@ -43,6 +43,8 @@ export default function ApolloProviderWrapper({ children }) {
 
     // console.debug('[ApolloProvider]', { key });
 
-    return <ApolloProvider {...{ key, client }}>{children}</ApolloProvider>;
+    return { client, key };
   }, [auth.jwt]);
+
+  return <ApolloProvider {...{ key, client }}>{children}</ApolloProvider>;
 }
