@@ -10,8 +10,8 @@ GamePage.title = null;
 
 const ModuleLoaders = [
   {
-    name: 'luxon',
-    load: () => import('luxon'),
+    name: 'Real-time communication utilites',
+    load: () => import('colyseus.js'),
   },
 ];
 
@@ -24,7 +24,7 @@ export default function GamePage(props) {
   React.useEffect(() => {
     console.debug('[Game]', 'mount');
     ModuleLoaders.forEach((moduleLoader) => {
-      set_message(`Loading ${moduleLoader.name}`);
+      set_message(`${moduleLoader.name}`);
       moduleLoader.load().then((...args) => {
         set_numberLoaded((n) => n + 1);
       });

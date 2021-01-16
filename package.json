@@ -2,7 +2,9 @@
   "name": "next-magic-auth",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["game"],
+  "workspaces": [
+    "game"
+  ],
   "scripts": {
     "dev": "yarn server:run",
     "build": "NODE_ENV=production next build",
@@ -22,6 +24,7 @@
     "@sentry/integrations": "^5.29.2",
     "@sentry/node": "^5.29.2",
     "@sentry/tracing": "^5.29.2",
+    "colyseus.js": "^0.14.1",
     "cookie": "^0.4.1",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
