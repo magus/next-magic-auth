@@ -21,7 +21,7 @@ export default async function login(req, res) {
       return res.status(400).json({ error: true, message: errorDetail.message });
     }
 
-    const { email } = value;
+    const email = value.email.toLowerCase();
 
     const loginToken = auth.generateLoginToken();
 
