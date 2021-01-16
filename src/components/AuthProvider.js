@@ -28,7 +28,9 @@ const ExpireDurationThreshold = 0.25;
 export function AuthProvider({ children }) {
   const instance = React.useRef({
     pendingRefresh: null,
+    timerFrequencyMs: ExpireTimerFrequencyMs,
   });
+
   const modal = useModal();
   const [state, set_state] = React.useState(LoggedOutState);
   const [init, set_init] = React.useState(false);
@@ -85,19 +87,19 @@ export function AuthProvider({ children }) {
         await refreshTokens();
       }
       // wait until threshold or ping at default frequency
-      const nextTimeoutMs = timeUntilThreshold > 0 ? timeUntilThreshold : ExpireTimerFrequencyMs;
+      const nextTimeoutMs = timeUntilThreshold > 0 ? timeUntilThreshold : instance.current.timerFrequencyMs;
 
-      // console.debug('[AuthProvider]', 'checkExpires', {
-      //   timeUntilThreshold,
-      //   nextTimeoutMs,
-      // });
+      console.debug('[AuthProvider]', 'checkExpires', {
+        timeUntilThreshold,
+        nextTimeoutMs,
+      });
 
       // call again near expire threshold
       timeoutId = setTimeout(checkExpires, nextTimeoutMs);
     }
 
     // start checking expires
-    timeoutId = setTimeout(checkExpires, ExpireTimerFrequencyMs);
+    timeoutId = setTimeout(checkExpires, instance.current.timerFrequencyMs);
 
     return function cleanup() {
       // console.debug('checkExpires', 'cleanup');
@@ -174,29 +176,30 @@ export function AuthProvider({ children }) {
 
         if (json.error) {
           await logout();
-          return false;
+          return true;
         } else if (json.loginRequestApproved) {
           await completeLogin();
-          return false;
+          return true;
         } else if (json.loginRequest) {
           modal.open(CheckEmailModal, {
             props: json.loginRequest,
             disableBackgroundDismiss: true,
           });
-          return false;
+          return true;
         } else if (json.jwtToken) {
-          return await setAuthentication(json);
+          await setAuthentication(json);
+          return true;
         } else if (response.status === 200) {
           // no-op, no cookie no refresh
-          return false;
+          return true;
         }
 
-        console.error('[AuthProvider]', 'handleRefreshTokens', 'unrecognized refresh response', { response });
-        return false;
+        console.error('[AuthProvider]', 'handleRefreshTokens', { response, json });
       } catch (error) {
-        console.error('[AuthProvider]', 'handleRefreshTokens', error);
-        return false;
+        console.error('[AuthProvider]', 'handleRefreshTokens', { error });
       }
+
+      return false;
     }
 
     // set shared pendingRefresh
@@ -204,6 +207,17 @@ export function AuthProvider({ children }) {
 
     // wait shared pending refresh
     const result = await instance.current.pendingRefresh;
+
+    // handle backoff for retrying
+    if (!result) {
+      // unable to handle response, increase latency for next request
+      console.debug('[AuthProvider]', 'exponential backoff timerFrequencyMs');
+      instance.current.timerFrequencyMs *= 2;
+    } else {
+      // reset timer frequency
+      console.debug('[AuthProvider]', 'restoring timerFrequencyMs');
+      instance.current.timerFrequencyMs = ExpireTimerFrequencyMs;
+    }
 
     // reset pendingRefresh back to null
     instance.current.pendingRefresh = null;
