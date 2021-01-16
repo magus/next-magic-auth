@@ -128,7 +128,7 @@ export default {
   },
 
   watchLoginRequests: () => {
-    const { loading, ...result } = useAdhocSubscription(gqls.watchLoginRequests, {
+    const result = useAdhocSubscription(gqls.watchLoginRequests, {
       role: roles.self,
     });
 
@@ -138,11 +138,12 @@ export default {
       loginRequests = result.data.loginToken;
     }
 
+    const loading = result.error || result.loading;
     return { loading, loginRequests };
   },
 
   watchRefreshTokens: () => {
-    const { loading, ...result } = useAdhocSubscription(gqls.watchRefreshTokens, {
+    const result = useAdhocSubscription(gqls.watchRefreshTokens, {
       role: roles.self,
     });
 
@@ -152,6 +153,7 @@ export default {
       refreshTokens = result.data.refreshToken;
     }
 
+    const loading = result.error || result.loading;
     return { loading, refreshTokens };
   },
 };

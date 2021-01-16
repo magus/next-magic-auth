@@ -19,8 +19,9 @@ export default function LoginActivity() {
   let loginRequests = [];
   let refreshTokens = [];
 
-  // Wait for both results before displaying
   const loading = watchLoginRequests.loading || watchRefreshTokens.loading;
+
+  // Wait for both results before displaying
   if (!loading) {
     refreshTokens = watchRefreshTokens.refreshTokens;
 
@@ -41,6 +42,7 @@ export default function LoginActivity() {
     });
   }
 
+  // console.debug('[LoginActivity]', { loading });
   return (
     <>
       <RefreshTokens {...{ loading, refreshTokens }} />
