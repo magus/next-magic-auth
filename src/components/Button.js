@@ -12,8 +12,8 @@ export default function Button({ className, children, href, simple, ...restProps
     );
   } else if (href) {
     return (
-      <Link href={href}>
-        <a className={[className, styles.inlineBlock, styles.button].join(' ')} {...restProps}>
+      <Link href={href} {...restProps} {...restProps}>
+        <a className={[className, styles.inlineBlock, styles.button].join(' ')} disabled={restProps.disabled}>
           {children}
         </a>
       </Link>

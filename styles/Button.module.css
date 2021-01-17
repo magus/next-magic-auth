@@ -19,6 +19,11 @@
   justify-content: center;
 }
 
+.button[disabled] {
+  pointer-events: none;
+  background-color: rgba(var(--gray), 1.0);
+}
+
 .simple {
   cursor: pointer;
 }
