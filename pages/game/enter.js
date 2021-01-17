@@ -1,9 +1,9 @@
 import * as React from 'react';
 
+import * as Colyseus from 'colyseus.js';
+
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
-
-import * as Colyseus from 'colyseus.js';
 
 export default function GameEnter() {
   console.debug({ Colyseus });
