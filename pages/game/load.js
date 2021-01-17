@@ -118,7 +118,7 @@ export default function Page(props) {
                   animate={{ opacity: 1, x: +0, height: 20 }}
                   exit={{ opacity: 0, y: +25, height: 20 }}
                 >
-                  <div className={styles.status}>[{status === LoadStatus.success ? '✅' : '⏳'}]</div>
+                  <div className={styles.status}>{status === LoadStatus.success ? '✅' : '⏳'}</div>
                   <div className={styles.message}>{moduleLoader.message}</div>
                 </motion.div>
               </AnimatePresence>
