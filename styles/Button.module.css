@@ -4,6 +4,7 @@
   margin: var(--spacer-2) 0 0 0;
 
   width: 100%;
+  padding: 0 var(--spacer);
   height: var(--button-height);
   border-radius: var(--spacer);
   background-color: rgba(var(--main-color), 1.0);
