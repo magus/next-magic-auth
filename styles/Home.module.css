@@ -10,7 +10,6 @@
 }
 
 .containerContent {
-  padding: var(--spacer-3);
   max-height: 100%;
   max-width: 100%;
   overflow-y: auto;
