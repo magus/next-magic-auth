@@ -22,12 +22,9 @@ export default function GameEnter() {
         // gl.shadowMap.type = THREE.PCFSoftShadowMap;
       }}
     >
-      <Stats />
-      <Debug />
-      {/* <OrbitControls /> */}
+      <Debug stats plane orbitControls={false} />
 
       <Light />
-      <Plane />
 
       <Camera position={[1, 3, CAMERA_HEIGHT]} />
 
@@ -71,6 +68,30 @@ function Camera(props) {
   return <perspectiveCamera ref={ref} {...props} />;
 }
 
+function Debug(props) {
+  React.useEffect(() => {
+    window.THREE = THREE;
+    window.__game = {};
+  }, []);
+
+  return (
+    <>
+      {!props.plane ? null : <Plane />}
+      {!props.stats ? null : <Stats />}
+      {!props.orbitControls ? null : <OrbitControls />}
+    </>
+  );
+}
+
+function Light() {
+  return (
+    <React.Fragment>
+      <ambientLight intensity={0.5} penumbra={1} />
+      {/* <spotLight intensity={0.1} position={[0, 10, 0]} penumbra={1} castShadow /> */}
+    </React.Fragment>
+  );
+}
+
 function Plane() {
   const InfiniteGridHelper = require('@three/InfiniteGridHelper').default;
 
@@ -91,21 +112,13 @@ function Plane() {
   );
 }
 
-function Debug() {
-  React.useEffect(() => {
-    window.THREE = THREE;
-    window.__game = {};
-  }, []);
-
-  return null;
-}
-
-function Light() {
+function Stats(props) {
   return (
-    <React.Fragment>
-      <ambientLight intensity={0.5} penumbra={1} />
-      {/* <spotLight intensity={0.1} position={[0, 10, 0]} penumbra={1} castShadow /> */}
-    </React.Fragment>
+    <DreiStats
+      showPanel={0} // Start-up panel (default=0)
+      className="stats" // Optional className to add to the stats container dom element
+      {...props} // All stats.js props are valid
+    />
   );
 }
 
@@ -127,16 +140,6 @@ function OrbitControls() {
       enableDamping
       minPolarAngle={Math.PI / 3}
       maxPolarAngle={Math.PI / 2}
-    />
-  );
-}
-
-function Stats(props) {
-  return (
-    <DreiStats
-      showPanel={0} // Start-up panel (default=0)
-      className="stats" // Optional className to add to the stats container dom element
-      {...props} // All stats.js props are valid
     />
   );
 }
