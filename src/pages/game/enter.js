@@ -8,7 +8,7 @@ import { Stats as DreiStats } from '@react-three/drei';
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
 
-const CAMERA_HEIGHT = 50;
+const CAMERA_HEIGHT = 100;
 
 export default function GameEnter() {
   return (
@@ -22,17 +22,17 @@ export default function GameEnter() {
         // gl.shadowMap.type = THREE.PCFSoftShadowMap;
       }}
     >
-      <Debug stats plane orbitControls={false} />
+      <Debug stats={true} plane={true} orbitControls={false} />
 
       <Light />
 
-      <Camera position={[1, 3, CAMERA_HEIGHT]} />
+      <Camera position={[1, CAMERA_HEIGHT, 3]} />
 
-      <Player position={[10, 10, 0]} />
-      <Player position={[41, 23, 0]} />
-      <Player position={[1, 3, 0]} />
-      <Player position={[9, 14, 0]} />
-      <Player position={[30, 30, 0]} />
+      <Player position={[10, 0, 10]} />
+      <Player position={[22, 0, 23]} />
+      <Player position={[1, 0, 3]} />
+      <Player position={[9, 0, 14]} />
+      <Player position={[30, 0, 30]} />
     </Canvas>
   );
 }
@@ -43,7 +43,7 @@ function Player(props) {
 
   return (
     <group ref={ref} {...props}>
-      <mesh transparent scale={[1, 1, 1]}>
+      <mesh transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
         <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
 
         <meshPhysicalMaterial attach="material" color="red" opacity={1.0} />
@@ -58,14 +58,17 @@ function Camera(props) {
 
   // Make the camera known to the system
   React.useEffect(() => {
-    window.__game.cameraRef = ref.current;
+    // window.__game.cameraRef = ref.current;
     void setDefaultCamera(ref.current);
   }, []);
 
   // Update it every frame
   useFrame(() => ref.current.updateMatrixWorld());
 
-  return <perspectiveCamera ref={ref} {...props} />;
+  // by default x is horizontal, z is vertical and y is the 3rd dimension
+  // so we rotate the camera about the x axis so that the plane is facing the camera
+  // this allows us to use x/z for horizontal/vertical position and y as the third dimension (jump) when needed
+  return <perspectiveCamera ref={ref} rotation={[-Math.PI / 2, 0, 0]} {...props} />;
 }
 
 function Debug(props) {
@@ -97,12 +100,8 @@ function Plane() {
 
   extend({ InfiniteGridHelper });
 
-  // by default x is horizontal, z is vertical and y is the 3rd dimension
-  // so we rotate the plane about the x axis so that it is facing the camera
-  // this allows us to use x/y for horizontal/vertical position and z as the third dimension (jump) when needed
-
   return (
-    <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+    <mesh position={[0, 0, 0]} rotation={[0, 0, 0]} receiveShadow>
       <gridHelper args={[100, 100, 'red', 'white']} position={[0, 0, 0]} rotation={[0, 0, 0]} />
       <infiniteGridHelper args={[1, 1]} />
 
@@ -130,16 +129,16 @@ function OrbitControls() {
   const ref = React.useRef();
   const { camera, gl, invalidate } = useThree();
 
-  // useFrame(() => ref.current.update());
+  useFrame(() => ref.current.update());
 
   return (
     <orbitControls
       ref={ref}
       args={[camera, gl.domElement]}
-      autoRotate
+      // autoRotate
       enableDamping
-      minPolarAngle={Math.PI / 3}
-      maxPolarAngle={Math.PI / 2}
+      // minPolarAngle={Math.PI / 3}
+      // maxPolarAngle={Math.PI / 2}
     />
   );
 }
