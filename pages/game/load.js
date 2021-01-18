@@ -17,6 +17,19 @@ const ModuleLoaders = [
   null,
 ].filter((_) => !!_);
 
+// Push a bunch of sleepers to test loading multiple modules
+ModuleLoaders.push(
+  ...new Array(20).fill(0).map((_, i) => {
+    const seconds = +(Math.random() * 4).toFixed(2);
+
+    return {
+      key: `sleep-${i}`,
+      message: `Sleeping for ${seconds} seconds`,
+      load: () => sleep(seconds),
+    };
+  }),
+);
+
 const MAX_CONCURRENCY = 2;
 
 Page.title = null;
@@ -53,10 +66,10 @@ export default function Page(props) {
       console.debug('[Load]', 'loadModule', moduleLoader.key);
       setModuleStatus(i, LoadStatus.pending);
 
-      moduleLoader.load().then((...args) => {
-        console.info(moduleLoader.key, ...args);
-        setModuleStatus(i, LoadStatus.success);
-      });
+      const result = await moduleLoader.load();
+
+      console.info(moduleLoader.key, result);
+      setModuleStatus(i, LoadStatus.success);
     }
 
     const active = state.filter(({ status }) => status === LoadStatus.pending).length;
@@ -93,42 +106,48 @@ export default function Page(props) {
   // console.debug("[Load]", { state, stateByTime });
 
   return (
-    <PageContainer className={styles.container}>
+    <PageContainer forceWindowHeight>
       <div className={styles.container}>
-        <Button className={styles.button} disabled={enterGameDisabled} prefetch={false} href="/game/enter">
-          Enter Game
-        </Button>
+        <div className={styles.topContainer}>
+          <Button className={styles.button} disabled={enterGameDisabled} prefetch={false} href="/game/enter">
+            Enter Game
+          </Button>
 
-        <div className={styles.loading}>
-          <motion.div className={styles.loaded} animate={loadingStyle} onAnimationComplete={handleTransitionEnd} />
+          <div className={styles.loading}>
+            <motion.div className={styles.loaded} animate={loadingStyle} onAnimationComplete={handleTransitionEnd} />
+          </div>
+
+          <div className={styles.loadCount}>{`${numberLoaded} / ${ModuleLoaders.length}`}</div>
         </div>
 
-        <div className={styles.loadCount}>{`${numberLoaded} / ${ModuleLoaders.length}`}</div>
-
-        <div className={styles.messages}>
-          {stateByTime.map(({ status, moduleLoader }, i) => {
-            return (
-              <AnimatePresence key={moduleLoader.key}>
-                <motion.div
-                  key={moduleLoader.key}
-                  className={styles.loadStatus}
-                  layout
-                  transition={spring}
-                  initial={{ opacity: 0, x: -25, height: 20 }}
-                  animate={{ opacity: 1, x: +0, height: 20 }}
-                  exit={{ opacity: 0, y: +25, height: 20 }}
-                >
-                  <div className={styles.status}>{status === LoadStatus.success ? '✅' : '⏳'}</div>
-                  <div className={styles.message}>{moduleLoader.message}</div>
-                </motion.div>
-              </AnimatePresence>
-            );
-          })}
+        <div className={styles.bottomContainer}>
+          <div className={styles.messages}>
+            {stateByTime.map(({ status, moduleLoader }, i) => {
+              return (
+                <AnimatePresence key={moduleLoader.key}>
+                  <motion.div
+                    key={moduleLoader.key}
+                    className={styles.loadStatus}
+                    layout
+                    transition={spring}
+                    initial={{ opacity: 0, x: -25 }}
+                    animate={{ opacity: 1, x: +0 }}
+                    exit={{ opacity: 0, y: +25 }}
+                  >
+                    <div className={styles.status}>［{status === LoadStatus.success ? '✅' : '⏳'}］</div>
+                    <div className={styles.message}>{moduleLoader.message}</div>
+                  </motion.div>
+                </AnimatePresence>
+              );
+            })}
+          </div>
         </div>
       </div>
     </PageContainer>
   );
 }
+
+const sleep = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 const LoadStatus = {
   none: 'none',
