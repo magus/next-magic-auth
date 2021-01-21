@@ -9,8 +9,8 @@ export default function LoginRequests({ loading, loginRequests }) {
   const [deletingSessions, set_deletingSessions] = React.useState({});
 
   const header = `Login requests${loading ? '' : ` (${loginRequests.length})`}`;
-  const columns = ['', 'Device', 'Location', 'Details'];
-  const loadingWidths = [32, 150, 250, 150];
+  const columns = ['', 'Device', 'Location', 'Details', 'Domain'];
+  const loadingWidths = [32, 150, 250, 150, 100];
 
   // mark session as 'deleting'
   async function handleDeleteSession(id) {
@@ -77,6 +77,8 @@ export default function LoginRequests({ loading, loginRequests }) {
                     }}
                   </TimeAgo>
                 </td>
+
+                <td>{lr.domain || 'Unknown'}</td>
               </React.Fragment>
             )}
           </tr>

@@ -26,6 +26,7 @@ export default async function login(req, res) {
     const loginToken = auth.generateLoginToken();
 
     const requestMetadata = request.parse(req);
+    const domain = request.getDomain(req);
 
     // update/create user & update/create loginToken
     // the stored token is used to confirm and complete login
@@ -36,6 +37,7 @@ export default async function login(req, res) {
 
         // metadata for login token (user agent, ip, etc.)
         ...requestMetadata,
+        domain,
         // loginToken contains secret and expires
         ...loginToken,
       },
@@ -69,6 +71,7 @@ const upsertLoginTokenWithUser = gql`
     $userAgent: String!
     $userAgentRaw: String!
     $geo: jsonb!
+    $domain: String!
   ) {
     insert_loginToken(
       objects: {
@@ -80,6 +83,7 @@ const upsertLoginTokenWithUser = gql`
         userAgent: $userAgent
         userAgentRaw: $userAgentRaw
         geo: $geo
+        domain: $domain
         user: { data: { email: $email }, on_conflict: { constraint: user_email_key, update_columns: updated } }
       }
     ) {

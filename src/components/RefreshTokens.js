@@ -14,8 +14,8 @@ export default function RefreshTokens({ loading, refreshTokens }) {
   const [deletingSessions, set_deletingSessions] = React.useState({});
 
   const header = `Active sessions${loading ? '' : ` (${refreshTokens.length})`}`;
-  const columns = ['', 'Device', 'Location', 'Last activity'];
-  const loadingWidths = [32, 150, 250, 150];
+  const columns = ['', 'Device', 'Location', 'Last activity', 'Domain'];
+  const loadingWidths = [32, 150, 250, 150, 100];
 
   // mark session as 'deleting'
   async function handleDeleteSession(id) {
@@ -71,6 +71,8 @@ export default function RefreshTokens({ loading, refreshTokens }) {
                     <TimeAgo simpledate date={rt.lastActive} /> (
                     <TimeAgo date={rt.lastActive} />)
                   </td>
+
+                  <td>{rt.loginToken.domain || 'Unknown'}</td>
                 </React.Fragment>
               )}
             </tr>

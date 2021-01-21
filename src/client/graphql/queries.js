@@ -49,6 +49,7 @@ const gqls = {
         geoState: geo(path: "code.state")
         geoCountry: geo(path: "code.country")
         geoCountryFull: geo(path: "country")
+        domain
       }
     }
   `,
@@ -66,6 +67,9 @@ const gqls = {
         geoState: geo(path: "code.state")
         geoCountry: geo(path: "code.country")
         geoCountryFull: geo(path: "country")
+        loginToken {
+          domain
+        }
       }
     }
   `,
