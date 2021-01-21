@@ -12,6 +12,8 @@ export default {
 const COOKIE_NAME = '__magic__rtk';
 
 function clearCookies(res) {
+  console.info({ resKeys: Object.keys(res) });
+
   const domain = request.getDomain(res.req);
   setCookie(res, '', { domain, expires: new Date(0) });
 }
