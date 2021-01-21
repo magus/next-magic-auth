@@ -1,6 +1,7 @@
 import { serialize } from 'cookie';
 
 import config from './config';
+import request from './request';
 
 export default {
   clear: clearCookies,
@@ -11,7 +12,8 @@ export default {
 const COOKIE_NAME = '__magic__rtk';
 
 function clearCookies(res) {
-  setCookie(res, '', { expires: new Date(0) });
+  const domain = request.getDomain(res.req);
+  setCookie(res, '', { domain, expires: new Date(0) });
 }
 
 function getCookie(req) {
@@ -19,7 +21,9 @@ function getCookie(req) {
 }
 
 function setCookie(res, value, cookieOptions) {
+  const domain = request.getDomain(res.req);
   const cookie = generateCookie(COOKIE_NAME, value, {
+    domain,
     ...cookieOptions,
   });
 
@@ -39,8 +43,16 @@ function generateCookie(name, value, extraOptions = {}) {
     ...extraOptions,
   };
 
-  if (!__DEV__ && config.COOKIE_DOMAIN) {
-    options.domain = config.COOKIE_DOMAIN;
+  // if domain from request is in matched allowed domains
+  // then use it to specify the domain in cookie options
+  // e.g. 'iamnoah.com' will match when used on req from 'magic.iamnoah.com'
+  //      and allow the cookie to be shared on all iamnoah.com requests
+  if (!__DEV__ && config.ALLOWED_COOKIE_DOMAINS && extraOptions.domain) {
+    for (const allowedDomain of config.ALLOWED_COOKIE_DOMAINS) {
+      if (!!~extraOptions.domain.indexOf(allowedDomain)) {
+        options.domain = allowedDomain;
+      }
+    }
   }
 
   if ('maxAge' in options) {

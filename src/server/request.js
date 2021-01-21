@@ -2,6 +2,7 @@ import geoip from 'geo-from-ip';
 import uaParser from 'ua-parser-js';
 
 export default {
+  getDomain,
   getRealIP,
   getUserAgent,
   parse,
@@ -14,6 +15,20 @@ function getDeviceDescription(device) {
     return 'Mobile';
   } else {
     return 'Desktop';
+  }
+}
+
+const DOMAIN_REGEX = /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n?]+)/gim;
+
+function getDomain(req) {
+  const values = [req.hostname, req.headers.host, req.headers.origin];
+  for (const value of values) {
+    if (value) {
+      const [domain] = value.match(DOMAIN_REGEX);
+      if (domain) {
+        return domain;
+      }
+    }
   }
 }
 
