@@ -28,6 +28,7 @@
       columns:
       - approved
       - created
+      - domain
       - expires
       - geo
       - id

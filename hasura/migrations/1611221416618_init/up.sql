@@ -20,7 +20,8 @@ CREATE TABLE public."loginToken" (
     ip text NOT NULL,
     "userAgent" text NOT NULL,
     "userAgentRaw" text NOT NULL,
-    geo jsonb DEFAULT jsonb_build_object() NOT NULL
+    geo jsonb DEFAULT jsonb_build_object() NOT NULL,
+    domain text NOT NULL
 );
 CREATE TABLE public."refreshToken" (
     "userId" uuid NOT NULL,
