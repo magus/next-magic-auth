@@ -48,7 +48,7 @@ export default async function login(req, res) {
     // store loginToken id in cookie
     // returns a jwtToken for requesting the single loginToken request
     // returns phrase for check email modal
-    const { jwtToken, phrase } = auth.setupLoginRequest(res, loginTokenId, loginToken.secret);
+    const { jwtToken, phrase } = auth.setupLoginRequest(req, res, loginTokenId, loginToken.secret);
 
     return res.status(200).json({
       error: false,

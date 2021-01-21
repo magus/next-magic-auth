@@ -67,7 +67,7 @@ function generateLoginToken() {
   return { secret, expires };
 }
 
-function setupLoginRequest(res, loginTokenId, loginTokenSecret) {
+function setupLoginRequest(req, res, loginTokenId, loginTokenSecret) {
   // loginTokenId will be written inside cookie
   // requesting client will send in /api/auth/complete
 
@@ -79,7 +79,7 @@ function setupLoginRequest(res, loginTokenId, loginTokenSecret) {
   });
 
   // store login token to auth cookie
-  cookie.set(res, encoded, { expires });
+  cookie.set(req, res, encoded, { expires });
 
   // generate a jwt to access the specific loginToken
   const jwtToken = encodeJwtToken(TokenKinds.login, config.LOGIN_TOKEN_EXPIRES, {
@@ -175,7 +175,7 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
     });
 
     // set new refresh token to cookie
-    cookie.set(res, refreshToken.encoded);
+    cookie.set(req, res, refreshToken.encoded);
   } else if (authCookie === serverToken.value) {
     // scenario  2: refreshing a login (refreshToken)
     // authCookie matches stored refreshToken (serverToken.value)
@@ -191,7 +191,7 @@ async function refreshAuthentication(req, res, serverToken, authCookie) {
     });
 
     // update refresh token cookie (so the expires updates)
-    cookie.set(res, serverToken.value);
+    cookie.set(req, res, serverToken.value);
   } else {
     // authCookie did not match server stored refreshToken
     // todo generate static page for this
@@ -226,7 +226,7 @@ async function restoreLoginRequest(req, res, loginRequestId) {
 
     // return loginRequest to restore on client
     // will open check email modal and listen for login token changes
-    const loginRequest = setupLoginRequest(res, loginToken.id, loginToken.secret);
+    const loginRequest = setupLoginRequest(req, res, loginToken.id, loginToken.secret);
 
     return loginRequest;
   }

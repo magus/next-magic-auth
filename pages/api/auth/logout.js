@@ -5,7 +5,7 @@ import graphql from 'src/server/graphql';
 
 export default async function logout(req, res) {
   try {
-    auth.clearCookies(res);
+    auth.clearCookies(req, res);
 
     const loginRequestId = auth.getLoginRequest(req);
     if (loginRequestId) {
