@@ -34,16 +34,19 @@ export default async function loginRefresh(req, res) {
     }
 
     // lookup refresh token in backend to compare against authCookie
-    const {
-      refreshToken_by_pk: serverRefreshToken,
-      loginTokenUser: { user },
-    } = await graphql.query(getRefreshToken, {
+    const { refreshToken_by_pk: serverRefreshToken, loginTokenUser } = await graphql.query(getRefreshToken, {
       variables: { loginRequestId },
     });
+
+    if (!loginTokenUser) {
+      throw new Error('no valid login tokens found in backend, logout and try again');
+    }
 
     if (!serverRefreshToken) {
       throw new Error('no valid login sessions found in backend, logout and try again');
     }
+
+    const { user } = loginTokenUser;
 
     // refreshAuthentication takes care of setting auth cookie
     // returns jwt token for client side authentication
