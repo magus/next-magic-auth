@@ -276,6 +276,26 @@ if (auth.isLoggedIn) {
 
 # learn more
 
+### flamegraphs
+
+Use **[nodejs profiling](https://nodejs.org/en/docs/guides/simple-profiling/)** and **[flamebearer](https://github.com/mapbox/flamebearer)** to profile server code easily
+
+
+
+
+```sh
+# build a production build of the server that will be deployed
+yarn build
+# profile and run that build
+NODE_ENV=production node --prof ./node_modules/.bin/next start
+# this produces many isolate files with all the relevant (unprocessed) profile performance data
+# the largest of these will contain the data for the server code
+ls -Slh isolate*
+# generate flamegraph.html and open it in the browser
+node --prof-process --preprocess -j isolate-0x110008000-90734-v8.log | flamebearer
+# use the search box to type the function name (e.g. the api route function name, e.g. auth/refresh)
+```
+
 ### migrations
 
 You can now use the admin console to create new tables, view and edit rows, etc. As you make changes they will be saved as migration files and can be applied to remote hasura instances as well allowing you to test and keep changes in sync across environments.
