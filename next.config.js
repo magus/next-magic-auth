@@ -1,6 +1,5 @@
 // next.config.js
 
-const webpack = require('webpack');
 const withSourceMaps = require('@zeit/next-source-maps');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -18,12 +17,22 @@ const __CONFIG = {
 
   // https://nextjs.org/docs/api-reference/next.config.js/custom-webpack-config
   webpack: (config, { isServer, buildId }) => {
-    config.plugins.push(
-      new webpack.DefinePlugin({
-        __DEV__: JSON.stringify(EnvConfig.DEV),
-        'process.env.SENTRY_RELEASE': JSON.stringify(buildId),
-      }),
-    );
+    // config.plugins.push(
+    //   new webpack.DefinePlugin({
+    //     __DEV__: JSON.stringify(EnvConfig.DEV),
+    //     'process.env.SENTRY_RELEASE': JSON.stringify(buildId),
+    //   }),
+    // );
+
+    config.plugins.forEach((plugin) => {
+      if (plugin.constructor.name === 'DefinePlugin') {
+        plugin.definitions = {
+          ...plugin.definitions,
+          __DEV__: JSON.stringify(EnvConfig.DEV),
+          'process.env.SENTRY_RELEASE': JSON.stringify(buildId),
+        };
+      }
+    });
 
     if (!isServer) {
       config.resolve.alias['@sentry/node'] = '@sentry/browser';
