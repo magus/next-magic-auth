@@ -34,6 +34,10 @@ const ModuleLoaders = [
     message: 'Game shell',
     load: () => import(/* webpackChunkName: "game-enter" */ '@pages/game/enter'),
   },
+
+  // TODO: build a loader for connecting to game server?
+  // async that resolves once a singleton is setup with connections to servers?
+
   null,
 ].filter(Boolean);
 
