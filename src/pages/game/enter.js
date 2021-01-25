@@ -7,10 +7,14 @@ import { Stats as DreiStats } from '@react-three/drei';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
+import useKeyboardControls from 'src/hooks/useKeyboardControls';
+import * as UserCommands from '@game/UserCommands';
 
 const CAMERA_HEIGHT = 100;
 
 export default function GameEnter() {
+  console.info('[GameEnter]', 'render');
+
   return (
     <Canvas
       style={{ position: 'absolute', width: '100%', height: '100%', background: 'rgba(0,0,0,1.0)' }}
@@ -26,14 +30,79 @@ export default function GameEnter() {
 
       <Light />
 
-      <Camera position={[1, CAMERA_HEIGHT, 3]} />
+      <Camera position={[0, CAMERA_HEIGHT, 0]} />
 
-      <Player position={[10, 0, 10]} />
-      <Player position={[22, 0, 23]} />
-      <Player position={[1, 0, 3]} />
-      <Player position={[9, 0, 14]} />
-      <Player position={[30, 0, 30]} />
+      <Players />
     </Canvas>
+  );
+}
+
+function Players() {
+  const instance = React.useRef({
+    client: null,
+    room: null,
+  });
+
+  const [players, set_players] = React.useState([]);
+  const [me, set_me] = React.useState(null);
+
+  React.useEffect(function setupClient() {
+    async function asyncSetupClient() {
+      const client = new Colyseus.Client('ws://localhost:2567');
+      instance.current.client = client;
+      console.info('[GameEnter]', { client });
+
+      const room = await client.join('zone');
+      instance.current.room = room;
+      console.info('[Zone]', { room });
+      set_me(room.sessionId);
+
+      room.onStateChange((state) => {
+        // console.info('[Zone]', { state });
+        const players = [];
+        state.players.forEach((value, key) => {
+          const position = [value.x, 0, value.y];
+          players.push({ key, position });
+        });
+        set_players(players);
+      });
+
+      room.onMessage('sync', (message) => {
+        console.info('[Zone]', 'sync', message);
+      });
+    }
+
+    asyncSetupClient();
+
+    return function cleanup() {
+      if (instance.current.room) {
+        instance.current.room.removeAllListeners();
+        instance.current.room.leave();
+      }
+    };
+  }, []);
+
+  useKeyboardControls((keys) => {
+    if (!instance.current.room) return;
+    instance.current.room.send(...new UserCommands.Move(keys));
+  });
+
+  // console.info('[Players]', { players, me });
+
+  return (
+    <>
+      <Player position={[20, 0, 10]} />
+      {/* <Player position={[10, 0, 10]} /> */}
+      {/* <Player position={[22, 0, 23]} /> */}
+      {/* <Player position={[1, 0, 3]} /> */}
+      {/* <Player position={[9, 0, 14]} /> */}
+      {/* <Player position={[30, 0, 30]} /> */}
+
+      {players.map((player) => {
+        const color = player.key === me ? 'green' : 'blue';
+        return <Player {...player} {...{ color }} />;
+      })}
+    </>
   );
 }
 
@@ -41,12 +110,14 @@ function Player(props) {
   // This reference will give us direct access to the mesh
   const ref = React.useRef();
 
+  const color = props.color || 'red';
+
   return (
     <group ref={ref} {...props}>
       <mesh transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
         <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
 
-        <meshPhysicalMaterial attach="material" color="red" opacity={1.0} />
+        <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
       </mesh>
     </group>
   );
@@ -58,7 +129,7 @@ function Camera(props) {
 
   // Make the camera known to the system
   React.useEffect(() => {
-    // window.__game.cameraRef = ref.current;
+    if (window.__game) window.__game.cameraRef = ref.current;
     void setDefaultCamera(ref.current);
   }, []);
 
@@ -68,7 +139,15 @@ function Camera(props) {
   // by default x is horizontal, z is vertical and y is the 3rd dimension
   // so we rotate the camera about the x axis so that the plane is facing the camera
   // this allows us to use x/z for horizontal/vertical position and y as the third dimension (jump) when needed
-  return <perspectiveCamera ref={ref} rotation={[-Math.PI / 2, 0, 0]} {...props} />;
+  return (
+    <perspectiveCamera
+      ref={ref}
+      {...props}
+      // rotation={[0, 0, 0]}
+      // rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
+      rotation={[-Math.PI / 2, 0, 0]}
+    />
+  );
 }
 
 function Debug(props) {
@@ -82,6 +161,7 @@ function Debug(props) {
       {!props.plane ? null : <Plane />}
       {!props.stats ? null : <Stats />}
       {!props.orbitControls ? null : <OrbitControls />}
+      <axesHelper args={[1000]} />
     </>
   );
 }
@@ -100,9 +180,12 @@ function Plane() {
 
   extend({ InfiniteGridHelper });
 
+  const defaultAxisColor = 'white';
+  const zeroAxisColor = defaultAxisColor;
+
   return (
     <mesh position={[0, 0, 0]} rotation={[0, 0, 0]} receiveShadow>
-      <gridHelper args={[100, 100, 'red', 'white']} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+      <gridHelper args={[100, 100, zeroAxisColor, defaultAxisColor]} position={[0, 0, 0]} rotation={[0, 0, 0]} />
       <infiniteGridHelper args={[1, 1]} />
 
       {/* <planeBufferGeometry args={[1000, 1000]} attach="geometry" /> */}

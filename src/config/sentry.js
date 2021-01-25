@@ -55,7 +55,7 @@ module.exports = function configureSentry(release = RELEASE_DEFAULT) {
       new Sentry.Integrations.UserAgent(),
 
       // https://github.com/getsentry/sentry-javascript/blob/master/packages/tracing/src/browser/browsertracing.ts
-      new SentryIntegrationsBrowserTracing(),
+      // new SentryIntegrationsBrowserTracing({ tracingOrigins: [''] }),
     ];
   }
 

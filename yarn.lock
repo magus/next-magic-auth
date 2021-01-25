@@ -114,6 +114,13 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@colyseus/command@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@colyseus/command/-/command-0.1.6.tgz#6a6f9c6912976ec21994e189477910e2fcb8e14a"
+  integrity sha512-RK8JDBDCpKKLcseTaVvHKdMfaLtiVLPWIWUim8LqhfQWl1rxDMnEPyVOePCxUu+FsfxzSYkT49RwgFICiW+Qlw==
+  dependencies:
+    debug "^4.1.1"
+
 "@colyseus/http@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@colyseus/http/-/http-2.0.0.tgz#620209a3dd06f9c455de12128d22ebdffda05592"

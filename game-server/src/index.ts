@@ -3,7 +3,7 @@ import express from 'express';
 // import path from 'path';
 import cors from 'cors';
 import { createServer } from 'http';
-import { Server, RelayRoom, matchMaker } from 'colyseus';
+import { Server, matchMaker } from 'colyseus';
 // import { Server, LobbyRoom, RelayRoom } from 'colyseus';
 // import { monitor } from '@colyseus/monitor';
 
@@ -13,6 +13,8 @@ import { Server, RelayRoom, matchMaker } from 'colyseus';
 // import { AuthRoom } from "./rooms/03-auth";
 // import { ReconnectionRoom } from './rooms/04-reconnection';
 // import { CustomLobbyRoom } from './rooms/07-custom-lobby-room';
+
+import { ZoneRoom } from './Rooms/ZoneRoom/ZoneRoom';
 
 const port = Number(process.env.PORT || 2567) + Number(process.env.NODE_APP_INSTANCE || 0);
 const app = express();
@@ -24,28 +26,31 @@ app.use(express.json());
 const gameServer = new Server({
   server: createServer(app),
   express: app,
-  pingInterval: 0,
+  pingInterval: 5000,
+  pingMaxRetries: 2,
 });
 
 // // Define "lobby" room
 // gameServer.define("lobby", LobbyRoom);
 
-class CustomRelayRoom extends RelayRoom {
-  // maxClients = 100;
-  autoDispose = false;
+// Define "zone" room
+gameServer.define('zone', ZoneRoom, /* default options */ { defaultOption: 'defaultOptionValue' });
 
-  onCreate(options) {
-    console.debug('CustomRelayRoom', 'onCreate', { options });
-  }
-}
+// class CustomRelayRoom extends RelayRoom {
+//   // maxClients = 100;
+//   autoDispose = false;
 
-// Define "relay" room
-gameServer
-  .define('relay', CustomRelayRoom, /* default options */ { default: 'blah' })
-  .on('create', (room) => console.debug('[relay]', 'room created', room.roomId))
-  .on('dispose', (room) => console.debug('[relay]', 'room disposed', room.roomId))
-  .on('join', (room, client) => console.debug('[relay]', client.id, 'joined', room.roomId))
-  .on('leave', (room, client) => console.debug('[relay]', client.id, 'left', room.roomId));
+//   onCreate(options) {
+//     console.debug('CustomRelayRoom', 'onCreate', { options });
+//   }
+// }
+// // Define "relay" room
+// gameServer
+//   .define('relay', CustomRelayRoom, /* default options */ { default: 'blah' })
+//   .on('create', (room) => console.debug('[relay]', 'room created', room.roomId))
+//   .on('dispose', (room) => console.debug('[relay]', 'room disposed', room.roomId))
+//   .on('join', (room, client) => console.debug('[relay]', client.id, 'joined', room.roomId))
+//   .on('leave', (room, client) => console.debug('[relay]', client.id, 'left', room.roomId));
 
 // // Define "chat" room
 // gameServer.define("chat", ChatRoom)
@@ -88,7 +93,7 @@ gameServer
 // });
 
 async function setup() {
-  const room = await matchMaker.createRoom('relay', /* options */ { blah: 42 });
+  const room = await matchMaker.createRoom('zone', /* options */ { matchmakerOption: 'matchmakerOptionValue' });
   console.debug('[setup]', { room });
 
   gameServer.listen(port);
