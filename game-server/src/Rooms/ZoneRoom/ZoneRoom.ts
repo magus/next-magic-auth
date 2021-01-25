@@ -6,6 +6,7 @@ import * as Commands from './Commands';
 
 import { State } from './State';
 
+const SIMULATION_INTERVAL = 1000 / 60; // 60 fps
 export class ZoneRoom extends Room<State> {
   // maxClients = 100;
   autoDispose = false;
@@ -22,6 +23,14 @@ export class ZoneRoom extends Room<State> {
         command,
       });
     });
+
+    this.setSimulationInterval((deltaTime) => this.update(deltaTime), SIMULATION_INTERVAL);
+  }
+
+  update(deltaTime) {
+    // console.debug('[ZoneRoom]', 'update', { deltaTime });
+    // implement your physics or world updates here!
+    // this is a good place to update the room state
   }
 
   onAuth(client, options, req, ...otherArgs) {
