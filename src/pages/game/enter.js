@@ -47,6 +47,29 @@ function Players() {
   const [me, set_me] = React.useState(null);
 
   React.useEffect(function setupClient() {
+    let cleanup = false;
+    let reconnectTimeoutId;
+    const DefaultReconnectDelayMs = 2 * 1000;
+    let reconnectDelayMs = DefaultReconnectDelayMs;
+
+    async function safeAsyncSetupClient() {
+      try {
+        await asyncSetupClient();
+        // reset reconnect delay
+        reconnectDelayMs = DefaultReconnectDelayMs;
+      } catch (err) {
+        console.info('[Zone]', 'asyncSetupClient', { err });
+        // exponential backoff
+        reconnectDelayMs *= 2;
+        retryReconnect();
+      }
+    }
+
+    async function retryReconnect() {
+      console.info('[Zone]', 'reconnect', { reconnectDelayMs });
+      reconnectTimeoutId = setTimeout(safeAsyncSetupClient, reconnectDelayMs);
+    }
+
     async function asyncSetupClient() {
       const client = new Colyseus.Client('ws://localhost:2567');
       instance.current.client = client;
@@ -67,14 +90,24 @@ function Players() {
         set_players(players);
       });
 
+      room.onLeave((code) => {
+        console.info('[Zone]', 'onLeave', { code });
+        // attempt to reconnect if this was not a teardown
+        if (!cleanup) {
+          console.error('[Zone]', 'unexpected onLeave', { code });
+          retryReconnect();
+        }
+      });
+
       room.onMessage('sync', (message) => {
         console.info('[Zone]', 'sync', message);
       });
     }
 
-    asyncSetupClient();
+    safeAsyncSetupClient();
 
     return function cleanup() {
+      cleanup = true;
       if (instance.current.room) {
         instance.current.room.removeAllListeners();
         instance.current.room.leave();

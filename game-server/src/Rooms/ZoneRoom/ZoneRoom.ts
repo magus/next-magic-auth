@@ -7,6 +7,7 @@ import * as Commands from './Commands';
 import { State } from './State';
 
 const SIMULATION_INTERVAL = 1000 / 60; // 60 fps
+
 export class ZoneRoom extends Room<State> {
   // maxClients = 100;
   autoDispose = false;
