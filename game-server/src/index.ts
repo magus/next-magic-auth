@@ -30,6 +30,12 @@ const gameServer = new Server({
   pingMaxRetries: 2,
 });
 
+// Make sure to never call the `simulateLatency()` method in production.
+if (process.env.NODE_ENV !== 'production') {
+  // simulate 200ms latency between server and client.
+  gameServer.simulateLatency(200);
+}
+
 // // Define "lobby" room
 // gameServer.define("lobby", LobbyRoom);
 
