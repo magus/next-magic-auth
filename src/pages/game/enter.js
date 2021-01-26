@@ -140,13 +140,45 @@ function Players() {
 }
 
 function Player(props) {
+  const FPS = 60;
   // This reference will give us direct access to the mesh
   const ref = React.useRef();
-
   const color = props.color || 'red';
+  const velocity = props.velocity || 8;
+  const maxMovementPerFrame = velocity / FPS;
+
+  const frameDelta = (delta) => {
+    const sign = delta < 0 ? -1 : +1;
+    // restrict change to at most maxMovementPerFrame
+    const frameDelta = Math.min(maxMovementPerFrame, Math.abs(delta));
+    // return original sign of delta
+    return sign * frameDelta;
+  };
+
+  React.useEffect(() => {
+    console.info('[Player]', 'mount');
+    ref.current.position.set(...props.position);
+  }, []);
+
+  useFrame(() => {
+    const position = ref.current.position;
+    const delta = new THREE.Vector3(...props.position).sub(position);
+
+    if (!(delta.x === 0 && delta.y === 0 && delta.z === 0)) {
+      position.set(
+        position.x + frameDelta(delta.x),
+        position.y + frameDelta(delta.y),
+        position.z + frameDelta(delta.z),
+      );
+    }
+  });
+
+  if (!props.position) throw new Error('Player must have a position');
+
+  const { position, ...propsWithoutPosition } = props;
 
   return (
-    <group ref={ref} {...props}>
+    <group ref={ref} {...propsWithoutPosition}>
       <mesh transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
         <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
 
