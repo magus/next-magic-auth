@@ -4,6 +4,7 @@ import * as Colyseus from 'colyseus.js';
 import * as THREE from 'three';
 import { Canvas, extend, useFrame, useThree } from 'react-three-fiber';
 import { Stats as DreiStats } from '@react-three/drei';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import Page from 'src/components/Page';
 import Button from 'src/components/Button';
@@ -26,7 +27,11 @@ export default function GameEnter() {
         // gl.shadowMap.type = THREE.PCFSoftShadowMap;
       }}
     >
-      <Debug stats={true} plane={true} orbitControls={false} />
+      <Debug
+        // debug settings
+        stats={true}
+        plane={true}
+      />
 
       <Light />
 
@@ -225,7 +230,6 @@ function Debug(props) {
     <>
       {!props.plane ? null : <Plane />}
       {!props.stats ? null : <Stats />}
-      {!props.orbitControls ? null : <OrbitControls />}
       <axesHelper args={[1000]} />
     </>
   );
@@ -269,9 +273,7 @@ function Stats(props) {
   );
 }
 
-function OrbitControls() {
-  const { OrbitControls } = require('three/examples/jsm/controls/OrbitControls');
-
+function OrbitControlsCamera(props) {
   extend({ OrbitControls });
 
   const ref = React.useRef();
@@ -285,8 +287,10 @@ function OrbitControls() {
       args={[camera, gl.domElement]}
       // autoRotate
       enableDamping
+      enablePan={false}
       // minPolarAngle={Math.PI / 3}
       // maxPolarAngle={Math.PI / 2}
+      {...props}
     />
   );
 }

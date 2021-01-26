@@ -25,6 +25,11 @@ const ModuleLoaders = [
     load: () => import(/* webpackChunkName: "react-three-fiber" */ 'react-three-fiber'),
   },
   {
+    key: 'orbit-controls',
+    message: 'Third person camera controls for WebGL',
+    load: () => import(/* webpackChunkName: "orbit-controls" */ 'three/examples/jsm/controls/OrbitControls'),
+  },
+  {
     key: '@react-three/drei',
     message: 'React renderer for WebGL utilities',
     load: () => import(/* webpackChunkName: "@react-three/drei" */ '@react-three/drei'),
