@@ -19,13 +19,23 @@ export class ZoneRoom extends Room<State> {
     this.setState(new State());
 
     this.onMessage(UserCommands.Move.type, (client, command) => {
-      this.dispatcher.dispatch(new Commands.Move(), {
-        sessionId: client.sessionId,
-        command,
-      });
+      try {
+        this.dispatcher.dispatch(new Commands.Move(), {
+          sessionId: client.sessionId,
+          command,
+        });
+      } catch (err) {
+        console.error('[ZoneRoom]', UserCommands.Move.type, { err });
+      }
     });
 
-    this.setSimulationInterval((deltaTime) => this.update(deltaTime), SIMULATION_INTERVAL);
+    this.setSimulationInterval((deltaTime) => {
+      try {
+        this.update(deltaTime);
+      } catch (err) {
+        console.error('[ZoneRoom]', 'update', { err });
+      }
+    }, SIMULATION_INTERVAL);
   }
 
   update(deltaTime) {
