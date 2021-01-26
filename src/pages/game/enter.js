@@ -11,7 +11,7 @@ import Button from 'src/components/Button';
 import useKeyboardControls from 'src/hooks/useKeyboardControls';
 import * as UserCommands from '@game/UserCommands';
 
-const CAMERA_HEIGHT = 100;
+const CAMERA_HEIGHT = 20;
 
 export default function GameEnter() {
   console.info('[GameEnter]', 'render');
@@ -35,8 +35,6 @@ export default function GameEnter() {
 
       <Light />
 
-      <Camera position={[0, CAMERA_HEIGHT, 0]} />
-
       <Players />
     </Canvas>
   );
@@ -48,6 +46,8 @@ function Players() {
     room: null,
   });
 
+  const currentPlayerRef = React.useRef();
+  const [movement, set_movement] = React.useState(null);
   const [players, set_players] = React.useState([]);
   const [me, set_me] = React.useState(null);
 
@@ -89,7 +89,7 @@ function Players() {
         // console.info('[Zone]', { state });
         const players = [];
         state.players.forEach((value, key) => {
-          const position = [value.x, 0, value.y];
+          const position = [value.x, value.y, value.z];
           players.push({ key, position });
         });
         set_players(players);
@@ -122,14 +122,35 @@ function Players() {
 
   useKeyboardControls((keys) => {
     if (!instance.current.room) return;
-    instance.current.room.send(...new UserCommands.Move(keys));
+
+    const movementUserCommand = new UserCommands.Move(keys);
+
+    // console.debug('[Zone]', { movement, currentPlayerRef });
+    // set_movement(movement);
+
+    // optimistically move current player locally immediately
+    const [, movementCommand] = movementUserCommand;
+    const [x, , z] = movementCommand.data;
+
+    // duplicated in Move.ts
+    // TODO refactor into some shared code so we use same logic on server and client for update
+    const VELOCITY_PER_SECOND = 2;
+    const COMMANDS_PER_SECOND = 30; // user commands captured per second
+    const VELOCITY_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
+    const round = (value, precision = 2) => +value.toFixed(precision);
+
+    currentPlayerRef.current.translateX(round(VELOCITY_PER_CAPTURE * x));
+    currentPlayerRef.current.translateZ(round(VELOCITY_PER_CAPTURE * z));
+
+    // transmit movement to
+    instance.current.room.send(...movementUserCommand);
   });
 
-  // console.info('[Players]', { players, me });
+  // console.info('[Players]', { players, me, movement });
 
   return (
     <>
-      <Player position={[20, 0, 10]} />
+      {/* <Player position={[20, 0, 10]} /> */}
       {/* <Player position={[10, 0, 10]} /> */}
       {/* <Player position={[22, 0, 23]} /> */}
       {/* <Player position={[1, 0, 3]} /> */}
@@ -137,19 +158,21 @@ function Players() {
       {/* <Player position={[30, 0, 30]} /> */}
 
       {players.map((player) => {
-        const color = player.key === me ? 'green' : 'blue';
-        return <Player {...player} {...{ color }} />;
+        const isCurrentUser = player.key === me;
+        if (isCurrentUser) {
+          return <Player {...player} ref={currentPlayerRef} isCurrentUser />;
+        }
+
+        return <Player {...player} />;
       })}
     </>
   );
 }
 
-function Player(props) {
+function useLerpPosition(props, onPositionUpdate) {
   const FPS = 60;
-  // This reference will give us direct access to the mesh
-  const ref = React.useRef();
-  const color = props.color || 'red';
-  const velocity = props.velocity || 8;
+  const ref = React.useRef({ position: new THREE.Vector3(...props.position) });
+  const velocity = props.velocity || 2;
   const maxMovementPerFrame = velocity / FPS;
 
   const frameDelta = (delta) => {
@@ -161,20 +184,69 @@ function Player(props) {
   };
 
   React.useEffect(() => {
-    console.info('[Player]', 'mount');
+    console.info('[useLerpPosition]', 'mount');
+
     ref.current.position.set(...props.position);
+    onPositionUpdate(ref.current.position);
   }, []);
 
   useFrame(() => {
     const position = ref.current.position;
+
     const delta = new THREE.Vector3(...props.position).sub(position);
 
+    // for current user only update if absolutely necessary
+    // optimistic updates take precedence unless we absolute need correcting
+    if (props.isCurrentUser) {
+      const needsPositionFix = delta.x > 1 || delta.y > 1 || delta.z > 1;
+      if (needsPositionFix) {
+        position.set(...props.position);
+      }
+      return;
+    }
+
+    // skip when no delta
     if (!(delta.x === 0 && delta.y === 0 && delta.z === 0)) {
-      position.set(
-        position.x + frameDelta(delta.x),
-        position.y + frameDelta(delta.y),
-        position.z + frameDelta(delta.z),
-      );
+      if (props.immediatePosition) {
+        position.set(...props.position);
+      } else {
+        position.set(
+          position.x + frameDelta(delta.x),
+          position.y + frameDelta(delta.y),
+          position.z + frameDelta(delta.z),
+        );
+      }
+
+      onPositionUpdate(ref.current.position);
+    }
+  });
+
+  if (!props.position) throw new Error('useLerpPosition must have a position');
+}
+
+const Player = React.forwardRef(function Player(props, outerRef) {
+  // This reference will give us direct access to the mesh
+  const ref = React.useRef();
+  if (outerRef) outerRef.current = ref.current;
+  const playerRef = React.useRef();
+  const cameraRef = React.useRef();
+  const color = props.color || props.isCurrentUser ? 'green' : 'blue';
+
+  useLerpPosition(props, (p) => {
+    // console.debug('[Player]', 'useLerpPosition', p);
+    // ref.current.position.set(p.x, p.y, p.z);
+    const position = ref.current.position;
+
+    ref.current.translateX(p.x - position.x);
+    ref.current.translateY(p.y - position.y);
+    ref.current.translateZ(p.z - position.z);
+  });
+
+  useFrame(() => {
+    if (cameraRef.current) {
+      // attempt to keep player rotation in sync with camera
+      // playerRef.current.rotation.y = cameraRef.current.rotation.z;
+      cameraRef.current.lookAt(ref.current.position);
     }
   });
 
@@ -183,42 +255,74 @@ function Player(props) {
   const { position, ...propsWithoutPosition } = props;
 
   return (
-    <group ref={ref} {...propsWithoutPosition}>
-      <mesh transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
-        <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
+    <>
+      <group ref={ref} {...propsWithoutPosition}>
+        <mesh ref={playerRef} transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
+          <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
 
-        <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
-      </mesh>
-    </group>
+          <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
+        </mesh>
+
+        {!props.isCurrentUser ? null : <Camera position={[0, CAMERA_HEIGHT, CAMERA_HEIGHT * -0.6]} ref={cameraRef} />}
+      </group>
+    </>
   );
-}
+});
 
-function Camera(props) {
+const Camera = React.forwardRef(function Camera(props, outerRef) {
   const ref = React.useRef();
-  const { setDefaultCamera } = useThree();
+  if (outerRef) outerRef.current = ref.current;
+
+  // const lerpPosition = React.useRef();
+  const { camera, setDefaultCamera } = useThree();
+
+  const { lookAt, position, ...restProps } = props;
 
   // Make the camera known to the system
   React.useEffect(() => {
     if (window.__game) window.__game.cameraRef = ref.current;
+
     void setDefaultCamera(ref.current);
+
+    // initialize with position
+    ref.current.position.set(...position);
   }, []);
 
+  // useLerpPosition({ position: lookAt, velocity: 1 }, (p) => {
+  //   // console.debug('[Camera]', 'useLerpPosition', p);
+  //   lerpPosition.current = p;
+  // });
+
   // Update it every frame
-  useFrame(() => ref.current.updateMatrixWorld());
+  useFrame(() => {
+    // ref.current.lookAt(0, 0, 0);
+
+    // ref.current.lookAt(...lookAt);
+
+    // const p = lerpPosition.current;
+    // ref.current.lookAt(p.x, p.y, p.z);
+    if (ref.current) {
+      ref.current.updateMatrixWorld();
+    }
+  });
 
   // by default x is horizontal, z is vertical and y is the 3rd dimension
   // so we rotate the camera about the x axis so that the plane is facing the camera
   // this allows us to use x/z for horizontal/vertical position and y as the third dimension (jump) when needed
   return (
-    <perspectiveCamera
-      ref={ref}
-      {...props}
-      // rotation={[0, 0, 0]}
-      // rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
-      rotation={[-Math.PI / 2, 0, 0]}
-    />
+    <>
+      <perspectiveCamera
+        ref={ref}
+        // {...props}
+        {...restProps}
+        // rotation={[0, 0, 0]}
+        // rotation={[-Math.PI / 2, 0, 0]}
+        // rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
+      />
+      <OrbitControlsCamera />
+    </>
   );
-}
+});
 
 function Debug(props) {
   React.useEffect(() => {

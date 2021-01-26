@@ -5,7 +5,10 @@ export class Player extends Schema {
   x = Math.floor(Math.random() * 25);
 
   @type('number')
-  y = Math.floor(Math.random() * 25);
+  y = 0;
+
+  @type('number')
+  z = Math.floor(Math.random() * 25);
 }
 
 export class State extends Schema {
