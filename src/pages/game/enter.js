@@ -1,15 +1,16 @@
 import * as React from 'react';
-
 import * as Colyseus from 'colyseus.js';
 import * as THREE from 'three';
 import { Canvas, extend, useFrame, useThree } from 'react-three-fiber';
 import { Stats as DreiStats } from '@react-three/drei';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-import Page from 'src/components/Page';
-import Button from 'src/components/Button';
 import useKeyboardControls from 'src/hooks/useKeyboardControls';
 import * as UserCommands from '@game/UserCommands';
+
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+extend({ OrbitControls });
+const InfiniteGridHelper = require('@three/InfiniteGridHelper').default;
+extend({ InfiniteGridHelper });
 
 const CAMERA_HEIGHT = 20;
 
@@ -350,17 +351,13 @@ function Light() {
 }
 
 function Plane() {
-  const InfiniteGridHelper = require('@three/InfiniteGridHelper').default;
-
-  extend({ InfiniteGridHelper });
-
   const defaultAxisColor = 'white';
   const zeroAxisColor = defaultAxisColor;
 
   return (
     <mesh position={[0, 0, 0]} rotation={[0, 0, 0]} receiveShadow>
       <gridHelper args={[100, 100, zeroAxisColor, defaultAxisColor]} position={[0, 0, 0]} rotation={[0, 0, 0]} />
-      <infiniteGridHelper args={[1, 1]} />
+      {/* <infiniteGridHelper args={[1, 1]} /> */}
 
       {/* <planeBufferGeometry args={[1000, 1000]} attach="geometry" /> */}
       {/* <meshPhysicalMaterial attach="material" color={'rgba(0,0,0,1.0)'} /> */}
@@ -379,8 +376,6 @@ function Stats(props) {
 }
 
 function OrbitControlsCamera(props) {
-  extend({ OrbitControls });
-
   const ref = React.useRef();
   const { camera, gl, invalidate } = useThree();
 
