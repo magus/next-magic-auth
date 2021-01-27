@@ -127,26 +127,26 @@ function Players() {
 
     const movementUserCommand = new UserCommands.Move(keys);
 
-    // console.debug('[Zone]', { movement, currentPlayerRef });
-    // set_movement(movement);
+    // transmit movement to
+    instance.current.room.send(...movementUserCommand);
+  }, 30);
+
+  useKeyboardControls((movement) => {
+    if (!instance.current.room) return;
 
     // optimistically move current player locally immediately
-    const [, movementCommand] = movementUserCommand;
-    const [x, , z] = movementCommand.data;
+    const [x, , z] = movement;
 
     // duplicated in Move.ts
     // TODO refactor into some shared code so we use same logic on server and client for update
     const VELOCITY_PER_SECOND = 8;
-    const COMMANDS_PER_SECOND = 30; // user commands captured per second
+    const COMMANDS_PER_SECOND = 60; // user commands captured per second
     const VELOCITY_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
     const round = (value, precision = 2) => +value.toFixed(precision);
 
     currentPlayerRef.current.translateX(round(VELOCITY_PER_CAPTURE * x));
     currentPlayerRef.current.translateZ(round(VELOCITY_PER_CAPTURE * z));
-
-    // transmit movement to
-    instance.current.room.send(...movementUserCommand);
-  }, 30);
+  }, 60);
 
   // console.info('[Players]', { players, me, movement });
 
