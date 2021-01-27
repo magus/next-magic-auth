@@ -44,6 +44,7 @@ function Players() {
   const instance = React.useRef({
     client: null,
     room: null,
+    cleanup: false,
   });
 
   const currentPlayerRef = React.useRef();
@@ -52,7 +53,7 @@ function Players() {
   const [me, set_me] = React.useState(null);
 
   React.useEffect(function setupClient() {
-    let cleanup = false;
+    instance.current.cleanup = false;
     let reconnectTimeoutId;
     const DefaultReconnectDelayMs = 2 * 1000;
     let reconnectDelayMs = DefaultReconnectDelayMs;
@@ -98,7 +99,7 @@ function Players() {
       room.onLeave((code) => {
         console.info('[Zone]', 'onLeave', { code });
         // attempt to reconnect if this was not a teardown
-        if (!cleanup) {
+        if (!instance.current.cleanup) {
           console.error('[Zone]', 'unexpected onLeave', { code });
           retryReconnect();
         }
@@ -112,7 +113,7 @@ function Players() {
     safeAsyncSetupClient();
 
     return function cleanup() {
-      cleanup = true;
+      instance.current.cleanup = true;
       if (instance.current.room) {
         instance.current.room.removeAllListeners();
         instance.current.room.leave();
@@ -263,7 +264,7 @@ const Player = React.forwardRef(function Player(props, outerRef) {
           <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
         </mesh>
 
-        {!props.isCurrentUser ? null : <Camera position={[0, CAMERA_HEIGHT, CAMERA_HEIGHT * -0.6]} ref={cameraRef} />}
+        {!props.isCurrentUser ? null : <Camera position={[0, CAMERA_HEIGHT, CAMERA_HEIGHT * 1.5]} ref={cameraRef} />}
       </group>
     </>
   );
@@ -383,7 +384,11 @@ function OrbitControlsCamera(props) {
   const ref = React.useRef();
   const { camera, gl, invalidate } = useThree();
 
-  useFrame(() => ref.current.update());
+  useFrame(() => {
+    if (ref.current) {
+      ref.current.update();
+    }
+  });
 
   return (
     <orbitControls
