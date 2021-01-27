@@ -3,7 +3,7 @@ import { Command } from '@colyseus/command';
 
 import { State } from '../State';
 
-const VELOCITY_PER_SECOND = 2;
+const VELOCITY_PER_SECOND = 8;
 const COMMANDS_PER_SECOND = 30; // user commands captured per second
 const VELOCITY_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
 

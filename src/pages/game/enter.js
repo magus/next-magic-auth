@@ -136,7 +136,7 @@ function Players() {
 
     // duplicated in Move.ts
     // TODO refactor into some shared code so we use same logic on server and client for update
-    const VELOCITY_PER_SECOND = 2;
+    const VELOCITY_PER_SECOND = 8;
     const COMMANDS_PER_SECOND = 30; // user commands captured per second
     const VELOCITY_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
     const round = (value, precision = 2) => +value.toFixed(precision);
@@ -146,7 +146,7 @@ function Players() {
 
     // transmit movement to
     instance.current.room.send(...movementUserCommand);
-  });
+  }, 30);
 
   // console.info('[Players]', { players, me, movement });
 
@@ -171,61 +171,6 @@ function Players() {
   );
 }
 
-function useLerpPosition(props, onPositionUpdate) {
-  const FPS = 60;
-  const ref = React.useRef({ position: new THREE.Vector3(...props.position) });
-  const velocity = props.velocity || 2;
-  const maxMovementPerFrame = velocity / FPS;
-
-  const frameDelta = (delta) => {
-    const sign = delta < 0 ? -1 : +1;
-    // restrict change to at most maxMovementPerFrame
-    const frameDelta = Math.min(maxMovementPerFrame, Math.abs(delta));
-    // return original sign of delta
-    return sign * frameDelta;
-  };
-
-  React.useEffect(() => {
-    console.info('[useLerpPosition]', 'mount');
-
-    ref.current.position.set(...props.position);
-    onPositionUpdate(ref.current.position);
-  }, []);
-
-  useFrame(() => {
-    const position = ref.current.position;
-
-    const delta = new THREE.Vector3(...props.position).sub(position);
-
-    // for current user only update if absolutely necessary
-    // optimistic updates take precedence unless we absolute need correcting
-    if (props.isCurrentUser) {
-      const needsPositionFix = delta.x > 1 || delta.y > 1 || delta.z > 1;
-      if (needsPositionFix) {
-        position.set(...props.position);
-      }
-      return;
-    }
-
-    // skip when no delta
-    if (!(delta.x === 0 && delta.y === 0 && delta.z === 0)) {
-      if (props.immediatePosition) {
-        position.set(...props.position);
-      } else {
-        position.set(
-          position.x + frameDelta(delta.x),
-          position.y + frameDelta(delta.y),
-          position.z + frameDelta(delta.z),
-        );
-      }
-
-      onPositionUpdate(ref.current.position);
-    }
-  });
-
-  if (!props.position) throw new Error('useLerpPosition must have a position');
-}
-
 const Player = React.forwardRef(function Player(props, outerRef) {
   // This reference will give us direct access to the mesh
   const ref = React.useRef();
@@ -234,17 +179,30 @@ const Player = React.forwardRef(function Player(props, outerRef) {
   const cameraRef = React.useRef();
   const color = props.color || props.isCurrentUser ? 'green' : 'blue';
 
-  useLerpPosition(props, (p) => {
-    // console.debug('[Player]', 'useLerpPosition', p);
-    // ref.current.position.set(p.x, p.y, p.z);
-    const position = ref.current.position;
-
-    ref.current.translateX(p.x - position.x);
-    ref.current.translateY(p.y - position.y);
-    ref.current.translateZ(p.z - position.z);
-  });
+  React.useEffect(() => {
+    // set position immediately on mount only
+    ref.current.position.set(...props.position);
+  }, []);
 
   useFrame(() => {
+    if (ref.current) {
+      const FPS = 60;
+      const velocity = props.velocity || 8;
+      const maxMovementPerFrame = velocity / FPS;
+
+      if (!props.isCurrentUser) {
+        ref.current.position.lerp(new THREE.Vector3(...props.position), maxMovementPerFrame);
+      } else {
+        const delta = new THREE.Vector3(...props.position).sub(ref.current.position);
+        // console.debug('[Player]', 'sync', delta);
+        const needsPositionFix = Math.abs(delta.x) > 24 || Math.abs(delta.y) > 24 || Math.abs(delta.z) > 24;
+        if (needsPositionFix) {
+          console.error('[Player]', 'out of sync', { expected: [...props.position], delta });
+          ref.current.position.set(...props.position);
+        }
+      }
+    }
+
     if (cameraRef.current) {
       // attempt to keep player rotation in sync with camera
       // playerRef.current.rotation.y = cameraRef.current.rotation.z;
@@ -262,7 +220,11 @@ const Player = React.forwardRef(function Player(props, outerRef) {
         <mesh ref={playerRef} transparent position={[0, 0.5, 0]} scale={[1, 1, 1]}>
           <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
 
-          <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
+          {props.isCurrentUser ? (
+            <meshNormalMaterial attach="material" opacity={1.0} />
+          ) : (
+            <meshPhysicalMaterial attach="material" color={color} opacity={1.0} />
+          )}
         </mesh>
 
         {!props.isCurrentUser ? null : <Camera position={[0, CAMERA_HEIGHT, CAMERA_HEIGHT * 1.5]} ref={cameraRef} />}
@@ -289,11 +251,6 @@ const Camera = React.forwardRef(function Camera(props, outerRef) {
     // initialize with position
     ref.current.position.set(...position);
   }, []);
-
-  // useLerpPosition({ position: lookAt, velocity: 1 }, (p) => {
-  //   // console.debug('[Camera]', 'useLerpPosition', p);
-  //   lerpPosition.current = p;
-  // });
 
   // Update it every frame
   useFrame(() => {
