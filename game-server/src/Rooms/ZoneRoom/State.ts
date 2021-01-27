@@ -9,6 +9,9 @@ export class Player extends Schema {
 
   @type('number')
   z = Math.floor(Math.random() * 25);
+
+  @type('number')
+  velocity = 8;
 }
 
 export class State extends Schema {
