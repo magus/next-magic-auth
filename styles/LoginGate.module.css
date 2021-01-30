@@ -1,26 +1,3 @@
-@keyframes WandAnimation {
-  0% {
-    transform: rotate(0deg);
-  }
-  55% {
-    transform: rotate(0deg);
-  }
-  70% {
-    transform: rotate(-10deg);
-  }
-  85% {
-    transform: rotate(10deg);
-  }
-  100% {
-    transform: rotate(10deg);
-  }
-}
-
-.wandAnimation {
-   animation: WandAnimation 2s ease-in-out;
-   animation-fill-mode: forwards;
-}
-
 .loginGateCover {
   background-color: rgba(var(--white), 1.0);
   position: absolute;
@@ -30,7 +7,37 @@
   left: 0;
 }
 
-.loginGateCoverMessage {
-  font-size: var(--font-large);
-  margin: var(--spacer-2) 0 0 0;
+.animatedWandContainer {
+  position: relative;
+  --animation-width: 256;
+  --animation-height: 256;
+  /* 19 frames but subtract 1 for number of steps (end on last frame so do not step over it) */
+  --animation-steps: 18;
+  --animation-delay: 100ms;
+  --animation-timing: calc(var(--animation-steps) * var(--animation-delay))
+}
+
+.animationBackground {
+  width: calc(var(--animation-width) * 1px);
+  height: calc(var(--animation-height) * 1px);
+  background-image: url(/wand-background.png);
+}
+
+.animatedWand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--animation-width) * 1px);
+  height: calc(var(--animation-height) * 1px);
+  background-image: url(/wand-spritesheet.png);
+
+  animation: spritesheetHorizontal var(--animation-timing) steps(var(--animation-steps)) forwards;
+  animation-fill-mode: forwards;
+}
+
+
+@keyframes spritesheetHorizontal {
+  from { background-position-x:     0px; }
+  /* 3840 = 256 * 15 (16 frames but end on last frame) */
+  to   { background-position-x: calc(-1 * (var(--animation-width) * 1px) * var(--animation-steps)); }
 }

@@ -7,6 +7,8 @@ import LoginGateCover from '@components/LoginGate/LoginGateCover';
 
 import styles from 'styles/LoginGate.module.css';
 
+const ANIMATION_TIMEOUT_MS = 3 * 1000;
+
 export default function LoginGateCoverAnimated() {
   const auth = useAuth();
   const [loading, set_loading] = React.useState(!auth.init);
@@ -14,7 +16,7 @@ export default function LoginGateCoverAnimated() {
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
       set_loading(false);
-    }, 3 * 1000);
+    }, ANIMATION_TIMEOUT_MS);
 
     return function cleanup() {
       clearTimeout(timeoutId);
@@ -22,6 +24,7 @@ export default function LoginGateCoverAnimated() {
   }, []);
 
   async function handleAnimationEnd() {
+    // console.debug('[LoginGateCoverAnimated]', 'handleAnimationEnd');
     set_loading(false);
   }
 
