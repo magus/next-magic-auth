@@ -1,8 +1,8 @@
 import * as React from 'react';
 import NextApp from 'next/app';
+import Error from 'next/error';
 
 import App from './App';
-import LoadingApp from './LoadingApp';
 
 let SentryConfig;
 
@@ -44,11 +44,31 @@ export default class MyApp extends NextApp {
   constructor() {
     super(...arguments);
 
+    this._errorEventId = null;
+
     this.state = {
       hasError: false,
-      errorEventId: undefined,
     };
   }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   const hasPropChange = ['hasError', 'errorEventId'].some((prop) => {
+  //     if (this.props[prop] !== nextProps[prop]) {
+  //       console.error('[_app]', 'sCU', prop);
+  //       return true;
+  //     }
+  //   });
+
+  //   const hasStateChange = ['hasError'].some((prop) => {
+  //     if (this.state[prop] !== nextState[prop]) {
+  //       console.error('[_app]', 'sCU', prop);
+  //       return true;
+  //     }
+  //   });
+
+  //   // console.debug('[_app]', { hasStateChange, hasPropChange });
+  //   return hasStateChange || hasPropChange;
+  // }
 
   componentDidCatch(error, errorInfo) {
     console.debug('componentDidCatch');
@@ -63,13 +83,13 @@ export default class MyApp extends NextApp {
       // `getDerivedStateFromError`.
       // `SentryConfig.Sentry.showReportDialog` can be used to manually send errors
       // e.g. SentryConfig.Sentry.showReportDialog({ eventId: this.state.errorEventId });
-      this.setState({ errorEventId });
+      this._errorEventId = errorEventId;
     }
   }
 
   render() {
     if (this.state.hasError) {
-      return <LoadingApp {...this.props} message="Something went wrong, please reload the page." />;
+      return <Error title="Something went wrong, please reload the page." />;
     }
 
     return <App {...this.props} />;
