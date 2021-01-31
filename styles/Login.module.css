@@ -34,13 +34,13 @@
 .loginInput {
   width: 100%;
   height: var(--button-height);
-  border: 1px solid rgba(var(--black), 0.4);
+  border: 1px solid rgba(var(--font-color), 0.4);
   border-radius: var(--spacer);
   padding: var(--spacer) var(--spacer-2);
 }
 
 .loginInput::placeholder {
-  color: rgba(var(--black), 0.25);
+  color: rgba(var(--font-color), 0.25);
 }
 
 .loginButton {
@@ -58,7 +58,7 @@
   min-width: 320px;
   max-height: 80%;
   min-height: 320px;
-  background-color: rgba(var(--white), 1.0);
+  background-color: rgba(var(--background-color), 1.0);
   border-radius: var(--spacer);
   padding: var(--spacer-3);
 

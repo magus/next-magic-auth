@@ -18,6 +18,22 @@
   --spacer-4: calc(var(--spacer) * 4);
   --spacer-5: calc(var(--spacer) * 5);
   --spacer-6: calc(var(--spacer) * 6);
+
+  --background-color: var(--white);
+  --font-color: var(--black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: var(--black);
+    --font-color: var(--white);
+  }
+}
+
+/* html.dark-mode  (document.documentElement) */
+:root.dark-mode {
+  --background-color: var(--black);
+  --font-color: var(--white);
 }
 
 * {
@@ -31,8 +47,8 @@
 html,
 body {
   font-size: 16px;
-  background: rgba(var(--white), 1.0);
-  color: rgba(var(--black), 1.0);
+  background: rgba(var(--background-color), 1.0);
+  color: rgba(var(--font-color), 1.0);
 }
 
 html,
