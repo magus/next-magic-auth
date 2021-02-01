@@ -44,26 +44,24 @@ export default function useKeyboardControls(handleCapture, capturesPerSecond = D
       }, {});
 
       if (Object.keys(mappedMoves).length) {
-        // calculate the vector of movement relative to camera
         // camera looks down negative z-axis (0, 0, -1)
         const cameraViewVector = new THREE.Vector3(0, 0, -1);
-        // apply the camera rotation to camera viewing vector
-        // to get the movement vector which is in direction the camera is currently facing
+
+        // get the movement vector which is in direction the camera is currently facing
+        // apply the camera rotation to camera viewing vector in order to calculate the vector of movement relative to camera
         const movementVector = cameraViewVector
           .applyQuaternion(instance.current.camera.quaternion)
           .projectOnPlane(new THREE.Vector3(0, 1, 0))
           .normalize();
 
-        let movement;
+        const movement = { position: null, jump: false };
 
-        // normalize vector (unit vector, max length of 1)
-        // then add Math.abs values of x and z components of vector
-        // sum of x and y must be less than the hypotenuse of unit vector (Math.sqrt(2) by definition)
-        // i.e. sumMagnitude <= Math.sqrt(2) must always be true
-        // const sumMagnitude = Math.abs(movementVector.x) + Math.abs(movementVector.z);
+        if (mappedMoves[MoveCommand.jump]) {
+          movement.jump = true;
+        }
 
         if (mappedMoves[MoveCommand.forward]) {
-          movement = movementVector.toArray().map((n) => +n.toFixed(2));
+          movement.position = movementVector.toArray().map((n) => +n.toFixed(2));
         }
 
         if (movement) {
@@ -89,11 +87,13 @@ export default function useKeyboardControls(handleCapture, capturesPerSecond = D
     if (!process.browser) return;
 
     function handleKeyDown() {
-      keys.current[event.key] = true;
+      // console.debug('[useKeyboardControls]', event);
+      keys.current[event.code] = true;
     }
 
     function handleKeyUp() {
-      delete keys.current[event.key];
+      // console.debug('[useKeyboardControls]', event);
+      delete keys.current[event.code];
     }
 
     // console.debug('usePageVisibility', 'setup');
@@ -114,10 +114,11 @@ const Events = {
 };
 
 const Keys = {
-  w: 'w',
-  a: 'a',
-  s: 's',
-  d: 'd',
+  w: 'KeyW',
+  a: 'KeyA',
+  s: 'KeyS',
+  d: 'KeyD',
+  space: 'Space',
 };
 
 const MoveCommand = {
@@ -125,6 +126,7 @@ const MoveCommand = {
   backward: 'backward',
   left: 'left',
   right: 'right',
+  jump: 'jump',
 };
 
 // if we ever allow customizing key bindings this map would change
@@ -133,4 +135,5 @@ const KeyMap = {
   [Keys.s]: MoveCommand.backward,
   [Keys.a]: MoveCommand.left,
   [Keys.d]: MoveCommand.right,
+  [Keys.space]: MoveCommand.jump,
 };

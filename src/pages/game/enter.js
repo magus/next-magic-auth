@@ -6,6 +6,7 @@ import { Stats as DreiStats } from '@react-three/drei';
 
 import useKeyboardControls from 'src/hooks/useKeyboardControls';
 import * as UserCommands from '@game/UserCommands';
+import * as Physics from '@game/Physics';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 extend({ OrbitControls });
@@ -48,8 +49,8 @@ function Players() {
     cleanup: false,
   });
 
+  const localPlayer = React.useRef({ velocity: { x: 0, y: 0, z: 0 } });
   const currentPlayerRef = React.useRef();
-  const [movement, set_movement] = React.useState(null);
   const [players, set_players] = React.useState([]);
   const [me, set_me] = React.useState(null);
 
@@ -89,11 +90,14 @@ function Players() {
 
       room.onStateChange((state) => {
         // console.info('[Zone]', { state });
+
         const players = [];
+
         state.players.forEach((value, key) => {
           const position = [value.x, value.y, value.z];
           players.push({ key, position });
         });
+
         set_players(players);
       });
 
@@ -101,7 +105,7 @@ function Players() {
         console.info('[Zone]', 'onLeave', { code });
         // attempt to reconnect if this was not a teardown
         if (!instance.current.cleanup) {
-          console.error('[Zone]', 'unexpected onLeave', { code });
+          console.error('[Zone]', 'UNEXPECTED_ONLEAVE', { code });
           retryReconnect();
         }
       });
@@ -122,30 +126,75 @@ function Players() {
     };
   }, []);
 
-  useKeyboardControls((keys) => {
+  useKeyboardControls((movement) => {
     if (!instance.current.room) return;
 
-    const movementUserCommand = new UserCommands.Move(keys);
-
-    // transmit movement to
+    const movementUserCommand = new UserCommands.Move(movement);
+    // transmit movement to room
     instance.current.room.send(...movementUserCommand);
+
+    // optimistically update client player object
+
+    // const player = localPlayer.current;
+
+    // if (movement.jump && Math.abs(player.velocity.y) === 0) {
+    //   player.velocity.y = 8;
+    // }
+
+    // if (movement.position) {
+    //   const [x, , z] = movement.position;
+
+    //   // duplicated in Move.ts
+    //   // TODO refactor into some shared code so we use same logic on server and client for update
+    //   const VELOCITY_PER_SECOND = 8;
+    //   const COMMANDS_PER_SECOND = 30; // user commands captured per second
+    //   const MOVEMENT_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
+    //   const round = (value, precision = 2) => +value.toFixed(precision);
+
+    //   currentPlayerRef.current.translateX(round(MOVEMENT_PER_CAPTURE * x));
+    //   currentPlayerRef.current.translateZ(round(MOVEMENT_PER_CAPTURE * z));
+    // }
   }, 30);
+
+  useFrame((webglState, deltaTime) => {
+    if (currentPlayerRef.current) {
+      if (deltaTime > 0) {
+        // keep localPlayer and position in sync
+        const player = localPlayer.current;
+        player.x = currentPlayerRef.current.position.x;
+        player.y = currentPlayerRef.current.position.y;
+        player.z = currentPlayerRef.current.position.z;
+        Physics.processGravity(player, deltaTime * 1000);
+        // sync back processing on localPlayer to player webgl object
+        currentPlayerRef.current.position.y = player.y;
+      }
+    }
+  });
 
   useKeyboardControls((movement) => {
     if (!instance.current.room) return;
 
     // optimistically move current player locally immediately
-    const [x, , z] = movement;
 
-    // duplicated in Move.ts
-    // TODO refactor into some shared code so we use same logic on server and client for update
-    const VELOCITY_PER_SECOND = 8;
-    const COMMANDS_PER_SECOND = 60; // user commands captured per second
-    const VELOCITY_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
-    const round = (value, precision = 2) => +value.toFixed(precision);
+    const player = localPlayer.current;
 
-    currentPlayerRef.current.translateX(round(VELOCITY_PER_CAPTURE * x));
-    currentPlayerRef.current.translateZ(round(VELOCITY_PER_CAPTURE * z));
+    if (movement.jump && Math.abs(player.velocity.y) === 0) {
+      player.velocity.y = 8;
+    }
+
+    if (movement.position) {
+      const [x, , z] = movement.position;
+
+      // duplicated in Move.ts
+      // TODO refactor into some shared code so we use same logic on server and client for update
+      const VELOCITY_PER_SECOND = 8;
+      const COMMANDS_PER_SECOND = 60; // user commands captured per second
+      const MOVEMENT_PER_CAPTURE = VELOCITY_PER_SECOND / COMMANDS_PER_SECOND;
+      const round = (value, precision = 2) => +value.toFixed(precision);
+
+      currentPlayerRef.current.translateX(round(MOVEMENT_PER_CAPTURE * x));
+      currentPlayerRef.current.translateZ(round(MOVEMENT_PER_CAPTURE * z));
+    }
   }, 60);
 
   // console.info('[Players]', { players, me, movement });
@@ -175,6 +224,7 @@ const Player = React.forwardRef(function Player(props, outerRef) {
   // This reference will give us direct access to the mesh
   const ref = React.useRef();
   if (outerRef) outerRef.current = ref.current;
+  const instance = React.useRef();
   const playerRef = React.useRef();
   const cameraRef = React.useRef();
   const color = props.color || props.isCurrentUser ? 'green' : 'blue';
@@ -184,26 +234,71 @@ const Player = React.forwardRef(function Player(props, outerRef) {
     ref.current.position.set(...props.position);
   }, []);
 
+  const FPS = 60;
+  const DefaultLerpAlpha = 0.2;
+  const VELOCITY_PER_SECOND = 8;
+  const velocity = props.velocity || VELOCITY_PER_SECOND;
+  const maxMovementPerFrame = velocity / FPS;
+
+  // use latency to estimate the error tolerance, we expect some level of error
+  // client side player moves and server only responds after latency
+  // TODO find a way to estimate rolling average latency and use here
+  const latencyMs = 200;
+  const framesPerMs = FPS / 1000;
+  const latencyFrames = latencyMs * framesPerMs;
+  const errorTolerance = 1.0 * latencyFrames * maxMovementPerFrame;
+
+  const correctionSeconds = latencyMs / 1000;
+  const correctionFrames = correctionSeconds * FPS;
+  const lerpAlphaSeconds = 1 / correctionFrames;
+
   useFrame(() => {
     if (ref.current) {
-      const FPS = 60;
-      const velocity = props.velocity || 8;
-      const maxMovementPerFrame = velocity / FPS;
+      const delta = new THREE.Vector3(...props.position).sub(ref.current.position);
+      const goalPosition = new THREE.Vector3(...props.position);
 
+      if (props.isCurrentUser) {
+        // fix y for current player because we simulate physics client side
+        // TODO if these values are far out of sync we may need to update
+        goalPosition.y = ref.current.position.y;
+      }
+
+      // // all server-side movement, no client-side
+      // ref.current.position.lerp(goalPosition, lerpPercent);
+      // ref.current.position.lerp(goalPosition, 0.01);
+
+      // client side update non current player
       if (!props.isCurrentUser) {
-        ref.current.position.lerp(new THREE.Vector3(...props.position), maxMovementPerFrame);
-      } else {
+        // move based on speed of player
         const delta = new THREE.Vector3(...props.position).sub(ref.current.position);
-        // console.debug('[Player]', 'sync', delta);
-        const needsPositionFix = Math.abs(delta.x) > 24 || Math.abs(delta.y) > 24 || Math.abs(delta.z) > 24;
-        if (needsPositionFix) {
-          console.error('[Player]', 'out of sync', { expected: [...props.position], delta });
-          ref.current.position.set(...props.position);
+        const maxMovement = Math.max(...[delta.x, delta.z].map(Math.abs));
+        const frames = maxMovement / maxMovementPerFrame;
+        // 1/frames gives us percent change per frame, which is what lerp alpha is
+        const lerpAlpha = 1 / frames;
+        const safeLerpAlpha = Math.min(DefaultLerpAlpha, lerpAlpha);
+        ref.current.position.lerp(goalPosition, safeLerpAlpha);
+      } else {
+        // // test the lerp based on timing
+        // ref.current.position.lerp(goalPosition, lerpAlphaSeconds);
+
+        const maxMovement = Math.max(...[delta.x, delta.z].map(Math.abs));
+        if (maxMovement > errorTolerance) {
+          // this may fire alot, that's okay? the corrections should be small (imperceptible)
+          console.error('[Player]', 'OUT_OF_SYNC', { errorTolerance });
+          ref.current.position.lerp(goalPosition, lerpAlphaSeconds);
         }
+
+        // else if (maxMovement > 0) {
+        //   const frames = maxMovement / maxMovementPerFrame;
+        //   // 1/frames gives us percent change per frame, which is what lerp alpha is
+        //   const lerpAlpha = 1 / frames;
+        //   // console.debug('currentPlayer', { lerpAlpha });
+        //   ref.current.position.lerp(goalPosition, lerpAlpha);
+        // }
       }
     }
 
-    if (cameraRef.current) {
+    if (cameraRef.current && ref.current) {
       // attempt to keep player rotation in sync with camera
       // playerRef.current.rotation.y = cameraRef.current.rotation.z;
       cameraRef.current.lookAt(ref.current.position);
