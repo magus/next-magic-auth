@@ -1,6 +1,6 @@
 # 🪄✨ next-magic-auth
 
-https://magicwords.vercel.app/
+https://magic.iamnoah.com
 
 **[magic email authentication for your nextjs app](https://magicwords.vercel.app/)**
 
